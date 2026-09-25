@@ -1,1 +1,107 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin · AP CNC DIY</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script></head><body><div class="shell"><div id="gate" class="card">กำลังตรวจสอบสิทธิ์...</div><div id="app" class="hidden"><div class="topbar"><div class="brand"><span class="brand-mark">AP</span><div><strong>ADMIN PANEL</strong><div id="userEmail" class="muted"></div></div></div><div><a class="btn" href="manual-editor.html">แก้ไขคู่มือ</a> <button id="logout" class="btn">ออกจากระบบ</button></div></div><section class="card"><input id="search" class="field" placeholder="ค้นหาอีเมล..." style="width:100%;height:40px;padding:0 10px;margin-bottom:12px"><div style="overflow:auto"><table><thead><tr><th>สมาชิก</th><th>คงเหลือ</th><th>สถานะ</th><th>หมดอายุ</th></tr></thead><tbody id="rows"></tbody></table></div></section></div></div><script src="auth-client.js"></script><script src="admin.js"></script></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin · DXF → G-Code Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <style>
+    body.page-admin .admin-main{max-width:1440px;display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);align-items:start;gap:18px}
+    body.page-admin .member-list-panel{position:sticky;top:18px;max-height:calc(100vh - 94px);display:flex;flex-direction:column;min-width:0}
+    body.page-admin .member-list-panel .table-scroll{overflow:auto;min-height:180px}
+    body.page-admin .member-search{width:100%;margin:10px 0 4px;padding:10px 12px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-850);color:var(--ink);outline:none}
+    body.page-admin .member-search:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,166,35,.12)}
+    body.page-admin .credit-tools{margin-top:16px;padding:14px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-800)}
+    body.page-admin .credit-tools h3{margin:0 0 10px;font-size:14px}
+    body.page-admin .credit-actions{display:grid;grid-template-columns:130px minmax(180px,1fr) auto auto;gap:8px;align-items:end}
+    body.page-admin .seller-hint{display:block;color:var(--ink-faint);font-size:11px;margin-top:5px}
+    body.page-admin #userTable{min-width:0;margin-top:8px}
+    body.page-admin #userTable th,body.page-admin #userTable td{padding:10px 8px}
+    body.page-admin #userTable th:nth-child(2),body.page-admin #userTable td:nth-child(2){text-align:right;width:92px;white-space:nowrap}body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{text-align:right;width:108px}
+    body.page-admin #userTableBody tr{cursor:pointer;transition:background .12s,border-color .12s}
+    body.page-admin #userTableBody tr:hover{background:var(--steel-750)}
+    body.page-admin #userTableBody tr.selected-member{background:rgba(245,166,35,.13);box-shadow:inset 3px 0 0 var(--amber)}
+    body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+    body.page-admin .admin-detail{min-width:0;min-height:420px}
+    body.page-admin .detail-placeholder{color:var(--ink-faint);display:flex;align-items:center;justify-content:center;min-height:320px;text-align:center;line-height:1.7}
+    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr}body.page-admin .member-list-panel{position:static;max-height:none}}
+  </style>
+</head>
+<body class="page-admin">
+  <div id="accessGate" class="access-gate">
+    <div class="access-card">
+      <span class="brand-mark">AP</span>
+      <p id="accessMsg">กำลังตรวจสอบสิทธิ์แอดมิน...</p>
+    </div>
+  </div>
+
+  <div id="appRoot" style="display:none">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">AP</span>
+        <div class="brand-text">
+          <strong>ADMIN PANEL</strong>
+          <span class="brand-sub">USER &amp; ACCESS MANAGEMENT</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="user-email" id="userEmail"></span>
+        <a id="btnManualEditor" href="manual-editor.html" class="mini" style="text-decoration:none">แก้ไขคู่มือ</a>
+        <button id="btnRefresh" class="mini">รีเฟรช</button>
+        <button id="btnLogout" class="mini">ออกจากระบบ</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-panel member-list-panel">
+        <p class="eyebrow">รายชื่อสมาชิกทั้งหมด</p>
+        <input id="memberSearch" class="member-search" type="search" placeholder="ค้นหาอีเมลสมาชิก..." autocomplete="off">
+        <div class="table-scroll">
+          <table class="admin-table" id="userTable">
+            <thead><tr><th>สมาชิก</th><th>คงเหลือ</th><th>สถานะ</th></tr></thead>
+            <tbody id="userTableBody"><tr><td colspan="3" class="empty-hint">กำลังโหลด...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-panel admin-detail" id="detailPanel">
+        <p class="eyebrow">รายละเอียด · <span id="detailEmail">กำลังโหลด...</span></p>
+        <div class="form-grid">
+          <label class="fld"><span>สถานะ</span><select id="detailStatus"><option value="pending">รออนุมัติ (pending)</option><option value="active">ใช้งานได้ (active)</option><option value="suspended">ระงับสิทธิ์ (suspended)</option></select></label>
+          <label class="fld"><span>ใช้ได้ถึงวันที่</span><input type="date" id="detailExpires"></label>
+          <label class="fld"><span>Role</span><select id="detailRole"><option value="member">member</option><option value="admin">admin</option></select></label>
+          <label class="fld"><span>ระดับผู้ขาย</span><select id="detailSellerLevel"><option value="0">None — ยังไม่มีสิทธิ์ขาย</option><option value="1">Seller 1 — สูงสุด 5 ชิ้น</option><option value="2">Seller 2 — สูงสุด 25 ชิ้น</option><option value="3">Seller 3 — สูงสุด 50 ชิ้น</option></select><small class="seller-hint" id="sellerLimitHint"></small></label>
+          <label class="fld"><span>เครดิตคงเหลือ</span><input type="text" id="detailCredits" value="0" readonly></label>
+        </div>
+        <button id="btnSaveUser" class="btn btn-accent" style="margin-top:12px">บันทึกการเปลี่ยนแปลง</button>
+        <span id="saveUserMsg" class="save-indicator"></span>
+
+        <section class="credit-tools">
+          <h3>ปรับเครดิตสมาชิก</h3>
+          <div class="credit-actions">
+            <label class="fld"><span>จำนวนเครดิต</span><input type="number" id="creditAmount" min="1" step="1" value="1"></label>
+            <label class="fld"><span>หมายเหตุ</span><input type="text" id="creditReason" placeholder="เติมเงิน / ขอเบิก / ปรับยอด"></label>
+            <button id="btnCreditAdd" class="btn btn-accent">＋ เพิ่มเครดิต</button>
+            <button id="btnCreditSubtract" class="btn">− ลดเครดิต</button>
+          </div>
+          <span id="creditMsg" class="save-indicator"></span>
+        </section>
+
+        <p class="eyebrow" style="margin-top:24px">ประวัติการ Login ล่าสุด</p>
+        <div class="login-log-hint">⚠ = Login จากเมืองหรือประเทศต่างกันภายใน 3 ชั่วโมงจากครั้งก่อน</div>
+        <div class="table-scroll">
+          <table class="admin-table small" id="logTable">
+            <thead><tr><th></th><th>เวลา</th><th>IP</th><th>เมือง/ประเทศ</th><th>อุปกรณ์</th></tr></thead>
+            <tbody id="logTableBody"><tr><td colspan="5" class="empty-hint">เลือกสมาชิกเพื่อดูประวัติ</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="auth-client.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

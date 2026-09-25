@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AP Cabinet Pro · เข้าสู่ระบบ</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Aphiphoom/Gcode@main/styles.css">
+  <link rel="stylesheet" href="styles.css">
   <style>
     :root{--auth-bg:#0d1218;--auth-card:#161e27;--auth-soft:#202b37;--auth-line:#364454;--auth-ink:#f4f7fb;--auth-muted:#9eacba;--auth-amber:#f6a623;--auth-cyan:#25c8d5;--auth-green:#45c98a;--auth-red:#ff7b7b}
     html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto}body{display:block}
@@ -30,12 +30,12 @@
 })();
 </script>
 <body><div class="auth-shell"><main class="auth-card">
-  <div class="auth-brand"><div class="auth-logo"><img src="https://cdn.jsdelivr.net/gh/Aphiphoom/Gcode@main/assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"></div><h1>AP Cabinet Pro</h1><p>เข้าสู่ระบบเพื่อใช้งานโปรแกรม</p></div>
+  <div class="auth-brand"><div class="auth-logo"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"></div><h1>AP Cabinet Pro</h1><p>เข้าสู่ระบบเพื่อใช้งานโปรแกรม</p></div>
   <section id="authLogin"><div class="auth-tabs"><button id="authTabLogin" class="active">เข้าสู่ระบบ</button><button id="authTabSignup">สมัครสมาชิกใหม่</button></div><label class="auth-field"><span>อีเมล</span><input id="authEmail" type="email" autocomplete="username"></label><label class="auth-field"><span id="authPasswordLabel">รหัสผ่าน</span><input id="authPassword" type="password" autocomplete="current-password"></label><label id="authPassword2Wrap" class="auth-field auth-hidden"><span>ยืนยันรหัสผ่าน</span><input id="authPassword2" type="password"></label><button id="authSubmit" class="auth-btn">เข้าสู่ระบบ</button><div class="auth-extra"><button id="authForgot">ลืมรหัสผ่าน?</button></div><div id="authLoginStatus" class="auth-status"></div></section>
   <section id="authMember" class="auth-member auth-hidden"><h2>สถานะสมาชิก</h2><div class="auth-member-grid"><div class="auth-member-row"><span>อีเมล</span><span id="authMemberEmail">-</span></div><div class="auth-member-row"><span>สถานะ</span><span id="authMemberStatus">-</span></div><div class="auth-member-row"><span>วันใช้งานคงเหลือ</span><span id="authMemberDays">-</span></div><div class="auth-member-row"><span>ใช้งานได้ถึง</span><span id="authMemberExpiry">-</span></div></div><section id="authLineGroup" class="auth-line-group auth-hidden"><h3>เข้าร่วมกลุ่ม LINE</h3><div id="authLineQr" class="auth-line-qr"></div><p>สแกน QR Code ด้วยโทรศัพท์เพื่อติดต่อและรับข่าวสาร</p></section><button id="authAdmin" class="auth-btn auth-admin auth-hidden">จัดการรายการสมาชิก</button><button id="authBuy" class="auth-btn auth-purchase">ซื้อสิทธิ์การใช้งาน</button><button id="authLogout" class="auth-btn secondary">ออกจากระบบ</button><div id="authMemberMessage" class="auth-status"></div></section>
   <div class="auth-latest"><div>รุ่นที่ติดตั้ง: <strong id="authInstalledVersion">เว็บ</strong></div><div>รุ่นล่าสุด: <strong id="authLatestVersion">กำลังตรวจสอบ...</strong></div><div id="authLatestFile"></div><a id="authDownload" class="disabled">ดาวน์โหลด Latest Version</a><div id="authLatestNotes"></div></div><div class="auth-foot">AP CNC DIY</div>
 </main></div>
-<script src="https://cdn.jsdelivr.net/gh/Aphiphoom/Gcode@main/qrcode.js"></script>
+<script src="qrcode.js"></script>
 <script>if(window.sketchup&&typeof window.sketchup.account_ready!=='function'){try{delete window.sketchup}catch(_e){window.sketchup=undefined}}</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script>
 <script>
 (()=>{const URL=window.SUPABASE_URL||'https://modbgnzikhrdvrcxnzqy.supabase.co',KEY=window.SUPABASE_ANON_KEY||'sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr',VERSION_URL='https://apcncdiy.com/version.json',MEMBERSHIP_URL='https://apcncdiy.com/membership.html',LOGIN_URL='https://apcncdiy.com/login.html';const inSketchup=typeof window.sketchup!=='undefined',params=new URLSearchParams(location.search),next=params.get('next')||'index.html';let sb=null,user=null,mode=params.get('mode')==='forgot'?'forgot':'login',initialPayload=null,downloadUrl='',cloudPayload=null,syncStarted=false,lineGroupUrl='',memberActive=false;const $=id=>document.getElementById(id);const openUrl=url=>inSketchup?sketchup.account_open_url(url):window.open(url,'_blank','noopener');const status=(id,msg,kind)=>{$(id).textContent=msg||'';$(id).className='auth-status'+(kind?' '+kind:'')};const busy=on=>{$('authSubmit').disabled=on;$('authLogout').disabled=on};

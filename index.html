@@ -1,1 +1,45 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AP CNC DIY</title><link rel="stylesheet" href="styles.css"></head><body><div class="shell"><div class="topbar"><div class="brand"><span class="brand-mark">AP</span><div><strong>AP CNC DIY</strong><div class="muted">CNC · Furniture · AP Cabinet Pro</div></div></div><div><a class="btn" href="manual.html">คู่มือ</a> <a class="btn btn-accent" href="login.html">เข้าสู่ระบบ</a></div></div><main class="card"><h1>APcncDIY.com</h1><p class="muted">เว็บไซต์หลักสำหรับ AP Cabinet Pro และระบบสมาชิก AP CNC DIY</p><div class="grid grid-2" style="margin-top:20px"><a class="card" href="membership.html" style="text-decoration:none"><h2>สมาชิก AP Cabinet Pro</h2><p class="muted">ตรวจสอบแพ็กเกจ ต่ออายุ และเข้าสู่ระบบ</p></a><a class="card" href="manual.html" style="text-decoration:none"><h2>คู่มือการใช้งาน</h2><p class="muted">เนื้อหาคู่มือโหลดจากฐานข้อมูล Supabase เดิม</p></a></div></main></div></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AP CNC DIY</title>
+  <style>
+    :root{--bg:#0d1218;--panel:#161e27;--panel2:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Segoe UI,Tahoma,sans-serif;background:var(--bg);color:var(--ink)}
+    body{display:block;overflow:auto}
+    a{color:var(--cyan)}
+    .shell{width:min(1100px,calc(100% - 28px));margin:0 auto;padding:28px 0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:9px;background:var(--amber);color:#1a1206;font-weight:900}
+    .muted{color:var(--muted)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 14px 34px #0006}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font-weight:700;text-decoration:none;cursor:pointer}
+    .btn-accent{background:var(--amber);border-color:var(--amber);color:#1a1206}
+    .grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card h1{margin-top:0}.card h2{color:var(--cyan)}
+    @media(max-width:720px){.grid-2{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <span class="brand-mark">AP</span>
+        <div><strong>AP CNC DIY</strong><div class="muted">CNC · Furniture · AP Cabinet Pro</div></div>
+      </div>
+      <div><a class="btn" href="manual.html">คู่มือ</a> <a class="btn btn-accent" href="login.html">เข้าสู่ระบบ</a></div>
+    </div>
+    <main class="card">
+      <h1>APcncDIY.com</h1>
+      <p class="muted">เว็บไซต์หลักสำหรับ AP Cabinet Pro และระบบสมาชิก AP CNC DIY</p>
+      <div class="grid grid-2" style="margin-top:20px">
+        <a class="card" href="membership.html" style="text-decoration:none"><h2>สมาชิก AP Cabinet Pro</h2><p class="muted">ตรวจสอบแพ็กเกจ ต่ออายุ และเข้าสู่ระบบ</p></a>
+        <a class="card" href="manual.html" style="text-decoration:none"><h2>คู่มือการใช้งาน</h2><p class="muted">เนื้อหาคู่มือโหลดจากฐานข้อมูล Supabase เดิม</p></a>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

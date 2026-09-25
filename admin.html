@@ -29,7 +29,41 @@
     body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none}
     body.page-admin .admin-detail{min-width:0;height:var(--admin-panel-height);min-height:520px;overflow:auto}
     body.page-admin .detail-placeholder{color:var(--ink-faint);display:flex;align-items:center;justify-content:center;min-height:320px;text-align:center;line-height:1.7}
-    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr;--admin-panel-height:auto}body.page-admin .member-list-panel{position:static;height:auto;min-height:0;overflow:visible}body.page-admin .admin-detail{height:auto;min-height:420px;overflow:visible}body.page-admin .member-list-panel .table-scroll{max-height:420px;flex:0 0 auto}}
+
+    @media(max-width:860px){
+      body.page-admin{overflow:auto}
+      body.page-admin #appRoot{height:auto;min-height:100vh}
+      body.page-admin .topbar{height:auto;min-height:52px;padding:10px 12px;align-items:flex-start;gap:10px}
+      body.page-admin .topbar-actions{flex-wrap:wrap;justify-content:flex-end;gap:6px}
+      body.page-admin .user-email{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      body.page-admin .admin-main{grid-template-columns:1fr;--admin-panel-height:auto;width:100%;max-width:none;padding:12px;gap:12px}
+      body.page-admin .member-list-panel{position:static;height:auto;min-height:0;overflow:hidden;width:100%}
+      body.page-admin .member-list-panel .table-scroll{max-height:420px;flex:0 0 auto;overflow:auto}
+      body.page-admin .admin-detail{height:auto;min-height:0;overflow:visible;width:100%}
+      body.page-admin .form-grid{grid-template-columns:1fr}
+      body.page-admin .form-grid .full2{grid-column:auto}
+      body.page-admin .credit-actions{grid-template-columns:1fr 1fr;gap:10px}
+      body.page-admin .credit-actions .fld{min-width:0}
+      body.page-admin #btnCreditAdd,body.page-admin #btnCreditSubtract{width:100%;justify-content:center;min-height:42px}
+      body.page-admin #userTable{font-size:12px}
+      body.page-admin #userTable th,body.page-admin #userTable td{padding:9px 6px}
+      body.page-admin #userTable th:nth-child(2),body.page-admin #userTable td:nth-child(2){width:72px}
+      body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{width:84px}
+      body.page-admin #logTable{min-width:620px}
+      body.page-admin .credit-tools{padding:12px}
+    }
+
+    @media(max-width:520px){
+      body.page-admin .topbar{flex-direction:column}
+      body.page-admin .topbar-actions{width:100%;justify-content:flex-start}
+      body.page-admin .admin-main{padding:10px 8px}
+      body.page-admin .admin-panel{padding:14px}
+      body.page-admin .credit-actions{grid-template-columns:1fr}
+      body.page-admin #btnSaveUser{width:100%;justify-content:center}
+      body.page-admin #userTable th:nth-child(2),body.page-admin #userTable td:nth-child(2){width:64px}
+      body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{width:76px}
+      body.page-admin #userTableBody td:first-child{max-width:0}
+    }
   </style>
 </head>
 <body class="page-admin">

@@ -10,7 +10,7 @@
   <style>
     body.page-admin .admin-main{--admin-panel-height:min(620px,calc(100vh - 94px));max-width:1540px;display:grid;grid-template-columns:minmax(400px,460px) minmax(0,1fr);align-items:stretch;gap:18px}
     body.page-admin .member-list-panel{position:sticky;top:18px;height:var(--admin-panel-height);min-height:520px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-    body.page-admin .member-list-panel .table-scroll{overflow:auto;min-height:0;max-height:350px;flex:0 0 350px}
+    body.page-admin .member-list-panel .table-scroll{overflow:auto;min-height:0;flex:1 1 auto}
     body.page-admin .member-search{width:100%;margin:10px 0 4px;padding:10px 12px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-850);color:var(--ink);outline:none}
     body.page-admin .member-search:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,166,35,.12)}
     body.page-admin .credit-tools{margin-top:16px;padding:14px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-800)}
@@ -29,7 +29,7 @@
     body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none}
     body.page-admin .admin-detail{min-width:0;height:var(--admin-panel-height);min-height:520px;overflow:auto}
     body.page-admin .detail-placeholder{color:var(--ink-faint);display:flex;align-items:center;justify-content:center;min-height:320px;text-align:center;line-height:1.7}
-    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr;--admin-panel-height:auto}body.page-admin .member-list-panel{position:static;height:auto;min-height:0;overflow:visible}body.page-admin .admin-detail{height:auto;min-height:420px;overflow:visible}body.page-admin .member-list-panel .table-scroll{max-height:350px;flex:0 0 350px}}
+    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr;--admin-panel-height:auto}body.page-admin .member-list-panel{position:static;height:auto;min-height:0;overflow:visible}body.page-admin .admin-detail{height:auto;min-height:420px;overflow:visible}body.page-admin .member-list-panel .table-scroll{max-height:420px;flex:0 0 auto}}
   </style>
 </head>
 <body class="page-admin">

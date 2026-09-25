@@ -8,25 +8,28 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <style>
-    body.page-admin .admin-main{max-width:1440px;display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);align-items:start;gap:18px}
-    body.page-admin .member-list-panel{position:sticky;top:18px;max-height:calc(100vh - 94px);display:flex;flex-direction:column;min-width:0}
-    body.page-admin .member-list-panel .table-scroll{overflow:auto;min-height:180px}
+    body.page-admin .admin-main{--admin-panel-height:min(620px,calc(100vh - 94px));max-width:1540px;display:grid;grid-template-columns:minmax(400px,460px) minmax(0,1fr);align-items:stretch;gap:18px}
+    body.page-admin .member-list-panel{position:sticky;top:18px;height:var(--admin-panel-height);min-height:520px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+    body.page-admin .member-list-panel .table-scroll{overflow:auto;min-height:0;max-height:350px;flex:0 0 350px}
     body.page-admin .member-search{width:100%;margin:10px 0 4px;padding:10px 12px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-850);color:var(--ink);outline:none}
     body.page-admin .member-search:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(245,166,35,.12)}
     body.page-admin .credit-tools{margin-top:16px;padding:14px;border:1px solid var(--steel-600);border-radius:8px;background:var(--steel-800)}
     body.page-admin .credit-tools h3{margin:0 0 10px;font-size:14px}
     body.page-admin .credit-actions{display:grid;grid-template-columns:130px minmax(180px,1fr) auto auto;gap:8px;align-items:end}
     body.page-admin .seller-hint{display:block;color:var(--ink-faint);font-size:11px;margin-top:5px}
-    body.page-admin #userTable{min-width:0;margin-top:8px}
+    body.page-admin #userTable{min-width:0;margin-top:8px;table-layout:fixed}
+    body.page-admin #userTable thead tr{height:38px}
+    body.page-admin #userTableBody tr{height:52px;cursor:pointer;transition:background .12s,border-color .12s}
     body.page-admin #userTable th,body.page-admin #userTable td{padding:10px 8px}
-    body.page-admin #userTable th:nth-child(2),body.page-admin #userTable td:nth-child(2){text-align:right;width:92px;white-space:nowrap}body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{text-align:right;width:108px}
-    body.page-admin #userTableBody tr{cursor:pointer;transition:background .12s,border-color .12s}
+    body.page-admin #userTable th:first-child,body.page-admin #userTable td:first-child{width:auto}
+    body.page-admin #userTable th:nth-child(2),body.page-admin #userTable td:nth-child(2){text-align:right;width:88px;white-space:nowrap}
+    body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{text-align:right;width:92px}
     body.page-admin #userTableBody tr:hover{background:var(--steel-750)}
     body.page-admin #userTableBody tr.selected-member{background:rgba(245,166,35,.13);box-shadow:inset 3px 0 0 var(--amber)}
-    body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
-    body.page-admin .admin-detail{min-width:0;min-height:420px}
+    body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none}
+    body.page-admin .admin-detail{min-width:0;height:var(--admin-panel-height);min-height:520px;overflow:auto}
     body.page-admin .detail-placeholder{color:var(--ink-faint);display:flex;align-items:center;justify-content:center;min-height:320px;text-align:center;line-height:1.7}
-    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr}body.page-admin .member-list-panel{position:static;max-height:none}}
+    @media(max-width:860px){body.page-admin .admin-main{grid-template-columns:1fr;--admin-panel-height:auto}body.page-admin .member-list-panel{position:static;height:auto;min-height:0;overflow:visible}body.page-admin .admin-detail{height:auto;min-height:420px;overflow:visible}body.page-admin .member-list-panel .table-scroll{max-height:350px;flex:0 0 350px}}
   </style>
 </head>
 <body class="page-admin">

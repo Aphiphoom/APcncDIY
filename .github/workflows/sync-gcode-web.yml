@@ -1,0 +1,78 @@
+name: Sync web pages from Gcode
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-gcode-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout APcncDIY
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Copy current web files from Gcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="https://raw.githubusercontent.com/Aphiphoom/Gcode/main"
+          files=(
+            admin.html
+            admin.js
+            ap3d-viewer.js
+            auth-client.js
+            config.js
+            login.html
+            manual-editor.html
+            manual-editor.js
+            manual.css
+            manual.html
+            manual.js
+            membership.html
+            model-viewer.html
+            qrcode.js
+            styles.css
+            version.json
+          )
+          for f in "${files[@]}"; do
+            curl -fsSL "$SRC/$f" -o "$f"
+          done
+          mkdir -p assets
+          curl -fsSL "$SRC/assets/ap-cnc-diy-logo.jpg" -o assets/ap-cnc-diy-logo.jpg
+
+      - name: Point new-site links to APcncDIY.com
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -IlR --exclude=index.html --exclude='*.jpg' 'https://aphiphoom.github.io/Gcode/' . \
+            | xargs -r sed -i 's#https://aphiphoom.github.io/Gcode/#https://apcncdiy.com/#g'
+
+      - name: Verify index was not replaced
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          grep -q 'APcncDIY.com' index.html
+
+      - name: Commit synchronized pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin.html admin.js ap3d-viewer.js auth-client.js config.js login.html manual-editor.html manual-editor.js manual.css manual.html manual.js membership.html model-viewer.html qrcode.js styles.css version.json assets/ap-cnc-diy-logo.jpg
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Sync web pages from Gcode [skip ci]'
+          git push

@@ -19,14 +19,14 @@
     .brand-copy{min-width:0}
     .muted{color:var(--muted)}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 14px 34px #0006}
+    .entry-card{display:block;text-decoration:none;margin-top:20px;transition:border-color .15s,transform .15s,background .15s}
+    .entry-card:hover{border-color:var(--cyan);transform:translateY(-1px);background:#18232e}
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
     .btn-accent{background:var(--amber);border-color:var(--amber);color:#1a1206}
     .account-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0;margin-left:auto}
     .account-email{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px;text-align:right}
-    .grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .card h1{margin-top:0}.card h2{color:var(--cyan)}
     @media(max-width:600px){
-      .grid-2{grid-template-columns:1fr}
       .topbar{align-items:flex-start;flex-direction:row;gap:10px}
       .brand{flex:1 1 auto;align-items:center}
       .brand-logo{width:42px;height:42px}
@@ -61,10 +61,10 @@
     <main class="card">
       <h1>APcncDIY.com</h1>
       <p class="muted">เว็บไซต์หลักสำหรับ AP Cabinet Pro และระบบสมาชิก AP CNC DIY</p>
-      <div class="grid grid-2" style="margin-top:20px">
-        <a class="card" href="membership.html" style="text-decoration:none"><h2>สมาชิก AP Cabinet Pro</h2><p class="muted">ตรวจสอบแพ็กเกจ ต่ออายุ และเข้าสู่ระบบ</p></a>
-        <a class="card" href="manual.html" style="text-decoration:none"><h2>คู่มือการใช้งาน</h2><p class="muted">เนื้อหาคู่มือโหลดจากฐานข้อมูล Supabase เดิม</p></a>
-      </div>
+      <a class="card entry-card" href="ap-cabinet-pro.html">
+        <h2>AP Cabinet Pro</h2>
+        <p class="muted">ตรวจสอบแพ็กเกจ ต่ออายุ และเข้าสู่ระบบ</p>
+      </a>
     </main>
   </div>
 

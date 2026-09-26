@@ -26,9 +26,13 @@
     body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{text-align:right;width:92px}
     body.page-admin #userTableBody tr:hover{background:var(--steel-750)}
     body.page-admin #userTableBody tr.selected-member{background:rgba(245,166,35,.13);box-shadow:inset 3px 0 0 var(--amber)}
+    body.page-admin #userTableBody tr.expired-member{opacity:.72}
     body.page-admin #userTableBody td:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none}
     body.page-admin .admin-detail{min-width:0;height:var(--admin-panel-height);min-height:520px;overflow:auto}
     body.page-admin .detail-placeholder{color:var(--ink-faint);display:flex;align-items:center;justify-content:center;min-height:320px;text-align:center;line-height:1.7}
+    body.page-admin .admin-brand-logo{width:42px;height:42px;display:block;border-radius:9px;object-fit:contain;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.18);flex:0 0 auto}
+    body.page-admin .access-card .admin-brand-logo{margin:0 auto 10px}
+    body.page-admin .member-count{color:var(--amber);font-weight:800}
 
     @media(max-width:860px){
       body.page-admin{overflow:auto}
@@ -51,6 +55,7 @@
       body.page-admin #userTable th:last-child,body.page-admin #userTable td:last-child{width:84px}
       body.page-admin #logTable{min-width:620px}
       body.page-admin .credit-tools{padding:12px}
+      body.page-admin .admin-brand-logo{width:38px;height:38px}
     }
 
     @media(max-width:520px){
@@ -69,7 +74,7 @@
 <body class="page-admin">
   <div id="accessGate" class="access-gate">
     <div class="access-card">
-      <span class="brand-mark">AP</span>
+      <img class="admin-brand-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY">
       <p id="accessMsg">กำลังตรวจสอบสิทธิ์แอดมิน...</p>
     </div>
   </div>
@@ -77,7 +82,7 @@
   <div id="appRoot" style="display:none">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark">AP</span>
+        <img class="admin-brand-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY">
         <div class="brand-text">
           <strong>ADMIN PANEL</strong>
           <span class="brand-sub">USER &amp; ACCESS MANAGEMENT</span>
@@ -93,7 +98,7 @@
 
     <main class="admin-main">
       <section class="admin-panel member-list-panel">
-        <p class="eyebrow">รายชื่อสมาชิกทั้งหมด</p>
+        <p class="eyebrow">รายชื่อสมาชิกทั้งหมด · <span id="memberCount" class="member-count">0</span></p>
         <input id="memberSearch" class="member-search" type="search" placeholder="ค้นหาอีเมลสมาชิก..." autocomplete="off">
         <div class="table-scroll">
           <table class="admin-table" id="userTable">

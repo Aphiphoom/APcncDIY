@@ -13,10 +13,31 @@
     suspended: "ระงับสิทธิ์"
   })[status] || status;
 
+  function isExpired(member) {
+    if (!member || !member.expiresAt) return false;
+    const expiry = new Date(member.expiresAt).getTime();
+    return Number.isFinite(expiry) && expiry < Date.now();
+  }
+
+  function sortedMembers(source) {
+    return [...source].sort((a, b) => {
+      const expiredDiff = Number(isExpired(a)) - Number(isExpired(b));
+      if (expiredDiff !== 0) return expiredDiff;
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+  }
+
   function visibleMembers() {
     const query = searchText.trim().toLocaleLowerCase();
-    if (!query) return members;
-    return members.filter((member) => (member.email || "").toLocaleLowerCase().includes(query));
+    const source = query
+      ? members.filter((member) => (member.email || "").toLocaleLowerCase().includes(query))
+      : members;
+    return sortedMembers(source);
+  }
+
+  function updateMemberCount() {
+    const count = $("memberCount");
+    if (count) count.textContent = members.length.toLocaleString("th-TH");
   }
 
   function remainingDays(expiresAt) {
@@ -31,6 +52,7 @@
   function renderMembers() {
     const body = $("userTableBody");
     const rows = visibleMembers();
+    updateMemberCount();
     if (!rows.length) {
       body.innerHTML = `<tr><td colspan="3" class="empty-hint">${members.length ? "ไม่พบสมาชิกที่ค้นหา" : "ยังไม่มีสมาชิก"}</td></tr>`;
       return;
@@ -39,10 +61,11 @@
     body.innerHTML = "";
     rows.forEach((member) => {
       const row = document.createElement("tr");
-      const expired = member.expiresAt && new Date(member.expiresAt).getTime() < Date.now();
+      const expired = isExpired(member);
       const shownStatus = expired ? "suspended" : member.status;
       row.dataset.id = member.id;
       row.classList.toggle("selected-member", member.id === selectedId);
+      row.classList.toggle("expired-member", expired);
       row.title = member.email || "";
 
       const emailCell = document.createElement("td");
@@ -130,9 +153,11 @@
       credits: Number(profile.credit_balance || 0),
       createdAt: profile.created_at
     }));
+    updateMemberCount();
     renderMembers();
 
-    const memberToShow = members.find((member) => member.id === selectedId) || members[0];
+    const ordered = sortedMembers(members);
+    const memberToShow = members.find((member) => member.id === selectedId) || ordered[0];
     if (memberToShow) selectMember(memberToShow);
     else {
       selectedId = null;

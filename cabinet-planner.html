@@ -6,178 +6,71 @@
   <title>AP Cabinet Planner · AP CNC DIY</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
-    :root{
-      --bg:#0d1218;--panel:#161e27;--panel2:#202b37;--line:#364454;--line2:#2b3744;
-      --ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5;--green:#45c98a;--red:#ff7b7b;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:'Kanit',sans-serif;background:var(--bg);color:var(--ink)}
-    body{overflow:auto}
-    button,input,select{font:inherit}
-    .shell{width:min(1280px,calc(100% - 24px));margin:0 auto;padding:20px 0 40px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
-    .brand{display:flex;align-items:center;gap:11px;min-width:0}.brand img{width:46px;height:46px;border-radius:10px;background:#fff;object-fit:contain;box-shadow:0 0 12px #fff3}.brand strong{display:block;font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px}
-    .tag{border:1px solid var(--line);background:var(--panel);color:var(--cyan);padding:7px 10px;border-radius:999px;font-size:11px;white-space:nowrap}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px #0005}
-    .settings{padding:18px}.settings h1{margin:0 0 5px;font-size:22px}.settings .lead{margin:0 0 16px;color:var(--muted);font-size:12px}
-    .form-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;color:var(--muted)}.field input,.field select{height:39px;border:1px solid var(--line);border-radius:7px;background:#0f171f;color:var(--ink);padding:0 10px;min-width:0}.field.span2{grid-column:span 2}
-    .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.btn{min-height:38px;padding:0 13px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:700;cursor:pointer}.btn.primary{background:var(--amber);border-color:var(--amber);color:#1a1206}.btn.cyan{background:#12343a;border-color:#1e6670;color:#8cf3fb}.btn:disabled{opacity:.5;cursor:default}
-    .section{margin-top:14px;padding:16px}.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.section h2{margin:0;font-size:17px}.section p{margin:3px 0 0;color:var(--muted);font-size:11px}.summary{color:var(--cyan);font-size:11px;text-align:right}
-    .cabinet-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.cab{border:1px solid var(--line2);background:#10171f;border-radius:9px;padding:10px}.cab-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.cab-index{font-size:10px;color:var(--muted)}.cab select{width:100%;height:34px;border:1px solid var(--line);border-radius:6px;background:#111a23;color:var(--ink);padding:0 8px;margin-top:7px}.cab-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.cab-row label{font-size:9px;color:var(--muted)}.cab-row input{width:100%;height:32px;border:1px solid var(--line);border-radius:6px;background:#0e151d;color:var(--ink);padding:0 7px}.cab-actions{display:flex;gap:6px;margin-top:8px}.mini{flex:1;height:30px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);font-size:10px;cursor:pointer}.mini.danger{color:#ffb0b0}.locked{border-color:#7d6b2a;box-shadow:inset 0 0 0 1px #7d6b2a55}
-    .views{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}.view{padding:14px;min-width:0}.view h2{margin:0 0 2px;font-size:16px}.view p{margin:0 0 10px;color:var(--muted);font-size:11px}.canvas-wrap{background:#f4f1e9;border-radius:9px;overflow:auto;min-height:330px;border:1px solid #46515d}.canvas-wrap.dark{background:#0a1016}.canvas-wrap svg{display:block;width:100%;height:auto;min-height:330px}
-    .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;color:var(--muted);font-size:9px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:2px;background:#c4c8cc}.dot.wall{background:#a7b8c7}.dot.tall{background:#8aa7bb}.dot.special{background:#d8a35d}
+    :root{--bg:#0d1218;--panel:#161e27;--panel2:#202b37;--line:#364454;--line2:#2b3744;--ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5;--green:#45c98a;--red:#ff7b7b}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:'Kanit',sans-serif;background:var(--bg);color:var(--ink)}
+    body{overflow:auto} button,input,select{font:inherit}.shell{width:min(1320px,calc(100% - 24px));margin:0 auto;padding:20px 0 40px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.brand{display:flex;align-items:center;gap:11px;min-width:0}.brand img{width:46px;height:46px;border-radius:10px;background:#fff;object-fit:contain;box-shadow:0 0 12px #fff3}.brand strong{display:block;font-size:17px}.brand small{display:block;color:var(--muted);font-size:11px}.tag{border:1px solid var(--line);background:var(--panel);color:var(--cyan);padding:7px 10px;border-radius:999px;font-size:11px;white-space:nowrap}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px #0005}.settings{padding:18px}.settings h1{margin:0 0 5px;font-size:22px}.lead{margin:0 0 16px;color:var(--muted);font-size:12px}.form-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:11px;color:var(--muted)}.field input,.field select{height:39px;border:1px solid var(--line);border-radius:7px;background:#0f171f;color:var(--ink);padding:0 10px;min-width:0}.field.span2{grid-column:span 2}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.btn{min-height:38px;padding:0 13px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:700;cursor:pointer}.btn.primary{background:var(--amber);border-color:var(--amber);color:#1a1206}.btn.cyan{background:#12343a;border-color:#1e6670;color:#8cf3fb}.btn.danger{color:#ffb0b0}.btn:disabled{opacity:.45;cursor:default}
+    .section{margin-top:14px;padding:16px}.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.section h2{margin:0;font-size:17px}.section p{margin:3px 0 0;color:var(--muted);font-size:11px}.summary{color:var(--cyan);font-size:11px;text-align:right}.empty{padding:22px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px;text-align:center}
+    .editor{display:grid;grid-template-columns:1.25fr repeat(3,minmax(0,.7fr));gap:10px;align-items:end}.editor .actions{display:flex;gap:7px;align-items:end}.editor-note{margin-top:10px;color:var(--muted);font-size:10px}.selected-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#102c31;color:#8cf3fb;border:1px solid #24515a;font-size:10px}
+    .view{margin-top:14px;padding:14px;min-width:0}.view h2{margin:0 0 2px;font-size:16px}.view p{margin:0 0 10px;color:var(--muted);font-size:11px}.canvas-wrap{width:100%;background:#f3f0e7;border-radius:9px;overflow:hidden;min-height:400px;border:1px solid #46515d}.canvas-wrap.dark{background:#0a1016}.canvas-wrap svg{display:block;width:100%;height:auto;min-height:400px;touch-action:manipulation}.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;color:var(--muted);font-size:9px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:8px;height:8px;border-radius:2px;background:#d5d9dc}.dot.wall{background:#c4d7e5}.dot.tall{background:#8aa7bb}.dot.special{background:#d8a35d}.dot.selected{background:var(--cyan)}
     .note{margin-top:14px;padding:12px 14px;border:1px dashed #4c5b69;border-radius:9px;color:var(--muted);font-size:11px;line-height:1.65}.note strong{color:var(--ink)}
-    @media(max-width:980px){.form-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.cabinet-list{grid-template-columns:repeat(2,minmax(0,1fr))}.views{grid-template-columns:1fr}.field.span2{grid-column:span 1}}
-    @media(max-width:620px){.shell{width:min(100% - 16px,1280px);padding-top:12px}.topbar{align-items:flex-start}.brand small{max-width:190px}.tag{font-size:9px}.settings{padding:14px}.form-grid{grid-template-columns:1fr 1fr}.field.span2{grid-column:span 2}.cabinet-list{grid-template-columns:1fr}.section{padding:13px}.canvas-wrap{min-height:270px}.canvas-wrap svg{min-height:270px}}
+    @media(max-width:980px){.form-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.field.span2{grid-column:span 1}.editor{grid-template-columns:1fr 1fr}.editor .actions{grid-column:1/-1}.canvas-wrap,.canvas-wrap svg{min-height:360px}}
+    @media(max-width:620px){.shell{width:min(100% - 16px,1320px);padding-top:12px}.topbar{align-items:flex-start}.brand small{max-width:190px}.tag{font-size:9px}.settings{padding:14px}.form-grid{grid-template-columns:1fr 1fr}.field.span2{grid-column:span 2}.section{padding:13px}.editor{grid-template-columns:1fr 1fr}.editor .type-field{grid-column:1/-1}.view{padding:12px}.canvas-wrap,.canvas-wrap svg{min-height:300px}}
   </style>
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <div class="brand"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"><div><strong>AP Cabinet Planner</strong><small>ทดลองจัดชุดตู้เบื้องต้นเพื่อใช้คุยงานและขอราคา</small></div></div>
-      <div class="tag">Prototype · ฟรีสำหรับลูกค้า</div>
-    </header>
+<div class="shell">
+  <header class="topbar"><div class="brand"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"><div><strong>AP Cabinet Planner</strong><small>ทดลองจัดชุดตู้เบื้องต้นเพื่อใช้คุยงานและขอราคา</small></div></div><div class="tag">Prototype · ฟรีสำหรับลูกค้า</div></header>
 
-    <section class="panel settings">
-      <h1>ตั้งค่าชุดตู้</h1>
-      <p class="lead">เลือกรูปแบบ กำหนดขนาดพื้นที่ แล้วให้ระบบเสนอการแบ่งตู้หลายใบเป็นชุด</p>
-      <div class="form-grid">
-        <div class="field span2"><label>ประเภทชุดตู้</label><select id="layoutType"><option value="kitchen-I">ตู้ครัวตัว I</option><option value="kitchen-L">ตู้ครัวตัว L</option><option value="kitchen-U">ตู้ครัวตัว U</option><option value="wardrobe-I">ตู้เสื้อผ้าตัว I</option><option value="wardrobe-L">ตู้เสื้อผ้าตัว L</option><option value="wardrobe-U">ตู้เสื้อผ้าตัว U</option></select></div>
-        <div class="field"><label>Wall A (มม.)</label><input id="wallA" type="number" min="1200" step="50" value="3600"></div>
-        <div class="field"><label>Wall B (มม.)</label><input id="wallB" type="number" min="1200" step="50" value="2400"></div>
-        <div class="field"><label>Wall C (มม.)</label><input id="wallC" type="number" min="1200" step="50" value="2400"></div>
-        <div class="field"><label>สูงห้อง (มม.)</label><input id="roomH" type="number" min="2000" step="50" value="2600"></div>
-        <div class="field"><label>สูงตู้ล่าง/ตู้หลัก</label><input id="baseH" type="number" min="600" step="10" value="720"></div>
-        <div class="field"><label>ลึกตู้ล่าง/ตู้หลัก</label><input id="baseD" type="number" min="300" step="10" value="560"></div>
-        <div class="field"><label>สูงตู้บน</label><input id="wallH" type="number" min="300" step="10" value="700"></div>
-        <div class="field"><label>ลึกตู้บน</label><input id="wallD" type="number" min="200" step="10" value="350"></div>
-        <div class="field span2"><label>สไตล์การจัดอัตโนมัติ</label><select id="strategy"><option value="balanced">สมดุล / ใช้งานทั่วไป</option><option value="storage">เน้นพื้นที่เก็บของ</option><option value="drawer">เน้นลิ้นชัก</option><option value="simple">เรียบง่าย / ตู้มาตรฐาน</option></select></div>
-      </div>
-      <div class="toolbar"><button class="btn primary" id="generateBtn">จัดชุดอัตโนมัติ</button><button class="btn" id="addBtn">เพิ่มตู้</button><button class="btn cyan" id="resetBtn">เริ่มใหม่</button></div>
-    </section>
-
-    <section class="panel section">
-      <div class="section-head"><div><h2>รายการตู้ในชุด</h2><p>แก้ชนิดตู้และความกว้างแต่ละใบได้ ตู้ที่ Lock จะไม่ถูกจัดใหม่</p></div><div class="summary" id="summary"></div></div>
-      <div class="cabinet-list" id="cabinetList"></div>
-    </section>
-
-    <div class="views">
-      <section class="panel view"><h2>2D Projection</h2><p>ภาพด้านหน้าและขนาดรวมสำหรับใช้คุยงานเบื้องต้น</p><div class="canvas-wrap"><svg id="elevation" viewBox="0 0 1100 430" aria-label="2D elevation"></svg></div><div class="legend"><span><i class="dot"></i>ตู้ล่าง/หลัก</span><span><i class="dot wall"></i>ตู้บน</span><span><i class="dot tall"></i>ตู้สูง</span><span><i class="dot special"></i>Sink / Hob / Drawer</span></div></section>
-      <section class="panel view"><h2>3D Preview</h2><p>พรีวิวแบบเบาเพื่อให้เห็นสัดส่วนและจังหวะตู้</p><div class="canvas-wrap dark"><svg id="preview3d" viewBox="0 0 900 520" aria-label="3D preview"></svg></div></section>
+  <section class="panel settings">
+    <h1>ตั้งค่าชุดตู้</h1><p class="lead">เลือกรูปแบบ กำหนดขนาดพื้นที่ แล้วให้ระบบเสนอการแบ่งตู้หลายใบเป็นชุด</p>
+    <div class="form-grid">
+      <div class="field span2"><label>ประเภทชุดตู้</label><select id="layoutType"><option value="kitchen-I">ตู้ครัวตัว I</option><option value="kitchen-L">ตู้ครัวตัว L</option><option value="kitchen-U">ตู้ครัวตัว U</option><option value="wardrobe-I">ตู้เสื้อผ้าตัว I</option><option value="wardrobe-L">ตู้เสื้อผ้าตัว L</option><option value="wardrobe-U">ตู้เสื้อผ้าตัว U</option></select></div>
+      <div class="field"><label>Wall A (มม.)</label><input id="wallA" type="number" min="1200" step="50" value="3600"></div><div class="field"><label>Wall B (มม.)</label><input id="wallB" type="number" min="1200" step="50" value="2400"></div><div class="field"><label>Wall C (มม.)</label><input id="wallC" type="number" min="1200" step="50" value="2400"></div><div class="field"><label>สูงห้อง (มม.)</label><input id="roomH" type="number" min="2000" step="50" value="2600"></div>
+      <div class="field"><label>สูงตู้ล่าง/ตู้หลัก</label><input id="baseH" type="number" min="600" step="10" value="720"></div><div class="field"><label>ลึกตู้ล่าง/ตู้หลัก</label><input id="baseD" type="number" min="300" step="10" value="560"></div><div class="field"><label>สูงตู้บน</label><input id="wallH" type="number" min="300" step="10" value="700"></div><div class="field"><label>ลึกตู้บน</label><input id="wallD" type="number" min="200" step="10" value="350"></div>
+      <div class="field span2"><label>สไตล์การจัดอัตโนมัติ</label><select id="strategy"><option value="balanced">สมดุล / ใช้งานทั่วไป</option><option value="storage">เน้นพื้นที่เก็บของ</option><option value="drawer">เน้นลิ้นชัก</option><option value="simple">เรียบง่าย / ตู้มาตรฐาน</option></select></div>
     </div>
+    <div class="toolbar"><button class="btn primary" id="generateBtn">จัดชุดอัตโนมัติ</button><button class="btn" id="addBtn">เพิ่มตู้</button><button class="btn cyan" id="resetBtn">เริ่มใหม่</button></div>
+  </section>
 
-    <div class="note"><strong>ต้นแบบสำหรับลูกค้า:</strong> หน้านี้ตั้งใจใช้ช่วยทดลองเลย์เอาท์และสัดส่วนเพื่อประกอบการสอบถามราคา ไม่ใช่แบบผลิตจริง และยังไม่ได้เชื่อมจากหน้า AP Cabinet Pro ตามคำขอในตอนนี้</div>
-  </div>
+  <section class="panel section">
+    <div class="section-head"><div><h2>แก้ไขตู้ที่เลือก</h2><p>แตะตู้ในภาพ 2D เพื่อเลือก แล้วแก้ชนิด/ขนาดทีละใบ</p></div><div class="summary" id="summary"></div></div>
+    <div id="editorHost" class="empty">แตะตู้ในภาพ 2D เพื่อเริ่มแก้ไข</div>
+  </section>
 
+  <section class="panel view"><h2>2D Projection</h2><p>ภาพด้านหน้าเต็มความกว้าง แตะตู้แต่ละใบเพื่อเลือกแก้ไข</p><div class="canvas-wrap"><svg id="elevation" viewBox="0 0 1280 520" aria-label="2D elevation"></svg></div><div class="legend"><span><i class="dot"></i>ตู้ล่าง/หลัก</span><span><i class="dot wall"></i>ตู้บน</span><span><i class="dot tall"></i>ตู้สูง</span><span><i class="dot special"></i>Sink / Hob / Drawer</span><span><i class="dot selected"></i>ตู้ที่เลือก</span></div></section>
+
+  <section class="panel view"><h2>3D Preview</h2><p>พรีวิวแบบตู้ให้เห็นหน้าบาน ลิ้นชัก ท็อป และตู้บนชัดขึ้น</p><div class="canvas-wrap dark"><svg id="preview3d" viewBox="0 0 1280 600" aria-label="3D preview"></svg></div></section>
+
+  <div class="note"><strong>ต้นแบบสำหรับลูกค้า:</strong> ใช้ทดลองเลย์เอาท์และสัดส่วนเพื่อประกอบการสอบถามราคา ไม่ใช่แบบผลิตจริง และยังไม่ได้เชื่อมจากหน้า AP Cabinet Pro</div>
+</div>
 <script>
 (() => {
-  const TYPES = {
-    base2:{label:'Base 2 Door',kind:'base',min:400,max:900,def:600},
-    base1:{label:'Base 1 Door',kind:'base',min:300,max:600,def:450},
-    drawer:{label:'Drawer 3',kind:'special',min:350,max:800,def:450},
-    sink:{label:'Sink Cabinet',kind:'special',min:600,max:1000,def:800},
-    hob:{label:'Hob / Oven',kind:'special',min:600,max:900,def:600},
-    tall:{label:'Tall Cabinet',kind:'tall',min:450,max:800,def:600},
-    wall2:{label:'Wall 2 Door',kind:'wall',min:400,max:900,def:600},
-    wall1:{label:'Wall 1 Door',kind:'wall',min:300,max:600,def:450},
-    robe2:{label:'Wardrobe 2 Door',kind:'tall',min:600,max:1200,def:900},
-    robe1:{label:'Wardrobe 1 Door',kind:'tall',min:350,max:700,def:500},
-    robeDraw:{label:'Wardrobe Drawer',kind:'tall',min:450,max:900,def:600}
+  const TYPES={
+    base2:{label:'Base 2 Door',kind:'base',min:400,max:900,def:600},base1:{label:'Base 1 Door',kind:'base',min:300,max:600,def:450},drawer:{label:'Drawer 3',kind:'special',min:350,max:800,def:450},sink:{label:'Sink Cabinet',kind:'special',min:600,max:1000,def:800},hob:{label:'Hob / Oven',kind:'special',min:600,max:900,def:600},tall:{label:'Tall Cabinet',kind:'tall',min:450,max:800,def:600},wall2:{label:'Wall 2 Door',kind:'wall',min:400,max:900,def:600},wall1:{label:'Wall 1 Door',kind:'wall',min:300,max:600,def:450},robe2:{label:'Wardrobe 2 Door',kind:'tall',min:600,max:1200,def:900},robe1:{label:'Wardrobe 1 Door',kind:'tall',min:350,max:700,def:500},robeDraw:{label:'Wardrobe Drawer',kind:'tall',min:450,max:900,def:600}
   };
-
-  const $ = id => document.getElementById(id);
-  let cabinets = [];
-  const settingsIds = ['layoutType','wallA','wallB','wallC','roomH','baseH','baseD','wallH','wallD','strategy'];
-  const n = id => Math.max(0, Number($(id).value) || 0);
-  const isWardrobe = () => $('layoutType').value.startsWith('wardrobe');
-  const shape = () => $('layoutType').value.split('-')[1];
-  const activeWalls = () => shape()==='I' ? ['A'] : shape()==='L' ? ['A','B'] : ['A','B','C'];
-  const wallLength = w => w==='A' ? n('wallA') : w==='B' ? n('wallB') : n('wallC');
-
-  function typeOptions(selected){ return Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${k===selected?'selected':''}>${v.label}</option>`).join(''); }
-  function make(type,width,wall='A',locked=false){ return {id:crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),type,width,wall,locked}; }
-
-  function autoForWall(wall){
-    const len = wallLength(wall); const strategy = $('strategy').value; const out=[];
-    if(isWardrobe()){
-      const picks = strategy==='drawer' ? ['robe2','robeDraw','robe2'] : ['robe2','robe1','robe2'];
-      let remain=len, i=0; while(remain>=350){ const t=picks[i%picks.length], def=TYPES[t].def; let width=Math.min(def,remain); if(remain-def<350 && remain-def>0) width=remain; out.push(make(t,width,wall)); remain-=width; i++; if(i>12)break; }
-    } else {
-      const picks = strategy==='drawer' ? ['base2','drawer','sink','drawer','hob','base2'] : strategy==='storage' ? ['base2','sink','base2','hob','base2','tall'] : ['base2','drawer','sink','base2','hob','base2'];
-      let remain=len, i=0; while(remain>=300){ const t=picks[i%picks.length], def=TYPES[t].def; let width=Math.min(def,remain); if(remain-def<300 && remain-def>0) width=remain; out.push(make(t,width,wall)); remain-=width; i++; if(i>14)break; }
-      const baseOnly=out.filter(c=>TYPES[c.type].kind!=='tall');
-      baseOnly.forEach((c,idx)=>{ if(idx%2===0 && c.type!=='sink' && c.type!=='hob') out.push(make(c.width>=550?'wall2':'wall1',c.width,wall)); });
-    }
-    return out;
-  }
-
-  function generate(){
-    const locked=cabinets.filter(c=>c.locked); const lockedByWall=Object.fromEntries(activeWalls().map(w=>[w,locked.filter(c=>c.wall===w)]));
-    const next=[];
-    activeWalls().forEach(w=>{
-      const keep=lockedByWall[w]||[]; const used=keep.reduce((s,c)=>s+c.width,0); const original=wallLength(w); const inputId=w==='A'?'wallA':w==='B'?'wallB':'wallC';
-      if(used>0){ const saved=$(inputId).value; $(inputId).value=Math.max(0,original-used); next.push(...keep,...autoForWall(w)); $(inputId).value=saved; } else next.push(...autoForWall(w));
-    });
-    cabinets=next; render();
-  }
-
-  function addCabinet(){ cabinets.push(make(isWardrobe()?'robe2':'base2',600,'A')); render(); }
-  function removeCabinet(id){ cabinets=cabinets.filter(c=>c.id!==id); render(); }
-  function move(id,dir){ const i=cabinets.findIndex(c=>c.id===id); const j=i+dir; if(i<0||j<0||j>=cabinets.length)return; [cabinets[i],cabinets[j]]=[cabinets[j],cabinets[i]]; render(); }
-
-  function renderList(){
-    const host=$('cabinetList'); host.innerHTML='';
-    cabinets.forEach((c,i)=>{
-      const el=document.createElement('div'); el.className='cab'+(c.locked?' locked':'');
-      el.innerHTML=`<div class="cab-top"><span class="cab-index">#${i+1} · Wall ${c.wall}</span><button class="mini" data-lock>${c.locked?'ปลด Lock':'Lock'}</button></div><select data-type>${typeOptions(c.type)}</select><div class="cab-row"><label>กว้าง (มม.)<input data-width type="number" step="10" min="200" value="${c.width}"></label><label>ผนัง<select data-wall>${activeWalls().map(w=>`<option ${w===c.wall?'selected':''}>${w}</option>`).join('')}</select></label></div><div class="cab-actions"><button class="mini" data-left>←</button><button class="mini" data-right>→</button><button class="mini danger" data-remove>ลบ</button></div>`;
-      el.querySelector('[data-type]').onchange=e=>{c.type=e.target.value;render();};
-      el.querySelector('[data-width]').onchange=e=>{c.width=Math.max(200,Number(e.target.value)||200);render();};
-      el.querySelector('[data-wall]').onchange=e=>{c.wall=e.target.value;render();};
-      el.querySelector('[data-lock]').onclick=()=>{c.locked=!c.locked;render();};
-      el.querySelector('[data-left]').onclick=()=>move(c.id,-1); el.querySelector('[data-right]').onclick=()=>move(c.id,1); el.querySelector('[data-remove]').onclick=()=>removeCabinet(c.id);
-      host.appendChild(el);
-    });
-    const sums=activeWalls().map(w=>{const used=cabinets.filter(c=>c.wall===w && TYPES[c.type].kind!=='wall').reduce((s,c)=>s+c.width,0);return `Wall ${w}: ${used}/${wallLength(w)} มม.`;});
-    $('summary').textContent=sums.join(' · ');
-  }
-
-  function svgEl(name,attrs={}){const e=document.createElementNS('http://www.w3.org/2000/svg',name);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
-  function addText(svg,x,y,text,size=20,color='#26313a',anchor='middle',weight='500'){const t=svgEl('text',{x,y,'font-size':size,fill:color,'text-anchor':anchor,'font-family':'Kanit, sans-serif','font-weight':weight});t.textContent=text;svg.appendChild(t);}
-
-  function renderElevation(){
-    const svg=$('elevation'); svg.innerHTML=''; const walls=activeWalls(); const W=1100, left=70, right=30, top=30; const roomH=n('roomH');
-    const wallBandH=Math.min(370,Math.max(250,roomH/7)); const bandGap=18; const bandHeight=(430-top-25-(walls.length-1)*bandGap)/walls.length;
-    walls.forEach((wall,wi)=>{
-      const y0=top+wi*(bandHeight+bandGap); const len=wallLength(wall); const scale=(W-left-right)/Math.max(len,1); const floor=y0+bandHeight-36; addText(svg,left-12,y0+18,`Wall ${wall}`,16,'#5b6770','end','700');
-      svg.appendChild(svgEl('line',{x1:left,y1:floor,x2:W-right,y2:floor,stroke:'#303b43','stroke-width':2}));
-      let x=left;
-      cabinets.filter(c=>c.wall===wall && TYPES[c.type].kind!=='wall').forEach(c=>{const meta=TYPES[c.type], cw=c.width*scale, h=meta.kind==='tall'?bandHeight-55:Math.min(bandHeight-80,n('baseH')/Math.max(roomH,1)*(bandHeight-30)*2.3); const y=floor-h; const fill=meta.kind==='tall'?'#aab9c5':meta.kind==='special'?'#e0ba82':'#d6d8da';svg.appendChild(svgEl('rect',{x,y,width:cw,height:h,fill,stroke:'#4d5459','stroke-width':1.3,rx:2}));svg.appendChild(svgEl('line',{x1:x+cw/2,y1:y+5,x2:x+cw/2,y2:floor-5,stroke:'#8a9094','stroke-width':1}));addText(svg,x+cw/2,floor+17,Math.round(c.width),11,'#4e5a63');x+=cw;});
-      let wx=left; const wallBottom=floor-Math.min(170,bandHeight*.52); cabinets.filter(c=>c.wall===wall && TYPES[c.type].kind==='wall').forEach(c=>{const cw=c.width*scale;svg.appendChild(svgEl('rect',{x:wx,y:wallBottom-65,width:cw,height:65,fill:'#bdc9d2',stroke:'#59656d','stroke-width':1.2,rx:2}));addText(svg,wx+cw/2,wallBottom-26,Math.round(c.width),10,'#53606a');wx+=cw;});
-      svg.appendChild(svgEl('line',{x1:left,y1:floor+27,x2:W-right,y2:floor+27,stroke:'#7c858b','stroke-width':1})); svg.appendChild(svgEl('line',{x1:left,y1:floor+20,x2:left,y2:floor+34,stroke:'#7c858b'}));svg.appendChild(svgEl('line',{x1:W-right,y1:floor+20,x2:W-right,y2:floor+34,stroke:'#7c858b'}));addText(svg,(left+W-right)/2,floor+42,`${len} มม.`,12,'#5b6770');
-    });
-  }
-
-  function render3D(){
-    const svg=$('preview3d'); svg.innerHTML='';
-    const wall='A', list=cabinets.filter(c=>c.wall===wall && TYPES[c.type].kind!=='wall'); const len=Math.max(wallLength(wall),1); const sx=690/len; const ox=90, oy=390, depth=42;
-    svg.appendChild(svgEl('polygon',{points:`${ox-35},${oy+15} ${800},${oy+15} ${845},${oy-30} ${ox+10},${oy-30}`,fill:'#121c25',stroke:'#2d4554'}));
-    let x=ox;
-    list.forEach(c=>{const meta=TYPES[c.type], w=Math.max(18,c.width*sx), h=meta.kind==='tall'?260:150; const y=oy-h; const fill=meta.kind==='tall'?'#5f7c90':meta.kind==='special'?'#8c6c42':'#50616f';
-      svg.appendChild(svgEl('polygon',{points:`${x},${y} ${x+w},${y} ${x+w+depth},${y-depth} ${x+depth},${y-depth}`,fill:'#718493',stroke:'#8da1b0'}));
-      svg.appendChild(svgEl('polygon',{points:`${x+w},${y} ${x+w},${oy} ${x+w+depth},${oy-depth} ${x+w+depth},${y-depth}`,fill:'#394a57',stroke:'#6d8291'}));
-      svg.appendChild(svgEl('rect',{x,y,width:w,height:h,fill,stroke:'#93a7b6','stroke-width':1.2,rx:1}));
-      svg.appendChild(svgEl('line',{x1:x+w/2,y1:y+6,x2:x+w/2,y2:oy-6,stroke:'#7f94a3'}));
-      addText(svg,x+w/2,oy+20,Math.round(c.width),11,'#9eb0bd'); x+=w;
-    });
-    let wx=ox; cabinets.filter(c=>c.wall===wall && TYPES[c.type].kind==='wall').forEach(c=>{const w=Math.max(18,c.width*sx), y=145;svg.appendChild(svgEl('rect',{x:wx,y,width:w,height:85,fill:'#607686',stroke:'#97a9b6',rx:1}));svg.appendChild(svgEl('polygon',{points:`${wx},${y} ${wx+depth},${y-depth} ${wx+w+depth},${y-depth} ${wx+w},${y}`,fill:'#8295a2',stroke:'#9fb0ba'}));wx+=w;});
-    addText(svg,450,48,`${$('layoutType').selectedOptions[0].textContent} · Wall A ${wallLength('A')} มม.`,17,'#c8d5de');
-    addText(svg,450,485,'พรีวิวสัดส่วนแบบง่าย — ไม่ใช่โมเดลผลิตจริง',11,'#71808c');
-  }
-
-  function render(){ renderList(); renderElevation(); render3D(); }
-  $('generateBtn').onclick=generate; $('addBtn').onclick=addCabinet; $('resetBtn').onclick=()=>{cabinets=[];generate();};
-  settingsIds.forEach(id=>$(id).addEventListener('change',()=>{ if(id==='layoutType'){ const s=shape(); $('wallB').disabled=s==='I'; $('wallC').disabled=s!=='U'; } render(); }));
-  $('layoutType').dispatchEvent(new Event('change')); generate();
+  const $=id=>document.getElementById(id), n=id=>Math.max(0,Number($(id).value)||0); let cabinets=[],selectedId=null,uid=1;
+  const isWardrobe=()=>$('layoutType').value.startsWith('wardrobe'),shape=()=>$('layoutType').value.split('-')[1],activeWalls=()=>shape()==='I'?['A']:shape()==='L'?['A','B']:['A','B','C'],wallLength=w=>w==='A'?n('wallA'):w==='B'?n('wallB'):n('wallC');
+  const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function add(type,width,wall,row){cabinets.push({id:uid++,type,width:width||TYPES[type].def,wall:wall||'A',row:row||TYPES[type].kind,locked:false});}
+  function chooseBasePattern(){const s=$('strategy').value;if(s==='drawer')return['base2','drawer','sink','drawer','hob','base2'];if(s==='storage')return['tall','base2','sink','base2','hob','base2'];if(s==='simple')return['base2','base2','sink','base2','hob','base2'];return['tall','base1','sink','drawer','hob','base2'];}
+  function fitWidths(items,target){const fixed=items.reduce((a,t)=>a+TYPES[t].def,0),ratio=fixed?target/fixed:1;return items.map(t=>Math.max(TYPES[t].min,Math.min(TYPES[t].max,Math.round(TYPES[t].def*ratio/50)*50)));}
+  function makeKitchenWall(wall){const target=wallLength(wall),pattern=chooseBasePattern(),widths=fitWidths(pattern,target);pattern.forEach((t,i)=>add(t,widths[i],wall,TYPES[t].kind));let used=0;for(let i=0;i<pattern.length;i++){const t=pattern[i],w=widths[i];if(t==='tall'||t==='hob'){used+=w;continue}const wt=w<=500?'wall1':'wall2';add(wt,w,wall,'wall');used+=w;if(used>=target)break;}}
+  function makeWardrobeWall(wall){const target=wallLength(wall),pattern=$('strategy').value==='drawer'?['robe2','robeDraw','robe2','robe1']:['robe2','robe1','robeDraw','robe2'],widths=fitWidths(pattern,target);pattern.forEach((t,i)=>add(t,widths[i],wall,'tall'));}
+  function generate(){cabinets=[];selectedId=null;activeWalls().forEach(w=>isWardrobe()?makeWardrobeWall(w):makeKitchenWall(w));selectedId=cabinets[0]?.id||null;render();}
+  function typeOptions(selected){return Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${k===selected?'selected':''}>${esc(v.label)}</option>`).join('')}
+  function wallOptions(selected){return activeWalls().map(w=>`<option value="${w}" ${w===selected?'selected':''}>Wall ${w}</option>`).join('')}
+  function renderEditor(){const host=$('editorHost'),c=cabinets.find(x=>x.id===selectedId);if(!c){host.className='empty';host.innerHTML='แตะตู้ในภาพ 2D เพื่อเริ่มแก้ไข';return}host.className='';host.innerHTML=`<div class="editor"><div class="field type-field"><label>ตู้ที่เลือก <span class="selected-pill">#${c.id} · Wall ${c.wall} · ${c.row==='wall'?'ตู้บน':'ตู้ล่าง/ตู้หลัก'}</span></label><select id="editType">${typeOptions(c.type)}</select></div><div class="field"><label>ความกว้าง (มม.)</label><input id="editWidth" type="number" step="10" value="${c.width}"></div><div class="field"><label>ผนัง</label><select id="editWall">${wallOptions(c.wall)}</select></div><div class="field"><label>สถานะ</label><button class="btn" id="lockBtn">${c.locked?'ปลด Lock':'Lock ตู้นี้'}</button></div><div class="actions"><button class="btn" id="leftBtn">← ก่อนหน้า</button><button class="btn" id="rightBtn">ถัดไป →</button><button class="btn danger" id="deleteBtn">ลบตู้</button></div></div><div class="editor-note">การแก้ไขจะอัปเดตภาพ 2D และ 3D ทันที</div>`;$('editType').onchange=e=>{c.type=e.target.value;c.row=TYPES[c.type].kind;render()};$('editWidth').onchange=e=>{c.width=Math.max(150,Number(e.target.value)||c.width);render()};$('editWall').onchange=e=>{c.wall=e.target.value;render()};$('lockBtn').onclick=()=>{c.locked=!c.locked;render()};$('deleteBtn').onclick=()=>{const i=cabinets.findIndex(x=>x.id===c.id);cabinets.splice(i,1);selectedId=cabinets[Math.max(0,i-1)]?.id||null;render()};$('leftBtn').onclick=()=>moveSelected(-1);$('rightBtn').onclick=()=>moveSelected(1)}
+  function moveSelected(dir){const i=cabinets.findIndex(x=>x.id===selectedId);if(i<0)return;const j=i+dir;if(j<0||j>=cabinets.length)return;[cabinets[i],cabinets[j]]=[cabinets[j],cabinets[i]];render()}
+  function kindColor(c){if(c.id===selectedId)return'#25c8d5';if(c.row==='wall'||TYPES[c.type].kind==='wall')return'#d5e5ef';if(TYPES[c.type].kind==='tall')return'#9bb2c2';if(TYPES[c.type].kind==='special')return'#d8a35d';return'#d8dadd'}
+  function cabinetFace(c,x,y,w,h,svg){const fill=kindColor(c),stroke=c.id===selectedId?'#087f88':'#52606c',sw=c.id===selectedId?5:2;svg.push(`<g class="pick" data-id="${c.id}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`);const t=c.type;if(t==='drawer'||t==='robeDraw'){for(let i=1;i<3;i++)svg.push(`<line x1="${x}" y1="${y+h*i/3}" x2="${x+w}" y2="${y+h*i/3}" stroke="#6f7880" stroke-width="1.5"/>`)}else if(t==='hob'){svg.push(`<rect x="${x+w*.18}" y="${y+h*.08}" width="${w*.64}" height="${h*.1}" rx="2" fill="#34383c"/><rect x="${x+w*.2}" y="${y+h*.27}" width="${w*.6}" height="${h*.56}" rx="2" fill="#3d4145" stroke="#747b82"/>`)}else if(t==='sink'){svg.push(`<ellipse cx="${x+w*.5}" cy="${y+h*.12}" rx="${w*.26}" ry="${Math.max(5,h*.05)}" fill="#b9c4cc" stroke="#76818a"/>`)}else if(w>48){svg.push(`<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#879097" stroke-width="1"/>`)}svg.push(`<text x="${x+w/2}" y="${y+h-9}" text-anchor="middle" font-size="11" fill="#28323a">${Math.round(c.width)}</text></g>`)}
+  function draw2D(){const svg=[],walls=activeWalls(),W=1280,margin=70;let blockY=58;walls.forEach((wall,wi)=>{const list=cabinets.filter(c=>c.wall===wall),bases=list.filter(c=>c.row!=='wall'),uppers=list.filter(c=>c.row==='wall'),len=Math.max(1,wallLength(wall)),scale=(W-margin*2)/len,baseH=150,wallH=100,gap=34;let x=margin;svg.push(`<text x="${margin}" y="${blockY-18}" font-size="16" font-weight="700" fill="#303a42">Wall ${wall}</text>`);bases.forEach(c=>{const cw=c.width*scale,ch=TYPES[c.type].kind==='tall'?baseH+wallH+gap:baseH;const y=TYPES[c.type].kind==='tall'?blockY:blockY+wallH+gap;cabinetFace(c,x,y,cw,ch,svg);x+=cw});x=margin;uppers.forEach(c=>{const cw=c.width*scale;cabinetFace(c,x,blockY,cw,wallH,svg);x+=cw});svg.push(`<rect x="${margin}" y="${blockY+wallH+gap-9}" width="${W-margin*2}" height="9" fill="#8a6b43"/><line x1="${margin}" y1="${blockY+wallH+gap+baseH+26}" x2="${W-margin}" y2="${blockY+wallH+gap+baseH+26}" stroke="#5b646b"/><text x="${W/2}" y="${blockY+wallH+gap+baseH+48}" text-anchor="middle" font-size="13" fill="#424b52">${len} มม.</text>`);blockY+=wi===walls.length-1?0:220});$('elevation').innerHTML=svg.join('');$('elevation').querySelectorAll('.pick').forEach(g=>g.addEventListener('click',()=>{selectedId=Number(g.dataset.id);render()}))}
+  function isoBox(svg,x,y,w,h,d,fill,stroke,id){const dx=d*.45,dy=-d*.28;svg.push(`<g class="pick3" data-id="${id}" style="cursor:pointer"><polygon points="${x},${y} ${x+w},${y} ${x+w+dx},${y+dy} ${x+dx},${y+dy}" fill="#d9dde0" stroke="${stroke}"/><polygon points="${x+w},${y} ${x+w},${y+h} ${x+w+dx},${y+h+dy} ${x+w+dx},${y+dy}" fill="#89939b" stroke="${stroke}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${stroke}" stroke-width="2"/></g>`)}
+  function draw3D(){const svg=[],wall='A',list=cabinets.filter(c=>c.wall===wall),bases=list.filter(c=>c.row!=='wall'),uppers=list.filter(c=>c.row==='wall'),len=Math.max(1,wallLength(wall)),scale=900/len,ox=120,baseY=330,baseH=170,wallH=110,depth=55;svg.push(`<text x="120" y="50" font-size="18" font-weight="700" fill="#dce6ee">ตัวอย่าง Wall A · ${len} มม.</text><line x1="90" y1="${baseY+baseH+30}" x2="1130" y2="${baseY+baseH+30}" stroke="#34424e" stroke-width="3"/>`);let x=ox;bases.forEach(c=>{const w=c.width*scale,h=TYPES[c.type].kind==='tall'?baseH+190:baseH,y=TYPES[c.type].kind==='tall'?baseY-190:baseY;isoBox(svg,x,y,w,h,depth,kindColor(c),c.id===selectedId?'#25c8d5':'#677784',c.id);if(c.type==='drawer'||c.type==='robeDraw'){for(let i=1;i<3;i++)svg.push(`<line x1="${x}" y1="${y+h*i/3}" x2="${x+w}" y2="${y+h*i/3}" stroke="#65717a"/>`)}else if(c.type!=='tall'&&w>50)svg.push(`<line x1="${x+w/2}" y1="${y}" x2="${x+w/2}" y2="${y+h}" stroke="#76828b"/>`);x+=w});svg.push(`<polygon points="${ox-5},${baseY-11} ${Math.min(1120,ox+900)},${baseY-11} ${Math.min(1145,ox+925)},${baseY-27} ${ox+20},${baseY-27}" fill="#9b7a50" stroke="#c8a574"/>`);x=ox;uppers.forEach(c=>{const w=c.width*scale;isoBox(svg,x,125,w,wallH,depth*.65,kindColor(c),c.id===selectedId?'#25c8d5':'#677784',c.id);if(w>50)svg.push(`<line x1="${x+w/2}" y1="125" x2="${x+w/2}" y2="${125+wallH}" stroke="#76828b"/>`);x+=w});$('preview3d').innerHTML=svg.join('');$('preview3d').querySelectorAll('.pick3').forEach(g=>g.addEventListener('click',()=>{selectedId=Number(g.dataset.id);render()}))}
+  function renderSummary(){const walls=activeWalls();$('summary').innerHTML=walls.map(w=>{const b=cabinets.filter(c=>c.wall===w&&c.row!=='wall').reduce((a,c)=>a+c.width,0),u=cabinets.filter(c=>c.wall===w&&c.row==='wall').reduce((a,c)=>a+c.width,0);return `Wall ${w}: ล่าง ${b}/${wallLength(w)} · บน ${u}`}).join('<br>')}
+  function render(){renderEditor();renderSummary();draw2D();draw3D()}
+  $('generateBtn').onclick=generate;$('resetBtn').onclick=()=>{cabinets=[];selectedId=null;render()};$('addBtn').onclick=()=>{const t=isWardrobe()?'robe1':'base1';add(t,TYPES[t].def,activeWalls()[0],TYPES[t].kind);selectedId=cabinets[cabinets.length-1].id;render()};$('layoutType').onchange=generate;['wallA','wallB','wallC','roomH','baseH','baseD','wallH','wallD','strategy'].forEach(id=>$(id).addEventListener('change',()=>render()));generate();
 })();
 </script>
 </body>

@@ -5,8 +5,8 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
   "use strict";
 
   const GOOGLE_BRIDGE_URL=`${window.SUPABASE_URL}/functions/v1/plugin-google-auth`;
-  const isLoginPage=()=>/\/login\.html$/i.test(location.pathname);
-  const isAdminPage=()=>/\/admin\.html$/i.test(location.pathname);
+  const isLoginPage=()=>/\/login(?:\.html)?\/?$/i.test(location.pathname);
+  const isAdminPage=()=>/\/admin(?:\.html)?\/?$/i.test(location.pathname);
   const inSketchUp=()=>!!(window.sketchup&&typeof window.sketchup.account_open_url==='function');
   const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 

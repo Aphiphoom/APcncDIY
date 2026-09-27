@@ -345,3 +345,16 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>setupFacebookContact().catch(console.error),0));
   else setTimeout(()=>setupFacebookContact().catch(console.error),0);
 })();
+
+(()=>{
+  "use strict";
+  if(!/\/public-profile(?:\.html)?\/?$/i.test(location.pathname))return;
+  const install=()=>{
+    if(document.getElementById('apContactIconOnlyStyle'))return;
+    const style=document.createElement('style');
+    style.id='apContactIconOnlyStyle';
+    style.textContent='#contact .contact-row{grid-template-columns:28px minmax(0,1fr)!important;gap:12px!important}#contact .contact-label{display:none!important}#contact .contact-value{min-width:0}#contact .inline-input{grid-column:2!important}';
+    document.head.appendChild(style);
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();

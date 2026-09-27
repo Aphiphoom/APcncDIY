@@ -256,3 +256,34 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireProfileProductsLink);else wireProfileProductsLink();
 })();
+
+(()=>{
+  "use strict";
+  const MESSAGE='ฟังก์ชันนี้สำหรับผู้ใช้งาน AP Cabinet Pro เท่านั้น';
+  let customer=false;
+
+  async function detectCustomer(){
+    if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY)return;
+    try{
+      const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+      const {data:{user}}=await client.auth.getUser();
+      if(!user)return;
+      const {data}=await client.from('profiles').select('status').eq('id',user.id).maybeSingle();
+      customer=data?.status==='customer';
+      const button=document.getElementById('myProfileButton');
+      if(customer&&button){button.href='#';button.title=MESSAGE;button.setAttribute('aria-label',MESSAGE)}
+    }catch(error){console.warn('customer profile gate unavailable',error)}
+  }
+
+  document.addEventListener('click',event=>{
+    const link=event.target.closest?.('a');
+    if(!link)return;
+    const isMyProfile=link.id==='myProfileButton'||link.textContent.trim()==='โปรไฟล์ของฉัน';
+    if(!isMyProfile||!customer)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    alert(MESSAGE);
+  },true);
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',detectCustomer);else detectCustomer();
+})();

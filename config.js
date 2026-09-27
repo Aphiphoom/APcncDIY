@@ -196,6 +196,12 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
       },0);
     });
 
+    if(params.get('plugin_google')==='1'&&!inSketchUp()){
+      loginStatus('กำลังเปิด Google Login...','ok');
+      await startGoogle(client);
+      return;
+    }
+
     const {data:{session}}=await client.auth.getSession();
     if(session)setTimeout(()=>applyCustomerState(client,session),50);
   }

@@ -7,178 +7,49 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
     :root{--bg:#0d1218;--panel:#161e27;--panel2:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5;--green:#45c98a;--danger:#ff6b6b}
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:'Kanit',sans-serif;background:var(--bg);color:var(--ink)}
-    body{overflow:auto}
-    button,input,select{font-family:'Kanit',sans-serif}
-    a{color:var(--cyan)}
-    .shell{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:28px 0 44px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;text-decoration:none;color:inherit}
-    .brand-logo{width:42px;height:42px;border-radius:9px;background:#fff;object-fit:contain;box-shadow:0 0 10px #fff3;flex:0 0 auto}
-    .muted{color:var(--muted)}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px #0006}
-    .hero{padding:24px;margin-bottom:16px}
-    .hero h1{margin:0 0 7px;font-size:32px;color:var(--cyan)}
-    .hero p{margin:0;line-height:1.7}
-    .toolbar{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px;margin-top:18px}
-    .control{height:44px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);padding:0 13px;outline:none}
-    .control:focus{border-color:var(--cyan)}
-    .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 2px;color:var(--muted);font-size:13px}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .product{overflow:hidden;display:flex;flex-direction:column;min-height:100%}
-    .cover{aspect-ratio:4/3;background:#10171e;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);overflow:hidden}
-    .cover img{width:100%;height:100%;object-fit:cover;display:block}
-    .placeholder{padding:18px;text-align:center;color:#6e7d8c;font-size:13px}
-    .body{padding:18px;display:flex;flex-direction:column;gap:10px;flex:1}
-    .meta{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .title{font-size:19px;font-weight:700;line-height:1.35;margin:0}
-    .category{font-size:11px;padding:4px 8px;border-radius:999px;background:#23313d;color:var(--cyan);border:1px solid #314656;white-space:nowrap}
-    .description{color:var(--muted);font-size:13px;line-height:1.55;min-height:20px}
-    .stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;color:var(--muted)}
-    .stat{padding:7px 9px;border:1px solid #2f3b48;border-radius:7px;background:#121a22}
-    .seller{margin-top:auto;padding-top:4px;font-size:12px;color:var(--muted)}
-    .seller a{text-decoration:none;font-weight:600}
-    .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
-    .price{font-size:16px;font-weight:700;color:var(--green)}
-    .price.paid{color:var(--amber)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}
-    .btn-cyan{border-color:var(--cyan);color:var(--cyan)}
-    .empty,.error{padding:34px;text-align:center;color:var(--muted)}
-    .error{color:var(--danger)}
-    .skeleton{min-height:350px;position:relative;overflow:hidden;background:#131b23;border-radius:12px;border:1px solid var(--line)}
-    .skeleton:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,#ffffff0b,transparent);animation:shine 1.2s infinite}
-    @keyframes shine{100%{transform:translateX(100%)}}
-    @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:650px){.shell{width:min(100% - 20px,1180px);padding-top:20px}.topbar{align-items:flex-start}.hero{padding:20px}.hero h1{font-size:28px}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.summary{align-items:flex-start;flex-direction:column}.btn{min-height:38px;padding:0 11px;font-size:12px}}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;font-family:'Kanit',sans-serif;background:var(--bg);color:var(--ink)} body{overflow:auto}
+    button,input,select{font-family:'Kanit',sans-serif} a{color:var(--cyan)}
+    .shell{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:28px 0 44px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0;text-decoration:none;color:inherit}.brand-logo{width:42px;height:42px;border-radius:9px;background:#fff;object-fit:contain;box-shadow:0 0 10px #fff3;flex:0 0 auto}.muted{color:var(--muted)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px #0006}.hero{padding:24px;margin-bottom:16px}.hero h1{margin:0 0 7px;font-size:32px;color:var(--cyan)}.hero p{margin:0;line-height:1.7}
+    .purpose{margin-top:14px;padding:12px 14px;border:1px solid #325064;border-radius:9px;background:#10202b;color:#c8d8e3;font-size:13px;line-height:1.6}.purpose strong{color:var(--green)}
+    .toolbar{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:10px;margin-top:18px}.control{height:44px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);padding:0 13px;outline:none}.control:focus{border-color:var(--cyan)}
+    .summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 2px;color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .product{overflow:hidden;display:flex;flex-direction:column;min-height:100%;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s,background .15s}.product:hover{border-color:var(--cyan);transform:translateY(-2px);background:#18232e}
+    .cover{aspect-ratio:4/3;background:#10171e;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);overflow:hidden}.cover img{width:100%;height:100%;object-fit:cover;display:block}.placeholder{padding:18px;text-align:center;color:#6e7d8c;font-size:13px}
+    .body{padding:18px;display:flex;flex-direction:column;gap:10px;flex:1}.meta{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.title{font-size:19px;font-weight:700;line-height:1.35;margin:0}.category{font-size:11px;padding:4px 8px;border-radius:999px;background:#23313d;color:var(--cyan);border:1px solid #314656;white-space:nowrap}.description{color:var(--muted);font-size:13px;line-height:1.55;min-height:20px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;color:var(--muted)}.stat{padding:7px 9px;border:1px solid #2f3b48;border-radius:7px;background:#121a22}.seller{margin-top:auto;padding-top:4px;font-size:12px;color:var(--muted)}
+    .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}.lead{font-size:13px;font-weight:600;color:var(--green)}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font-weight:700;text-decoration:none;cursor:pointer;white-space:nowrap}.btn-cyan{border-color:var(--cyan);color:var(--cyan)}
+    .empty,.error{padding:34px;text-align:center;color:var(--muted)}.error{color:var(--danger)}.skeleton{min-height:350px;position:relative;overflow:hidden;background:#131b23;border-radius:12px;border:1px solid var(--line)}.skeleton:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,#ffffff0b,transparent);animation:shine 1.2s infinite}@keyframes shine{100%{transform:translateX(100%)}}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:650px){.shell{width:min(100% - 20px,1180px);padding-top:20px}.topbar{align-items:flex-start}.hero{padding:20px}.hero h1{font-size:28px}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.summary{align-items:flex-start;flex-direction:column}.btn{min-height:38px;padding:0 11px;font-size:12px}}
   </style>
 </head>
 <body>
   <div class="shell">
     <div class="topbar">
-      <a class="brand" href="ap-cabinet-pro.html">
-        <img class="brand-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY">
-        <div><strong>AP CNC DIY</strong><div class="muted">AP Cabinet Pro Marketplace</div></div>
-      </a>
+      <a class="brand" href="ap-cabinet-pro.html"><img class="brand-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"><div><strong>AP CNC DIY</strong><div class="muted">AP Cabinet Pro Marketplace</div></div></a>
       <a class="btn" href="ap-cabinet-pro.html">กลับ AP Cabinet Pro</a>
     </div>
-
     <section class="card hero">
       <h1>Marketplace</h1>
-      <p class="muted">รวมสินค้าและชุดตู้ที่ผู้ใช้งาน AP Cabinet Pro เผยแพร่จากปลั๊กอิน สามารถค้นหาและดูข้อมูลผู้สร้างของแต่ละรายการได้จากหน้านี้</p>
-      <div class="toolbar">
-        <input id="searchInput" class="control" type="search" placeholder="ค้นหาชื่อสินค้า หมวดหมู่ หรือผู้สร้าง..." autocomplete="off">
-        <select id="categorySelect" class="control">
-          <option value="">ทุกหมวดหมู่</option>
-        </select>
-      </div>
+      <p class="muted">ค้นหาแบบตู้ ผลงาน และแนวทางงานจากสมาชิก AP Cabinet Pro เพื่อเลือกผู้ผลิตและสอบถามงานจริงกับเจ้าของผลงานโดยตรง</p>
+      <div class="purpose"><strong>Marketplace นี้เน้นการจ้างผลิตงานจริง</strong> ระหว่างเจ้าของบ้าน ลูกค้าที่กำลังทำเฟอร์นิเจอร์ และสมาชิก AP Cabinet Pro โดยรายการด้านล่างทำหน้าที่เป็นตัวอย่างผลงาน/ชุดตู้เพื่อเริ่มต้นการพูดคุยและขอใบเสนอราคา ไม่ได้เน้นการขายไฟล์โมเดล</div>
+      <div class="toolbar"><input id="searchInput" class="control" type="search" placeholder="ค้นหาชุดตู้ หมวดหมู่ หรือผู้ผลิต..." autocomplete="off"><select id="categorySelect" class="control"><option value="">ทุกหมวดหมู่</option></select></div>
     </section>
-
-    <div class="summary">
-      <div id="resultSummary">กำลังโหลด Marketplace...</div>
-      <div>แสดงเฉพาะรายการที่เผยแพร่แล้ว</div>
-    </div>
-
-    <main id="productGrid" class="grid" aria-live="polite">
-      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
-    </main>
+    <div class="summary"><div id="resultSummary">กำลังโหลด Marketplace...</div><div>แสดงเฉพาะผลงานที่สมาชิกเผยแพร่แล้ว</div></div>
+    <main id="productGrid" class="grid" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></main>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
-  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script>
   <script>
-    (() => {
-      const grid = document.getElementById('productGrid');
-      const summary = document.getElementById('resultSummary');
-      const searchInput = document.getElementById('searchInput');
-      const categorySelect = document.getElementById('categorySelect');
-      let models = [];
-      let sellers = new Map();
-
-      const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-      const publicFile = (path) => path ? `${window.SUPABASE_URL}/storage/v1/object/public/market-public/${String(path).split('/').map(encodeURIComponent).join('/')}` : '';
-      const formatNumber = (value) => Number(value || 0).toLocaleString('th-TH');
-      const dimensions = (m) => {
-        const d = m?.dimensions_mm || {};
-        const w = Number(d.width || 0), h = Number(d.height || 0), dep = Number(d.depth || 0);
-        if (!w && !h && !dep) return 'ไม่ระบุขนาด';
-        return `${formatNumber(w)} × ${formatNumber(h)} × ${formatNumber(dep)} มม.`;
-      };
-
-      function render() {
-        const q = searchInput.value.trim().toLocaleLowerCase('th');
-        const category = categorySelect.value;
-        const filtered = models.filter((m) => {
-          const seller = sellers.get(m.seller_id)?.display_name || '';
-          const hay = [m.title,m.description,m.category,seller,...(Array.isArray(m.tags)?m.tags:[])].join(' ').toLocaleLowerCase('th');
-          return (!category || m.category === category) && (!q || hay.includes(q));
-        });
-
-        summary.textContent = `พบ ${filtered.length.toLocaleString('th-TH')} รายการ`;
-        if (!filtered.length) {
-          grid.innerHTML = '<div class="card empty" style="grid-column:1/-1">ยังไม่มีรายการที่ตรงกับเงื่อนไขการค้นหา</div>';
-          return;
-        }
-
-        grid.innerHTML = filtered.map((m) => {
-          const seller = sellers.get(m.seller_id);
-          const sellerName = seller?.display_name || 'ผู้ใช้งาน AP Cabinet Pro';
-          const cover = publicFile(m.cover_path);
-          const desc = (m.description || '').trim() || 'ไม่มีคำอธิบายเพิ่มเติม';
-          const free = Number(m.price_credits || 0) <= 0;
-          return `
-            <article class="card product">
-              <div class="cover">${cover ? `<img src="${esc(cover)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove();this.parentElement.innerHTML='<div class=&quot;placeholder&quot;>ยังไม่มีภาพปก</div>'">` : '<div class="placeholder">ยังไม่มีภาพปก</div>'}</div>
-              <div class="body">
-                <div class="meta">
-                  <h2 class="title">${esc(m.title)}</h2>
-                  <span class="category">${esc(m.category || 'ไม่ระบุหมวด')}</span>
-                </div>
-                <div class="description">${esc(desc)}</div>
-                <div class="stats">
-                  <div class="stat">ขนาด<br><strong>${esc(dimensions(m))}</strong></div>
-                  <div class="stat">ดาวน์โหลด<br><strong>${formatNumber(m.download_count)}</strong></div>
-                </div>
-                <div class="seller">โดย <a href="public-profile.html?id=${encodeURIComponent(m.seller_id)}">${esc(sellerName)}</a></div>
-                <div class="foot">
-                  <div class="price${free ? '' : ' paid'}">${free ? 'ฟรี' : `${formatNumber(m.price_credits)} เครดิต`}</div>
-                  <a class="btn btn-cyan" href="public-profile.html?id=${encodeURIComponent(m.seller_id)}">ดูผู้สร้าง</a>
-                </div>
-              </div>
-            </article>`;
-        }).join('');
-      }
-
-      async function load() {
-        if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) throw new Error('Supabase configuration unavailable');
-        const sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-        const { data, error } = await sb
-          .from('market_models')
-          .select('id,seller_id,title,description,price_credits,tags,status,category,model_type,placement_type,dimensions_mm,selection_count,cover_path,preview_path,gallery_paths,minimum_plugin_version,download_count,created_at')
-          .eq('status','published')
-          .order('created_at',{ascending:false});
-        if (error) throw error;
-        models = data || [];
-
-        const sellerIds = [...new Set(models.map((m) => m.seller_id).filter(Boolean))];
-        if (sellerIds.length) {
-          const result = await sb.from('public_profiles').select('user_id,display_name,is_public').in('user_id',sellerIds).eq('is_public',true);
-          if (!result.error) sellers = new Map((result.data || []).map((p) => [p.user_id,p]));
-        }
-
-        const categories = [...new Set(models.map((m) => m.category).filter(Boolean))].sort((a,b) => a.localeCompare(b,'th'));
-        categorySelect.insertAdjacentHTML('beforeend', categories.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join(''));
-        render();
-      }
-
-      searchInput.addEventListener('input', render);
-      categorySelect.addEventListener('change', render);
-      load().catch((error) => {
-        console.error(error);
-        summary.textContent = 'ไม่สามารถโหลด Marketplace ได้';
-        grid.innerHTML = '<div class="card error" style="grid-column:1/-1">เกิดข้อผิดพลาดในการโหลดข้อมูล Marketplace กรุณาลองใหม่ภายหลัง</div>';
-      });
+    (()=>{
+      const grid=document.getElementById('productGrid'),summary=document.getElementById('resultSummary'),searchInput=document.getElementById('searchInput'),categorySelect=document.getElementById('categorySelect');let models=[],sellers=new Map();
+      const esc=v=>String(v??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+      const publicFile=path=>path?`${window.SUPABASE_URL}/storage/v1/object/public/market-public/${String(path).split('/').map(encodeURIComponent).join('/')}`:'';
+      const formatNumber=v=>Number(v||0).toLocaleString('th-TH');
+      const dimensions=m=>{const d=m?.dimensions_mm||{},w=Number(d.width||0),h=Number(d.height||0),dep=Number(d.depth||0);if(!w&&!h&&!dep)return'ไม่ระบุขนาด';return`${formatNumber(w)} × ${formatNumber(h)} × ${formatNumber(dep)} มม.`};
+      function render(){const q=searchInput.value.trim().toLocaleLowerCase('th'),category=categorySelect.value;const filtered=models.filter(m=>{const seller=sellers.get(m.seller_id)?.display_name||'';const hay=[m.title,m.description,m.category,seller,...(Array.isArray(m.tags)?m.tags:[])].join(' ').toLocaleLowerCase('th');return(!category||m.category===category)&&(!q||hay.includes(q))});summary.textContent=`พบ ${filtered.length.toLocaleString('th-TH')} ผลงาน`;if(!filtered.length){grid.innerHTML='<div class="card empty" style="grid-column:1/-1">ยังไม่มีผลงานที่ตรงกับเงื่อนไขการค้นหา</div>';return}
+        grid.innerHTML=filtered.map(m=>{const seller=sellers.get(m.seller_id),sellerName=seller?.display_name||'สมาชิก AP Cabinet Pro',cover=publicFile(m.cover_path),desc=(m.description||'').trim()||'เปิดดูรายละเอียดผลงานและติดต่อผู้ผลิตเพื่อสอบถามงาน';const href=`marketplace-item.html?id=${encodeURIComponent(m.id)}`;return`<a class="card product" href="${href}"><div class="cover">${cover?`<img src="${esc(cover)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove();this.parentElement.innerHTML='<div class=&quot;placeholder&quot;>ยังไม่มีภาพปก</div>'">`:'<div class="placeholder">ยังไม่มีภาพปก</div>'}</div><div class="body"><div class="meta"><h2 class="title">${esc(m.title)}</h2><span class="category">${esc(m.category||'ไม่ระบุหมวด')}</span></div><div class="description">${esc(desc)}</div><div class="stats"><div class="stat">ขนาดอ้างอิง<br><strong>${esc(dimensions(m))}</strong></div><div class="stat">ผู้ผลิต<br><strong>${esc(sellerName)}</strong></div></div><div class="seller">ผลงานโดย ${esc(sellerName)}</div><div class="foot"><div class="lead">สอบถามงาน / ขอใบเสนอราคา</div><span class="btn btn-cyan">ดูรายละเอียด</span></div></div></a>`}).join('')}
+      async function load(){if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY)throw new Error('Supabase configuration unavailable');const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);const {data,error}=await sb.from('market_models').select('id,seller_id,title,description,tags,status,category,model_type,placement_type,dimensions_mm,selection_count,cover_path,preview_path,gallery_paths,minimum_plugin_version,download_count,created_at').eq('status','published').order('created_at',{ascending:false});if(error)throw error;models=data||[];const sellerIds=[...new Set(models.map(m=>m.seller_id).filter(Boolean))];if(sellerIds.length){const result=await sb.from('public_profiles').select('user_id,display_name,is_public').in('user_id',sellerIds).eq('is_public',true);if(!result.error)sellers=new Map((result.data||[]).map(p=>[p.user_id,p]))}const categories=[...new Set(models.map(m=>m.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));categorySelect.insertAdjacentHTML('beforeend',categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(''));render()}
+      searchInput.addEventListener('input',render);categorySelect.addEventListener('change',render);load().catch(error=>{console.error(error);summary.textContent='ไม่สามารถโหลด Marketplace ได้';grid.innerHTML='<div class="card error" style="grid-column:1/-1">เกิดข้อผิดพลาดในการโหลดข้อมูล Marketplace กรุณาลองใหม่ภายหลัง</div>'})
     })();
   </script>
-</body>
-</html>
+</body></html>

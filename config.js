@@ -236,3 +236,23 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
+
+(()=>{
+  "use strict";
+  function wireProfileProductsLink(){
+    if(!/\/public-profile(?:\.html)?\/?$/i.test(location.pathname))return;
+    const params=new URLSearchParams(location.search);
+    const profileId=params.get('id')||'';
+    const apply=()=>{
+      document.querySelectorAll('a').forEach(a=>{
+        if(a.textContent.trim().includes('ดูสินค้าทั้งหมด')){
+          a.href='profile-products.html'+(profileId?'?id='+encodeURIComponent(profileId):'');
+        }
+      });
+    };
+    apply();
+    setTimeout(apply,300);
+    setTimeout(apply,1000);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireProfileProductsLink);else wireProfileProductsLink();
+})();

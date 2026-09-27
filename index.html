@@ -56,6 +56,7 @@
       </div>
       <div class="account-actions">
         <span id="accountEmail" class="account-email" hidden></span>
+        <a id="profileButton" class="btn" href="profile.html" hidden>โปรไฟล์ของฉัน</a>
         <a id="accountButton" class="btn btn-accent" href="login.html">เข้าสู่ระบบ/สมัครสมาชิค</a>
       </div>
     </div>
@@ -77,18 +78,21 @@
     (() => {
       const button = document.getElementById('accountButton');
       const email = document.getElementById('accountEmail');
-      if (!button || !email || !window.AuthClient) return;
+      const profileButton = document.getElementById('profileButton');
+      if (!button || !email || !profileButton || !window.AuthClient) return;
 
       function render(user) {
         if (user && user.email) {
           email.textContent = user.email;
           email.hidden = false;
+          profileButton.hidden = false;
           button.textContent = 'ออกจากระบบ';
           button.href = '#';
           button.dataset.mode = 'logout';
         } else {
           email.textContent = '';
           email.hidden = true;
+          profileButton.hidden = true;
           button.textContent = 'เข้าสู่ระบบ/สมัครสมาชิค';
           button.href = 'login.html';
           button.dataset.mode = 'login';

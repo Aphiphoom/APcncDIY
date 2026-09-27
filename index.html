@@ -56,7 +56,7 @@
       </div>
       <div class="account-actions">
         <span id="accountEmail" class="account-email" hidden></span>
-        <a id="profileButton" class="btn" href="profile.html" hidden>โปรไฟล์ของฉัน</a>
+        <a id="profileButton" class="btn" href="public-profile.html" hidden>โปรไฟล์ของฉัน</a>
         <a id="accountButton" class="btn btn-accent" href="login.html">เข้าสู่ระบบ/สมัครสมาชิค</a>
       </div>
     </div>
@@ -86,6 +86,7 @@
           email.textContent = user.email;
           email.hidden = false;
           profileButton.hidden = false;
+          profileButton.href = 'public-profile.html?id=' + encodeURIComponent(user.id);
           button.textContent = 'ออกจากระบบ';
           button.href = '#';
           button.dataset.mode = 'logout';
@@ -93,6 +94,7 @@
           email.textContent = '';
           email.hidden = true;
           profileButton.hidden = true;
+          profileButton.href = 'public-profile.html';
           button.textContent = 'เข้าสู่ระบบ/สมัครสมาชิค';
           button.href = 'login.html';
           button.dataset.mode = 'login';

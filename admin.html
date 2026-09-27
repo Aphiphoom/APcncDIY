@@ -114,7 +114,7 @@
           <label class="fld"><span>สถานะ</span><select id="detailStatus"><option value="pending">รออนุมัติ (pending)</option><option value="active">ใช้งานได้ (active)</option><option value="suspended">ระงับสิทธิ์ (suspended)</option></select></label>
           <label class="fld"><span>ใช้ได้ถึงวันที่</span><input type="date" id="detailExpires"></label>
           <label class="fld"><span>Role</span><select id="detailRole"><option value="member">member</option><option value="admin">admin</option></select></label>
-          <label class="fld"><span>ระดับผู้ขาย</span><select id="detailSellerLevel"><option value="0">None — ยังไม่มีสิทธิ์ขาย</option><option value="1">Seller 1 — สูงสุด 5 ชิ้น</option><option value="2">Seller 2 — สูงสุด 25 ชิ้น</option><option value="3">Seller 3 — สูงสุด 50 ชิ้น</option></select><small class="seller-hint" id="sellerLimitHint"></small></label>
+          <label class="fld"><span>ระดับผู้ขาย</span><select id="detailSellerLevel"><option value="0">None — ยังไม่มีสิทธิ์ขาย</option><option value="1">Seller 1 — สูงสุด 10 ชิ้น</option><option value="2">Seller 2 — สูงสุด 25 ชิ้น</option><option value="3">Seller 3 — สูงสุด 50 ชิ้น</option><option value="4">Seller 4 — สูงสุด 100 ชิ้น</option></select><small class="seller-hint" id="sellerLimitHint"></small></label>
           <label class="fld"><span>เครดิตคงเหลือ</span><input type="text" id="detailCredits" value="0" readonly></label>
         </div>
         <button id="btnSaveUser" class="btn btn-accent" style="margin-top:12px">บันทึกการเปลี่ยนแปลง</button>
@@ -145,5 +145,6 @@
 
   <script src="auth-client.js"></script>
   <script src="admin.js"></script>
+  <script src="admin-seller-level.js"></script>
 </body>
 </html>

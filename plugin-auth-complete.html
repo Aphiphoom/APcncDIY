@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AP Cabinet Pro · Google Login</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    html,body{min-height:100%;height:auto;overflow:auto}body{display:block;background:#0d1218}.bridge-shell{min-height:100vh;display:grid;place-items:center;padding:24px}.bridge-card{width:min(420px,100%);background:#161e27;border:1px solid #364454;border-radius:12px;padding:28px;text-align:center;box-shadow:0 14px 34px #0007}.bridge-logo{width:58px;height:58px;border-radius:10px;background:#fff;object-fit:contain}.bridge-card h1{font-size:18px;margin:14px 0 6px}.bridge-card p{font-size:12px;line-height:1.7;color:#9eacba;margin:0}.bridge-status{margin-top:18px;font-size:13px;color:#25c8d5}.bridge-status.err{color:#ff7b7b}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <main class="bridge-shell"><section class="bridge-card">
+    <img class="bridge-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY">
+    <h1>กำลังเชื่อมบัญชี Google</h1>
+    <p>กำลังส่งสิทธิ์การเข้าสู่ระบบกลับไปยัง AP Cabinet Pro</p>
+    <div id="bridgeStatus" class="bridge-status">กรุณารอสักครู่...</div>
+  </section></main>
+<script>
+(async()=>{
+  const status=document.getElementById('bridgeStatus');
+  const setStatus=(text,error=false)=>{status.textContent=text;status.className='bridge-status'+(error?' err':'')};
+  try{
+    const params=new URLSearchParams(location.search);
+    const requestId=params.get('plugin_request')||'';
+    const secret=params.get('plugin_secret')||'';
+    if(!requestId||!secret)throw new Error('ข้อมูลเชื่อมต่อ AP Cabinet Pro ไม่ครบ');
+    const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    let session=(await client.auth.getSession()).data.session;
+    if(!session){
+      await new Promise(resolve=>setTimeout(resolve,250));
+      session=(await client.auth.getSession()).data.session;
+    }
+    if(!session?.access_token)throw new Error('ไม่พบ Session จาก Google กรุณากลับไปลองใหม่');
+    const response=await fetch(`${window.SUPABASE_URL}/functions/v1/plugin-google-auth`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+      body:JSON.stringify({action:'complete',request_id:requestId,secret})
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok)throw new Error('ส่งสิทธิ์กลับ AP Cabinet Pro ไม่สำเร็จ');
+    setStatus('เข้าสู่ระบบสำเร็จ · กลับไปที่ SketchUp ได้เลย');
+    document.querySelector('.bridge-card h1').textContent='เข้าสู่ระบบสำเร็จ';
+    document.querySelector('.bridge-card p').textContent='บัญชี Google ถูกเชื่อมกับ AP Cabinet Pro แล้ว หน้านี้สามารถปิดได้';
+  }catch(error){
+    console.error(error);
+    setStatus(error?.message||'เชื่อมบัญชีไม่สำเร็จ',true);
+    document.querySelector('.bridge-card h1').textContent='เชื่อมบัญชีไม่สำเร็จ';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,1 +1,227 @@
-window.SUPABASE_URL="https://modbgnzikhrdvrcxnzqy.supabase.co",window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
+window.SUPABASE_URL="https://modbgnzikhrdvrcxnzqy.supabase.co";
+window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
+
+(()=>{
+  "use strict";
+
+  const GOOGLE_BRIDGE_URL=`${window.SUPABASE_URL}/functions/v1/plugin-google-auth`;
+  const isLoginPage=()=>/\/login\.html$/i.test(location.pathname);
+  const isAdminPage=()=>/\/admin\.html$/i.test(location.pathname);
+  const inSketchUp=()=>!!(window.sketchup&&typeof window.sketchup.account_open_url==='function');
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+  function randomSecret(){
+    const bytes=new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function loginStatus(message,kind=''){
+    const el=document.getElementById('authLoginStatus');
+    if(!el)return;
+    el.textContent=message||'';
+    el.className='auth-status'+(kind?` ${kind}`:'');
+  }
+
+  function installGoogleStyle(){
+    if(document.getElementById('apGoogleAuthStyle'))return;
+    const style=document.createElement('style');
+    style.id='apGoogleAuthStyle';
+    style.textContent=`
+      .auth-google{width:100%;height:42px;border:1px solid #cbd2d9;border-radius:6px;background:#fff;color:#202124;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 12px}.auth-google:hover{background:#f7f8f8}.auth-google:disabled{opacity:.55;cursor:default}.auth-google-mark{font-size:18px;font-weight:800;color:#4285f4}.auth-or{display:flex;align-items:center;gap:9px;color:var(--auth-muted);font-size:10px;margin:2px 0 12px}.auth-or:before,.auth-or:after{content:"";height:1px;background:var(--auth-line);flex:1}.auth-customer{color:var(--auth-cyan)!important}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function googleRedirectUrl(){
+    const url=new URL(location.href);
+    url.hash='';
+    return url.toString();
+  }
+
+  async function completePluginBridge(client,requestId,secret,session){
+    if(!requestId||!secret||!session?.access_token)return false;
+    const response=await fetch(GOOGLE_BRIDGE_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+      body:JSON.stringify({action:'complete',request_id:requestId,secret})
+    });
+    if(!response.ok)throw new Error('ส่งสิทธิ์กลับ AP Cabinet Pro ไม่สำเร็จ');
+    const result=await response.json();
+    if(!result?.ok)throw new Error('ส่งสิทธิ์กลับ AP Cabinet Pro ไม่สำเร็จ');
+    const card=document.querySelector('.auth-card');
+    if(card){
+      card.innerHTML=`<div class="auth-brand"><div class="auth-logo"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"></div><h1>เข้าสู่ระบบสำเร็จ</h1><p>บัญชี Google เชื่อมกับ AP Cabinet Pro แล้ว</p></div><div class="auth-status ok" style="line-height:1.7">กลับไปที่ SketchUp ได้เลย<br>หน้าต่างนี้สามารถปิดได้</div>`;
+    }
+    return true;
+  }
+
+  async function pollPluginBridge(client,requestId,secret){
+    const started=Date.now();
+    loginStatus('เปิดเบราว์เซอร์แล้ว · กรุณาเข้าสู่ระบบด้วย Google','ok');
+    while(Date.now()-started<5*60*1000){
+      await delay(1500);
+      try{
+        const response=await fetch(GOOGLE_BRIDGE_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'claim',request_id:requestId,secret})
+        });
+        const result=await response.json().catch(()=>({}));
+        if(response.status===410)throw new Error('คำขอเข้าสู่ระบบหมดอายุ กรุณาลองใหม่');
+        if(!response.ok&&!result.pending)throw new Error('ตรวจสอบการเข้าสู่ระบบ Google ไม่สำเร็จ');
+        if(result.pending)continue;
+        if(result.ok&&result.token_hash){
+          const verified=await client.auth.verifyOtp({token_hash:result.token_hash,type:'email'});
+          if(verified.error)throw verified.error;
+          const session=verified.data?.session;
+          if(!session)throw new Error('ไม่ได้รับ Session จาก Google');
+          if(window.sketchup&&typeof window.sketchup.account_save_session==='function'){
+            window.sketchup.account_save_session(JSON.stringify(session));
+          }
+          loginStatus('เข้าสู่ระบบ Google สำเร็จ · กำลังโหลดบัญชี...','ok');
+          await delay(350);
+          location.reload();
+          return;
+        }
+      }catch(error){
+        loginStatus(error?.message||'เข้าสู่ระบบ Google ไม่สำเร็จ','err');
+        return;
+      }
+    }
+    loginStatus('หมดเวลารอการเข้าสู่ระบบ Google กรุณาลองใหม่','err');
+  }
+
+  async function startGoogle(client){
+    const button=document.getElementById('authGoogle');
+    if(button)button.disabled=true;
+    try{
+      if(inSketchUp()){
+        const requestId=crypto.randomUUID();
+        const secret=randomSecret();
+        const external=new URL('https://apcncdiy.com/login.html');
+        external.searchParams.set('plugin_google','1');
+        external.searchParams.set('plugin_request',requestId);
+        external.searchParams.set('plugin_secret',secret);
+        external.searchParams.set('next','index.html');
+        window.sketchup.account_open_url(external.toString());
+        pollPluginBridge(client,requestId,secret);
+        return;
+      }
+      const {error}=await client.auth.signInWithOAuth({
+        provider:'google',
+        options:{redirectTo:googleRedirectUrl()}
+      });
+      if(error)throw error;
+    }catch(error){
+      loginStatus(error?.message||'ไม่สามารถเปิด Google Login ได้','err');
+      if(button)button.disabled=false;
+    }
+  }
+
+  async function applyCustomerState(client,session){
+    const user=session?.user;
+    if(!user)return;
+    const {data:profile}=await client.from('profiles').select('status,expires_at,role,account_type').eq('id',user.id).maybeSingle();
+    if(!profile)return;
+    if(profile.status==='customer'){
+      const statusEl=document.getElementById('authMemberStatus');
+      const daysEl=document.getElementById('authMemberDays');
+      const expiryEl=document.getElementById('authMemberExpiry');
+      const msgEl=document.getElementById('authMemberMessage');
+      if(statusEl){statusEl.textContent='Web User / Customer';statusEl.className='auth-customer'}
+      if(daysEl)daysEl.textContent='ยังไม่มีแพ็กเกจ';
+      if(expiryEl)expiryEl.textContent='—';
+      if(msgEl)msgEl.textContent='บัญชีเว็บไซต์พร้อมใช้งาน · ซื้อแพ็กเกจเพื่อใช้งาน AP Cabinet Pro';
+    }
+  }
+
+  async function setupLogin(){
+    installGoogleStyle();
+    const host=document.getElementById('authLogin');
+    if(!host||document.getElementById('authGoogle'))return;
+
+    const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{
+      auth:{persistSession:!inSketchUp(),autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    window.APGoogleAuthClient=client;
+
+    const tabs=host.querySelector('.auth-tabs');
+    const google=document.createElement('button');
+    google.id='authGoogle';
+    google.type='button';
+    google.className='auth-google';
+    google.innerHTML='<span class="auth-google-mark">G</span><span>ดำเนินการต่อด้วย Google</span>';
+    const divider=document.createElement('div');
+    divider.className='auth-or';
+    divider.textContent='หรือ';
+    if(tabs){tabs.after(google,divider)}else host.prepend(google,divider);
+    google.addEventListener('click',()=>startGoogle(client));
+
+    const params=new URLSearchParams(location.search);
+    const pluginRequest=params.get('plugin_request')||'';
+    const pluginSecret=params.get('plugin_secret')||'';
+    const externalPluginFlow=params.get('plugin_google')==='1'&&!inSketchUp();
+
+    client.auth.onAuthStateChange((_event,session)=>{
+      if(!session)return;
+      setTimeout(async()=>{
+        try{
+          if(externalPluginFlow&&pluginRequest&&pluginSecret){
+            await completePluginBridge(client,pluginRequest,pluginSecret,session);
+            return;
+          }
+          await applyCustomerState(client,session);
+          if(!inSketchUp()){
+            const {data:profile}=await client.from('profiles').select('status').eq('id',session.user.id).maybeSingle();
+            if(profile?.status==='customer'){
+              const next=params.get('next')||'index.html';
+              if(!externalPluginFlow)setTimeout(()=>location.replace(next),250);
+            }
+          }
+        }catch(error){
+          loginStatus(error?.message||'ดำเนินการ Google Login ไม่สำเร็จ','err');
+        }
+      },0);
+    });
+
+    const {data:{session}}=await client.auth.getSession();
+    if(session){
+      if(externalPluginFlow&&pluginRequest&&pluginSecret){
+        try{await completePluginBridge(client,pluginRequest,pluginSecret,session)}catch(error){loginStatus(error?.message||'ส่งสิทธิ์กลับโปรแกรมไม่สำเร็จ','err')}
+      }else{
+        setTimeout(()=>applyCustomerState(client,session),50);
+      }
+    }
+  }
+
+  function setupAdminCustomerStatus(){
+    const style=document.createElement('style');
+    style.textContent='.status-customer{background:rgba(52,210,192,.15);color:var(--cyan)}';
+    document.head.appendChild(style);
+    const select=document.getElementById('detailStatus');
+    if(select&&!Array.from(select.options).some(o=>o.value==='customer')){
+      const option=document.createElement('option');
+      option.value='customer';
+      option.textContent='ลูกค้าเว็บไซต์ (customer)';
+      select.insertBefore(option,select.firstChild);
+    }
+    const normalize=()=>document.querySelectorAll('.status-pill').forEach(el=>{
+      if(el.textContent.trim()==='customer'){
+        el.textContent='ลูกค้าเว็บไซต์';
+        el.classList.add('status-customer');
+      }
+    });
+    normalize();
+    const body=document.getElementById('userTableBody');
+    if(body)new MutationObserver(normalize).observe(body,{childList:true,subtree:true,characterData:true});
+  }
+
+  function boot(){
+    if(!window.supabase)return;
+    if(isLoginPage())setTimeout(()=>setupLogin().catch(console.error),0);
+    if(isAdminPage())setTimeout(setupAdminCustomerStatus,0);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();

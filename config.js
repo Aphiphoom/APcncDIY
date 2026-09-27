@@ -287,3 +287,61 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',detectCustomer);else detectCustomer();
 })();
+
+(()=>{
+  "use strict";
+  if(!/\/public-profile(?:\.html)?\/?$/i.test(location.pathname))return;
+
+  async function setupFacebookContact(){
+    if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY)return;
+    const contact=document.querySelector('#contact .contact-list');
+    if(!contact||document.getElementById('facebookUrl'))return;
+
+    const row=document.createElement('div');
+    row.className='contact-row';
+    row.innerHTML='<span style="font-weight:700;color:#5b8def">f</span><span class="contact-label">Facebook</span><a id="facebookUrl" class="contact-value" href="#" target="_blank" rel="noopener">-</a><input id="facebookUrlInput" class="inline-input" type="url" placeholder="https://www.facebook.com/..." hidden>';
+    const locationRow=document.getElementById('addressText')?.closest('.contact-row');
+    contact.insertBefore(row,locationRow||null);
+
+    const fallbackId='6faf161f-f1a5-4ba7-a044-c68577711e93';
+    const params=new URLSearchParams(location.search);
+    const profileId=params.get('id')||fallbackId;
+    const client=window.AuthClient?.sb||window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+    const {data:profile}=await client.from('public_profiles').select('facebook_url').eq('user_id',profileId).maybeSingle();
+    let value=profile?.facebook_url||'';
+    const link=document.getElementById('facebookUrl');
+    const input=document.getElementById('facebookUrlInput');
+
+    const render=()=>{
+      link.textContent=value||'-';
+      link.href=value||'#';
+      link.style.pointerEvents=value?'auto':'none';
+      link.style.color=value?'var(--cyan)':'';
+      input.value=value;
+    };
+    render();
+
+    const editBtn=document.querySelector('#contact [data-edit="contact"]');
+    const saveBtn=document.querySelector('#contact [data-save="contact"]');
+    const cancelBtn=document.querySelector('#contact [data-cancel="contact"]');
+    editBtn?.addEventListener('click',()=>{link.hidden=true;input.hidden=false;input.value=value});
+    cancelBtn?.addEventListener('click',()=>{input.hidden=true;link.hidden=false;input.value=value});
+    saveBtn?.addEventListener('click',async()=>{
+      const next=input.value.trim();
+      try{
+        const {error}=await client.from('public_profiles').update({facebook_url:next||null,updated_at:new Date().toISOString()}).eq('user_id',profileId);
+        if(error)throw error;
+        value=next;
+        input.hidden=true;
+        link.hidden=false;
+        render();
+      }catch(error){
+        console.error('facebook profile save failed',error);
+        alert('บันทึก Facebook ไม่สำเร็จ: '+(error?.message||'unknown error'));
+      }
+    });
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>setupFacebookContact().catch(console.error),0));
+  else setTimeout(()=>setupFacebookContact().catch(console.error),0);
+})();

@@ -34,26 +34,16 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
   }
 
   function googleRedirectUrl(){
+    const params=new URLSearchParams(location.search);
+    if(params.get('plugin_google')==='1'&&!inSketchUp()){
+      const callback=new URL('https://apcncdiy.com/plugin-auth-complete.html');
+      callback.searchParams.set('plugin_request',params.get('plugin_request')||'');
+      callback.searchParams.set('plugin_secret',params.get('plugin_secret')||'');
+      return callback.toString();
+    }
     const url=new URL(location.href);
     url.hash='';
     return url.toString();
-  }
-
-  async function completePluginBridge(client,requestId,secret,session){
-    if(!requestId||!secret||!session?.access_token)return false;
-    const response=await fetch(GOOGLE_BRIDGE_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
-      body:JSON.stringify({action:'complete',request_id:requestId,secret})
-    });
-    if(!response.ok)throw new Error('ส่งสิทธิ์กลับ AP Cabinet Pro ไม่สำเร็จ');
-    const result=await response.json();
-    if(!result?.ok)throw new Error('ส่งสิทธิ์กลับ AP Cabinet Pro ไม่สำเร็จ');
-    const card=document.querySelector('.auth-card');
-    if(card){
-      card.innerHTML=`<div class="auth-brand"><div class="auth-logo"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"></div><h1>เข้าสู่ระบบสำเร็จ</h1><p>บัญชี Google เชื่อมกับ AP Cabinet Pro แล้ว</p></div><div class="auth-status ok" style="line-height:1.7">กลับไปที่ SketchUp ได้เลย<br>หน้าต่างนี้สามารถปิดได้</div>`;
-    }
-    return true;
   }
 
   async function pollPluginBridge(client,requestId,secret){
@@ -103,7 +93,6 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
         external.searchParams.set('plugin_google','1');
         external.searchParams.set('plugin_request',requestId);
         external.searchParams.set('plugin_secret',secret);
-        external.searchParams.set('next','index.html');
         window.sketchup.account_open_url(external.toString());
         pollPluginBridge(client,requestId,secret);
         return;
@@ -136,8 +125,28 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
     }
   }
 
+  function relabelLegacyPendingAsCustomer(){
+    const apply=()=>{
+      const statusEl=document.getElementById('authMemberStatus');
+      if(statusEl&&statusEl.textContent.trim()==='รออนุมัติ'){
+        statusEl.textContent='Web User / Customer';
+        statusEl.className='auth-customer';
+        const days=document.getElementById('authMemberDays');
+        const expiry=document.getElementById('authMemberExpiry');
+        const msg=document.getElementById('authMemberMessage');
+        if(days)days.textContent='ยังไม่มีแพ็กเกจ';
+        if(expiry)expiry.textContent='—';
+        if(msg)msg.textContent='บัญชีเว็บไซต์พร้อมใช้งาน · ซื้อแพ็กเกจเพื่อใช้งาน AP Cabinet Pro';
+      }
+    };
+    apply();
+    const root=document.getElementById('authMember');
+    if(root)new MutationObserver(apply).observe(root,{childList:true,subtree:true,characterData:true});
+  }
+
   async function setupLogin(){
     installGoogleStyle();
+    relabelLegacyPendingAsCustomer();
     const host=document.getElementById('authLogin');
     if(!host||document.getElementById('authGoogle'))return;
 
@@ -159,24 +168,16 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
     google.addEventListener('click',()=>startGoogle(client));
 
     const params=new URLSearchParams(location.search);
-    const pluginRequest=params.get('plugin_request')||'';
-    const pluginSecret=params.get('plugin_secret')||'';
-    const externalPluginFlow=params.get('plugin_google')==='1'&&!inSketchUp();
-
     client.auth.onAuthStateChange((_event,session)=>{
       if(!session)return;
       setTimeout(async()=>{
         try{
-          if(externalPluginFlow&&pluginRequest&&pluginSecret){
-            await completePluginBridge(client,pluginRequest,pluginSecret,session);
-            return;
-          }
           await applyCustomerState(client,session);
-          if(!inSketchUp()){
+          if(!inSketchUp()&&params.get('plugin_google')!=='1'){
             const {data:profile}=await client.from('profiles').select('status').eq('id',session.user.id).maybeSingle();
             if(profile?.status==='customer'){
               const next=params.get('next')||'index.html';
-              if(!externalPluginFlow)setTimeout(()=>location.replace(next),250);
+              setTimeout(()=>location.replace(next),250);
             }
           }
         }catch(error){
@@ -186,13 +187,7 @@ window.SUPABASE_ANON_KEY="sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr";
     });
 
     const {data:{session}}=await client.auth.getSession();
-    if(session){
-      if(externalPluginFlow&&pluginRequest&&pluginSecret){
-        try{await completePluginBridge(client,pluginRequest,pluginSecret,session)}catch(error){loginStatus(error?.message||'ส่งสิทธิ์กลับโปรแกรมไม่สำเร็จ','err')}
-      }else{
-        setTimeout(()=>applyCustomerState(client,session),50);
-      }
-    }
+    if(session)setTimeout(()=>applyCustomerState(client,session),50);
   }
 
   function setupAdminCustomerStatus(){

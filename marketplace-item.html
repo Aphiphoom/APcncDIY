@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>รายละเอียดผลงาน · AP CNC DIY Marketplace</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+    :root{--bg:#0d1218;--panel:#161e27;--panel2:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5;--green:#45c98a;--danger:#ff6b6b}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'Kanit',sans-serif;background:var(--bg);color:var(--ink)}body{overflow:auto}a{color:var(--cyan);text-decoration:none}button{font-family:inherit}.shell{width:min(1180px,calc(100% - 28px));margin:auto;padding:28px 0 48px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px;color:inherit}.brand-logo{width:42px;height:42px;border-radius:9px;background:#fff;object-fit:contain}.muted{color:var(--muted)}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 15px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);font-weight:700;cursor:pointer}.btn.primary{background:var(--amber);border-color:var(--amber);color:#1a1206}.btn.cyan{border-color:var(--cyan);color:var(--cyan)}.btn.green{border-color:var(--green);color:var(--green)}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:0 14px 34px #0006}.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(310px,.75fr);gap:18px}.main{min-width:0}.hero{overflow:hidden}.cover{aspect-ratio:16/9;background:#10171e;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line)}.cover img{width:100%;height:100%;object-fit:cover;display:block}.placeholder{color:#6f7e8d}.content{padding:24px}.eyebrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.chip{font-size:11px;padding:5px 9px;border:1px solid #314656;border-radius:999px;background:#22303b;color:var(--cyan)}h1{font-size:30px;line-height:1.28;margin:0 0 10px}.desc{color:#c7d0d8;line-height:1.8;white-space:pre-line}.notice{margin-top:16px;padding:13px 14px;border:1px solid #335164;border-radius:9px;background:#10202b;color:#c7d7e1;font-size:13px;line-height:1.65}.notice strong{color:var(--green)}.section{padding:22px;margin-top:16px}.section h2,.sidecard h2{margin:0 0 15px;font-size:19px}.specs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.spec{padding:13px;border:1px solid #2f3c49;border-radius:9px;background:#121a22}.spec span{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#111923}.side{display:grid;align-content:start;gap:16px}.sidecard{padding:20px}.seller-name{font-size:21px;font-weight:700;margin-bottom:4px}.seller-tag{color:var(--muted);font-size:13px;line-height:1.55}.contact{display:grid;gap:9px;margin:15px 0}.contact-row{padding:10px 11px;border:1px solid #2d3b48;border-radius:8px;background:#111a22;font-size:13px;overflow-wrap:anywhere}.contact-row small{display:block;color:var(--muted);font-size:10px;margin-bottom:2px}.actions{display:grid;gap:9px}.workflow{display:grid;gap:10px}.step{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}.stepnum{width:30px;height:30px;border-radius:50%;background:#22313d;border:1px solid #365166;display:grid;place-items:center;color:var(--cyan);font-weight:700}.step b{display:block}.step span{color:var(--muted);font-size:12px;line-height:1.55}.status{padding:30px;text-align:center;color:var(--muted)}.error{color:var(--danger)}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.specs{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.shell{width:min(100% - 20px,1180px);padding-top:20px}.topbar{align-items:flex-start}.brand strong{font-size:14px}.topbar .btn{font-size:11px;padding:0 10px;min-height:38px}.content,.section,.sidecard{padding:18px}h1{font-size:25px}.side{grid-template-columns:1fr}.specs,.gallery{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <a class="brand" href="marketplace.html"><img class="brand-logo" src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"><div><strong>AP CNC DIY Marketplace</strong><div class="muted">ผลงานจากสมาชิก AP Cabinet Pro</div></div></a>
+      <a class="btn" href="marketplace.html">กลับ Marketplace</a>
+    </div>
+    <div id="loading" class="card status">กำลังโหลดรายละเอียดผลงาน...</div>
+    <main id="page" class="layout" hidden>
+      <div class="main">
+        <section class="card hero"><div id="cover" class="cover"></div><div class="content"><div id="chips" class="eyebrow"></div><h1 id="title"></h1><div id="description" class="desc"></div><div class="notice"><strong>รายการนี้เป็นตัวอย่างผลงานสำหรับการจ้างผลิตจริง</strong> ขนาด วัสดุ ราคา และรายละเอียดงานสามารถเปลี่ยนได้ตามพื้นที่หน้างานและความต้องการของลูกค้า กรุณาติดต่อผู้ผลิตเพื่อประเมินและออกใบเสนอราคา</div></div></section>
+        <section class="card section"><h2>ข้อมูลอ้างอิงของชุดตู้</h2><div id="specs" class="specs"></div></section>
+        <section id="gallerySection" class="card section" hidden><h2>รูปเพิ่มเติม</h2><div id="gallery" class="gallery"></div></section>
+      </div>
+      <aside class="side">
+        <section class="card sidecard"><h2>ผู้ผลิต / เจ้าของผลงาน</h2><div id="sellerName" class="seller-name">สมาชิก AP Cabinet Pro</div><div id="sellerTag" class="seller-tag"></div><div id="contact" class="contact"></div><div id="actions" class="actions"></div></section>
+        <section class="card sidecard"><h2>ขั้นตอนการเริ่มงาน</h2><div class="workflow"><div class="step"><div class="stepnum">1</div><div><b>เลือกผลงานที่สนใจ</b><span>ใช้แบบใน Marketplace เป็นแนวทางเริ่มต้น</span></div></div><div class="step"><div class="stepnum">2</div><div><b>ติดต่อผู้ผลิต</b><span>แจ้งขนาดพื้นที่ รูปแบบ วัสดุ และงบประมาณเบื้องต้น</span></div></div><div class="step"><div class="stepnum">3</div><div><b>ปรับแบบและเสนอราคา</b><span>ผู้ผลิตตรวจรายละเอียดจริงก่อนสรุปแบบและราคา</span></div></div><div class="step"><div class="stepnum">4</div><div><b>ตกลงผลิตและติดตั้ง</b><span>การซื้อขายเกิดขึ้นโดยตรงระหว่างลูกค้ากับผู้ผลิต</span></div></div></div></section>
+      </aside>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script>
+  <script>
+    (()=>{
+      const esc=v=>String(v??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+      const publicFile=path=>path?`${window.SUPABASE_URL}/storage/v1/object/public/market-public/${String(path).split('/').map(encodeURIComponent).join('/')}`:'';
+      const num=v=>Number(v||0).toLocaleString('th-TH');
+      const loading=document.getElementById('loading'),page=document.getElementById('page');
+      const fail=msg=>{loading.textContent=msg;loading.classList.add('error')};
+      async function load(){
+        const id=new URLSearchParams(location.search).get('id'); if(!id){fail('ไม่พบรหัสผลงาน');return}
+        if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY){fail('ไม่พบการตั้งค่า Supabase');return}
+        const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+        const {data:m,error}=await sb.from('market_models').select('id,seller_id,title,description,tags,status,category,model_type,placement_type,dimensions_mm,selection_count,cover_path,preview_path,gallery_paths,minimum_plugin_version,download_count,created_at').eq('id',id).eq('status','published').maybeSingle();
+        if(error)throw error;if(!m){fail('ไม่พบผลงานนี้ หรือผลงานไม่ได้เผยแพร่แล้ว');return}
+        const profileResult=await sb.from('public_profiles').select('user_id,display_name,tagline,avatar_url,province,country,phone,line_id,public_email,about,services,products,is_public,is_maker').eq('user_id',m.seller_id).maybeSingle();
+        const p=profileResult.data&&profileResult.data.is_public?profileResult.data:null;
+        const d=m.dimensions_mm||{};
+        document.title=`${m.title} · AP CNC DIY Marketplace`;
+        const coverUrl=publicFile(m.cover_path);document.getElementById('cover').innerHTML=coverUrl?`<img src="${esc(coverUrl)}" alt="${esc(m.title)}">`:'<div class="placeholder">ยังไม่มีภาพปก</div>';
+        document.getElementById('chips').innerHTML=[m.category,m.model_type==='parametric'?'ปรับขนาดได้':'แบบอ้างอิง',p?.province].filter(Boolean).map(x=>`<span class="chip">${esc(x)}</span>`).join('');
+        document.getElementById('title').textContent=m.title||'ผลงาน';document.getElementById('description').textContent=(m.description||'').trim()||'ผลงานชุดตู้นี้เผยแพร่โดยสมาชิก AP Cabinet Pro เพื่อใช้เป็นแนวทางสำหรับลูกค้าที่ต้องการสอบถามและจ้างผลิตงานจริง';
+        document.getElementById('specs').innerHTML=`<div class="spec"><span>ความกว้างอ้างอิง</span><strong>${d.width?num(d.width)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>ความสูงอ้างอิง</span><strong>${d.height?num(d.height)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>ความลึกอ้างอิง</span><strong>${d.depth?num(d.depth)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>ประเภทการวาง</span><strong>${esc(m.placement_type||'-')}</strong></div><div class="spec"><span>จำนวนชุด/องค์ประกอบ</span><strong>${num(m.selection_count||1)}</strong></div><div class="spec"><span>สมาชิกผู้เผยแพร่</span><strong>${esc(p?.display_name||'AP Cabinet Pro Member')}</strong></div>`;
+        const gallery=(Array.isArray(m.gallery_paths)?m.gallery_paths:[]).map(publicFile).filter(Boolean);if(gallery.length){document.getElementById('gallerySection').hidden=false;document.getElementById('gallery').innerHTML=gallery.map((url,i)=>`<img src="${esc(url)}" alt="รูปผลงาน ${i+1}" loading="lazy">`).join('')}
+        document.getElementById('sellerName').textContent=p?.display_name||'สมาชิก AP Cabinet Pro';document.getElementById('sellerTag').textContent=p?.tagline||p?.about||[p?.province,p?.country].filter(Boolean).join(' · ')||'ติดต่อผู้ผลิตเพื่อสอบถามรายละเอียดงานและขอใบเสนอราคา';
+        const contacts=[];if(p?.phone)contacts.push(`<div class="contact-row"><small>โทรศัพท์</small><a href="tel:${encodeURIComponent(p.phone)}">${esc(p.phone)}</a></div>`);if(p?.line_id)contacts.push(`<div class="contact-row"><small>LINE ID</small>${esc(p.line_id)}</div>`);if(p?.public_email)contacts.push(`<div class="contact-row"><small>อีเมล</small><a href="mailto:${encodeURIComponent(p.public_email)}">${esc(p.public_email)}</a></div>`);if(p?.province)contacts.push(`<div class="contact-row"><small>พื้นที่</small>${esc([p.province,p.country].filter(Boolean).join(', '))}</div>`);document.getElementById('contact').innerHTML=contacts.length?contacts.join(''):'<div class="contact-row"><small>ข้อมูลติดต่อ</small>เปิดโปรไฟล์ผู้ผลิตเพื่อดูช่องทางติดต่อ</div>';
+        const actions=[];if(p?.phone)actions.push(`<a class="btn primary" href="tel:${encodeURIComponent(p.phone)}">โทรสอบถามงาน</a>`);if(p?.public_email)actions.push(`<a class="btn green" href="mailto:${encodeURIComponent(p.public_email)}?subject=${encodeURIComponent('สอบถามงาน: '+m.title)}">ขอใบเสนอราคา</a>`);actions.push(`<a class="btn cyan" href="public-profile.html?id=${encodeURIComponent(m.seller_id)}">ดูโปรไฟล์ผู้ผลิต</a>`);document.getElementById('actions').innerHTML=actions.join('');
+        loading.hidden=true;page.hidden=false;
+      }
+      load().catch(e=>{console.error(e);fail('เกิดข้อผิดพลาดในการโหลดรายละเอียดผลงาน กรุณาลองใหม่ภายหลัง')});
+    })();
+  </script>
+</body></html>

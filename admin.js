@@ -208,7 +208,20 @@
     sb = window.AuthClient.sb;
     const user = await window.AuthClient.requireLogin();
     if (!user) return;
-    const profile = await window.AuthClient.getMyProfile();
+    let profile;
+    try {
+      const profileRequest = sb.from("profiles").select("role,status,account_type").eq("id", user.id).maybeSingle();
+      const profileResult = await Promise.race([
+        profileRequest,
+        new Promise((_, reject) => window.setTimeout(() => reject(new Error("profile-timeout")), 12000))
+      ]);
+      if (profileResult.error) throw profileResult.error;
+      profile = profileResult.data;
+    } catch (error) {
+      console.warn("ตรวจสอบสิทธิ์แอดมินไม่สำเร็จ", error);
+      $("accessMsg").textContent = "ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง";
+      return;
+    }
     if (!profile || profile.role !== "admin") {
       $("accessMsg").textContent = "หน้านี้สำหรับแอดมินเท่านั้น — บัญชีของคุณไม่มีสิทธิ์เข้าถึง";
       return;

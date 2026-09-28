@@ -65,7 +65,20 @@
   async function getUser() {
     try {
       await ensureBridgeSession();
-      const result = await withTimeout(client.auth.getUser(), "auth");
+      const sessionResult = await withTimeout(client.auth.getSession(), "session");
+      if (sessionResult.error) throw sessionResult.error;
+      let session = sessionResult.data && sessionResult.data.session;
+      if (!session) return null;
+
+      let result = await withTimeout(client.auth.getUser(session.access_token), "auth");
+      if (!result.error && result.data && result.data.user) return result.data.user;
+
+      const refreshed = await withTimeout(client.auth.refreshSession(), "refresh");
+      if (refreshed.error || !refreshed.data || !refreshed.data.session) {
+        throw refreshed.error || result.error || new Error("session-refresh-failed");
+      }
+      session = refreshed.data.session;
+      result = await withTimeout(client.auth.getUser(session.access_token), "auth");
       if (result.error) throw result.error;
       return result.data && result.data.user ? result.data.user : null;
     } catch (error) {

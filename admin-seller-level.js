@@ -16,7 +16,7 @@
     Object.entries(labels).forEach(([value,text])=>{
       let option=Array.from(select.options).find(o=>o.value===value);
       if(!option){option=document.createElement('option');option.value=value;select.appendChild(option)}
-      option.textContent=text;
+      if(option.textContent!==text)option.textContent=text;
     });
     const level=Number(select.value||0);
     const expected=role&&role.value==='admin'?'Admin ลงสินค้าได้ไม่จำกัด':(level>0?`ลง Marketplace ได้สูงสุด ${LIMITS[level]||0} รายการ`:'ยังไม่มีสิทธิ์เผยแพร่ Marketplace');
@@ -30,8 +30,8 @@
     if(select)select.addEventListener('change',()=>setTimeout(normalize,0));
     if(role)role.addEventListener('change',()=>setTimeout(normalize,0));
     if(hint)new MutationObserver(()=>normalize()).observe(hint,{childList:true,characterData:true,subtree:true});
-    const detail=document.getElementById('detailPanel');
-    if(detail)new MutationObserver(()=>normalize()).observe(detail,{childList:true,subtree:true});
+    // Avoid observing detailPanel: normalize() itself updates controls inside it,
+    // which can create a self-triggering MutationObserver loop on Safari/iOS.
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

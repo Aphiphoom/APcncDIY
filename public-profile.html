@@ -32,8 +32,11 @@ const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 const publicFile=path=>path?`${window.SUPABASE_URL}/storage/v1/object/public/market-public/${String(path).split('/').map(encodeURIComponent).join('/')}`:'';
 const fmt=n=>Number(n||0).toLocaleString('th-TH');
 const priceText=p=>{const a=Number(p.price_min_thb||0),b=Number(p.price_max_thb||0);if(a&&b)return `${fmt(a)}–${fmt(b)} บาท`;if(a)return `เริ่มต้น ${fmt(a)} บาท`;if(b)return `ไม่เกิน ${fmt(b)} บาท`;return p.price_note||'สอบถามราคา'};
-const {data:profile,error}=await sb.from('public_profiles').select('*').eq('user_id',profileId).maybeSingle();if(error||!profile){document.body.innerHTML='<div style="padding:40px">ไม่พบ Public Profile นี้</div>';return}
-const {data:userData}=await sb.auth.getUser();const user=userData?.user||null,isOwner=!!user&&user.id===profile.user_id;if(isOwner)document.body.classList.add('owner');
+const {data:userData}=await sb.auth.getUser();const user=userData?.user||null;
+const {data:profile,error}=await sb.from('public_profiles').select('*').eq('user_id',profileId).maybeSingle();
+if(error){console.error(error);document.body.innerHTML='<div style="padding:40px">ไม่สามารถโหลด Public Profile ได้</div>';return}
+if(!profile){if(user&&user.id===profileId){location.replace('profile-setup.html');return}document.body.innerHTML='<div style="padding:40px">ไม่พบ Public Profile นี้</div>';return}
+const isOwner=!!user&&user.id===profile.user_id;if(isOwner)document.body.classList.add('owner');
 function renderAccount(currentUser){const email=$('accountEmail'),myProfile=$('myProfileButton'),account=$('accountButton');if(currentUser&&currentUser.email){email.textContent=currentUser.email;email.hidden=false;myProfile.hidden=false;myProfile.href='public-profile.html?id='+encodeURIComponent(currentUser.id);account.textContent='ออกจากระบบ';account.href='#';account.dataset.mode='logout'}else{email.textContent='';email.hidden=true;myProfile.hidden=true;myProfile.href='public-profile.html';account.textContent='เข้าสู่ระบบ/สมัครสมาชิค';account.href='login.html';account.dataset.mode='login'}}
 renderAccount(user);
 $('accountButton').addEventListener('click',async e=>{if($('accountButton').dataset.mode!=='logout')return;e.preventDefault();$('accountButton').style.pointerEvents='none';try{await sb.auth.signOut()}catch(err){console.warn(err)}finally{$('accountButton').style.pointerEvents='';renderAccount(null)}});

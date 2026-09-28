@@ -127,4 +127,19 @@
       location.replace("login.html");
     }
   };
+
+  // The public profile has a compact inline editor for text fields, but media
+  // (logo/avatar and cover image) is managed by profile-setup.html. Route the
+  // owner-facing "แก้ไขข้อมูลร้าน" action to that complete editor so image
+  // changes are available on mobile and desktop as well.
+  document.addEventListener("click", (event) => {
+    const target = event.target && event.target.closest
+      ? event.target.closest('[data-edit="hero"]')
+      : null;
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
+    location.href = "profile-setup.html";
+  }, true);
 })();

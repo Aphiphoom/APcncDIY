@@ -66,7 +66,7 @@
           <a href="index.html#cnc">เครื่อง CNC</a>
           <a href="index.html#parts">อะไหล่และอุปกรณ์</a>
           <a href="ap-cabinet-pro.html">AP Cabinet Pro</a>
-          <a href="index.html#services">บริการ</a>
+          <a href="marketplace.html">Marketplace</a>
           <a href="index.html#about">เกี่ยวกับเรา</a>
         </nav>
         <div class="apsh-actions">

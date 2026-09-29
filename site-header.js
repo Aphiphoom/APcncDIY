@@ -30,15 +30,21 @@
     document.head.appendChild(style);
   }
 
-  function removeLegacyHeader(){
+  function hideLegacyHeader(){
     document.querySelectorAll('.topbar').forEach(el=>{
       const text=(el.textContent||'').replace(/\s+/g,' ').trim();
-      if(el.querySelector('.brand,.brand-logo,.account-actions')||text.includes('AP CNC DIY'))el.remove();
+      if(el.querySelector('.brand,.brand-logo,.account-actions')||text.includes('AP CNC DIY')){
+        el.hidden=true;
+        el.style.display='none';
+      }
     });
     document.querySelectorAll('header').forEach(el=>{
       if(el.id===HEADER_ID)return;
       const text=(el.textContent||'').replace(/\s+/g,' ').trim();
-      if(text.includes('AP CNC DIY')&&(el.querySelector('img')||el.querySelector('.brand')))el.remove();
+      if(text.includes('AP CNC DIY')&&(el.querySelector('img')||el.querySelector('.brand'))){
+        el.hidden=true;
+        el.style.display='none';
+      }
     });
   }
 
@@ -50,7 +56,7 @@
   function buildHeader(){
     if(document.getElementById(HEADER_ID))return;
     installStyle();
-    removeLegacyHeader();
+    hideLegacyHeader();
 
     const header=document.createElement('header');
     header.id=HEADER_ID;

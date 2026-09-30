@@ -29,10 +29,41 @@
 
   function visibleMembers() {
     const query = searchText.trim().toLocaleLowerCase();
-    const source = query
-      ? members.filter((member) => (member.email || "").toLocaleLowerCase().includes(query))
-      : members;
-    return sortedMembers(source);
+    const byId = new Map(members.map((member) => [member.id, member]));
+    const childIds = new Set(members.filter((member) => member.memberType === "child").map((member) => member.id));
+    let roots = sortedMembers(members.filter((member) => !childIds.has(member.id)));
+
+    if (query) {
+      const matches = new Set();
+      members.forEach((member) => {
+        const haystack = [member.email, member.enterpriseName, member.accountType].filter(Boolean).join(" ").toLocaleLowerCase();
+        if (haystack.includes(query)) {
+          matches.add(member.id);
+          if (member.parentId) matches.add(member.parentId);
+        }
+      });
+      roots = roots.filter((root) => matches.has(root.id) || members.some((child) => child.parentId === root.id && matches.has(child.id)));
+    }
+
+    const rows = [];
+    roots.forEach((root) => {
+      rows.push(root);
+      const children = sortedMembers(members.filter((member) => member.parentId === root.id));
+      const visibleChildren = query ? children.filter((child) => {
+        const haystack = [child.email, child.enterpriseName, child.accountType].filter(Boolean).join(" ").toLocaleLowerCase();
+        return haystack.includes(query) || matchesParent(root, query);
+      }) : children;
+      visibleChildren.forEach((child, index) => {
+        child.treeLast = index === visibleChildren.length - 1;
+        rows.push(child);
+      });
+    });
+
+    return rows;
+  }
+
+  function matchesParent(member, query) {
+    return [member.email, member.enterpriseName, member.accountType].filter(Boolean).join(" ").toLocaleLowerCase().includes(query);
   }
 
   function updateMemberCount() {
@@ -63,13 +94,42 @@
       const row = document.createElement("tr");
       const expired = isExpired(member);
       const shownStatus = expired ? "suspended" : member.status;
+      const isChild = member.memberType === "child";
       row.dataset.id = member.id;
       row.classList.toggle("selected-member", member.id === selectedId);
       row.classList.toggle("expired-member", expired);
+      row.classList.toggle("enterprise-child-row", isChild);
       row.title = member.email || "";
+      if (isChild) row.style.background = "rgba(37,200,213,.035)";
 
       const emailCell = document.createElement("td");
-      emailCell.textContent = member.email || "—";
+      if (isChild) {
+        emailCell.style.paddingLeft = "22px";
+        const branch = document.createElement("span");
+        branch.textContent = member.treeLast ? "└─ " : "├─ ";
+        branch.style.color = "var(--cyan)";
+        branch.style.opacity = ".78";
+        branch.style.fontFamily = "monospace";
+        emailCell.appendChild(branch);
+      } else if (member.accountType === "enterprise") {
+        const marker = document.createElement("span");
+        marker.textContent = "▾ ";
+        marker.style.color = "var(--amber)";
+        marker.style.fontSize = "11px";
+        emailCell.appendChild(marker);
+      }
+      const emailText = document.createElement("span");
+      emailText.textContent = member.email || "—";
+      emailCell.appendChild(emailText);
+      if (member.accountType === "enterprise" && member.enterpriseName) {
+        const company = document.createElement("div");
+        company.textContent = member.enterpriseName;
+        company.style.fontSize = "10px";
+        company.style.color = "var(--ink-faint)";
+        company.style.marginTop = "2px";
+        emailCell.appendChild(company);
+      }
+
       const statusCell = document.createElement("td");
       const pill = document.createElement("span");
       pill.className = `status-pill status-${shownStatus}`;
@@ -77,6 +137,10 @@
       statusCell.appendChild(pill);
       const daysCell = document.createElement("td");
       daysCell.textContent = remainingDays(member.expiresAt);
+      if (isChild) {
+        daysCell.title = "วันหมดอายุตาม Enterprise ID หลัก";
+        daysCell.style.color = "var(--ink-faint)";
+      }
       row.append(emailCell, daysCell, statusCell);
       row.addEventListener("click", () => selectMember(member));
       body.appendChild(row);
@@ -137,26 +201,44 @@
 
   async function loadMembers() {
     $("userTableBody").innerHTML = '<tr><td colspan="3" class="empty-hint">กำลังโหลด...</td></tr>';
-    const { data, error } = await sb.from("profiles").select("*").order("created_at", { ascending: false });
-    if (error) {
-      $("userTableBody").innerHTML = `<tr><td colspan="3" class="empty-hint">โหลดไม่สำเร็จ: ${error.message}</td></tr>`;
+    const [profileResult, memberResult, accountResult] = await Promise.all([
+      sb.from("profiles").select("*").order("created_at", { ascending: false }),
+      sb.from("enterprise_members").select("enterprise_id,user_id,member_type"),
+      sb.from("enterprise_accounts").select("id,name,primary_user_id")
+    ]);
+    if (profileResult.error) {
+      $("userTableBody").innerHTML = `<tr><td colspan="3" class="empty-hint">โหลดไม่สำเร็จ: ${profileResult.error.message}</td></tr>`;
       return;
     }
 
-    members = data.map((profile) => ({
-      id: profile.id,
-      email: profile.email,
-      role: profile.role,
-      status: profile.status,
-      expiresAt: profile.expires_at,
-      sellerLevel: Number(profile.seller_level || 0),
-      credits: Number(profile.credit_balance || 0),
-      createdAt: profile.created_at
-    }));
+    const links = memberResult.error ? [] : (memberResult.data || []);
+    const accounts = accountResult.error ? [] : (accountResult.data || []);
+    const linkByUser = new Map(links.map((link) => [link.user_id, link]));
+    const accountById = new Map(accounts.map((account) => [account.id, account]));
+
+    members = profileResult.data.map((profile) => {
+      const link = linkByUser.get(profile.id) || null;
+      const account = link ? accountById.get(link.enterprise_id) : null;
+      return {
+        id: profile.id,
+        email: profile.email,
+        role: profile.role,
+        status: profile.status,
+        accountType: profile.account_type || "customer",
+        expiresAt: profile.expires_at,
+        sellerLevel: Number(profile.seller_level || 0),
+        credits: Number(profile.credit_balance || 0),
+        createdAt: profile.created_at,
+        enterpriseId: link?.enterprise_id || null,
+        memberType: link?.member_type || null,
+        enterpriseName: account?.name || null,
+        parentId: link?.member_type === "child" ? (account?.primary_user_id || null) : null
+      };
+    });
     updateMemberCount();
     renderMembers();
 
-    const ordered = sortedMembers(members);
+    const ordered = visibleMembers();
     const memberToShow = members.find((member) => member.id === selectedId) || ordered[0];
     if (memberToShow) selectMember(memberToShow);
     else {

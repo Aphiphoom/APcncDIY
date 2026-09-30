@@ -31,7 +31,7 @@
     if(isChild)select.value='0';
     const level=Number(select.value||0);
     const expected=isChild
-      ?'Enterprise Child — สิทธิ์ตั้งค่าโปรไฟล์และลงขายสินค้าอยู่ที่ ID หลักของบริษัท'
+      ?'Enterprise Child — วันหมดอายุ, การตั้งค่าหลัก, โปรไฟล์ผู้ผลิต และสิทธิ์ลงขาย ตาม Enterprise ID หลัก'
       :(role&&role.value==='admin'?'Admin ลงสินค้าได้ไม่จำกัด':(level>0?`ลง Marketplace ได้สูงสุด ${LIMITS[level]||0} รายการ`:'ยังไม่มีสิทธิ์เผยแพร่ Marketplace'));
     if(hint.textContent!==expected)hint.textContent=expected;
   }
@@ -54,7 +54,7 @@
     parent.className='fld';
     parent.id='enterpriseParentWrap';
     parent.hidden=true;
-    parent.innerHTML='<span>บริษัทต้นสังกัด</span><select id="enterpriseParent"><option value="">— เลือกบริษัท —</option></select>';
+    parent.innerHTML='<span>บริษัทต้นสังกัด</span><select id="enterpriseParent"><option value="">— เลือกบริษัท —</option></select><small id="enterpriseInheritanceHint" class="seller-hint">ใช้วันหมดอายุและ Default Settings จาก ID หลัก</small>';
 
     const members=document.createElement('div');
     members.className='fld full2';
@@ -108,7 +108,7 @@
     const {data:profiles,error:profileError}=await client.from('profiles').select('id,email').in('id',childIds);
     if(profileError){box.textContent='โหลดอีเมลไม่สำเร็จ';return}
     const byId=new Map((profiles||[]).map(p=>[p.id,p.email||p.id]));
-    box.innerHTML=childIds.map(id=>`<div>${escapeHtml(byId.get(id)||id)}</div>`).join('');
+    box.innerHTML=childIds.map((id,index)=>`<div>${index===childIds.length-1?'└─':'├─'} ${escapeHtml(byId.get(id)||id)}</div>`).join('');
   }
 
   function updateEnterpriseVisibility(){
@@ -119,6 +119,14 @@
     if($('enterpriseParentWrap'))$('enterpriseParentWrap').hidden=!isChild;
     if($('enterpriseMembersWrap'))$('enterpriseMembersWrap').hidden=!isEnterprise;
     if($('detailSellerLevel'))$('detailSellerLevel').disabled=isChild;
+    if($('detailStatus')){
+      $('detailStatus').disabled=isChild;
+      $('detailStatus').title=isChild?'สถานะตาม Enterprise ID หลัก':'';
+    }
+    if($('detailExpires')){
+      $('detailExpires').disabled=isChild;
+      $('detailExpires').title=isChild?'วันหมดอายุตาม Enterprise ID หลัก':'';
+    }
     if(isChild&&$('detailSellerLevel'))$('detailSellerLevel').value='0';
   }
 
@@ -130,7 +138,7 @@
     try{
       const client=sb();
       const [{data:profile,error:profileError},{data:member,error:memberError}]=await Promise.all([
-        client.from('profiles').select('id,role,account_type').eq('id',userId).maybeSingle(),
+        client.from('profiles').select('id,role,account_type,status,expires_at').eq('id',userId).maybeSingle(),
         client.from('enterprise_members').select('enterprise_id,member_type').eq('user_id',userId).maybeSingle()
       ]);
       if(profileError)throw profileError;
@@ -199,7 +207,9 @@
         if(enterpriseError)throw enterpriseError;
       }
 
-      msg.textContent='✓ บันทึกแล้ว (มีผลตอนสมาชิก login ครั้งถัดไป)';
+      msg.textContent=accountType==='enterprise_child'
+        ?'✓ บันทึกแล้ว — วันหมดอายุและ Default Settings เชื่อมกับ ID หลักแล้ว'
+        :'✓ บันทึกแล้ว (มีผลตอนสมาชิก login ครั้งถัดไป)';
       await loadCompanies();
       document.getElementById('btnRefresh')?.click();
       setTimeout(loadSelectedEnterprise,500);

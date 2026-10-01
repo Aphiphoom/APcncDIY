@@ -8,8 +8,12 @@
     return (location.pathname.split('/').pop()||'index.html').toLowerCase();
   }
 
+  function currentPageKey(){
+    return currentPage().replace(/\.html$/,'');
+  }
+
   function isAdminToolPage(){
-    return ['admin.html','admin-products.html','manual-editor.html'].includes(currentPage());
+    return ['admin','admin-products','manual-editor'].includes(currentPageKey());
   }
 
   function installStyle(){
@@ -27,15 +31,19 @@
       #${HEADER_ID} .apsh-nav::-webkit-scrollbar{display:none}
       #${HEADER_ID} .apsh-nav a{font-size:13px;font-weight:600;color:#f4f7fb;opacity:.92;padding:26px 0 24px}
       #${HEADER_ID} .apsh-nav a:hover,#${HEADER_ID} .apsh-nav a[aria-current='page']{color:#ffffff;opacity:1}
-      #${HEADER_ID} .apsh-nav .apsh-admin{color:#f6a623}
-      #${HEADER_ID} .apsh-nav .apsh-admin[aria-current='page']{color:#ffc35b}
       #${HEADER_ID} .apsh-actions{display:flex;align-items:center;gap:9px;flex:0 0 auto;margin-left:auto}
       #${HEADER_ID} .apsh-btn{min-height:38px;padding:0 14px;border:1px solid #405366;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;white-space:nowrap;background:#0f1922;color:#f4f7fb;cursor:pointer}
       #${HEADER_ID} .apsh-btn.apsh-accent{background:#f6a623;border-color:#f6a623;color:#171109}
       #${HEADER_ID} .apsh-btn[hidden]{display:none!important}
+      #${HEADER_ID} .apsh-adminbar{display:flex;align-items:center;gap:8px;padding:8px 20px 10px;border-top:1px solid #1d2b38;background:#0c151e;overflow-x:auto;scrollbar-width:none}
+      #${HEADER_ID} .apsh-adminbar::-webkit-scrollbar{display:none}
+      #${HEADER_ID} .apsh-adminbar-label{flex:0 0 auto;margin-right:3px;color:#f6a623;font-size:12px;font-weight:700;white-space:nowrap}
+      #${HEADER_ID} .apsh-adminlink{flex:0 0 auto;min-height:34px;padding:0 12px;border:1px solid #405366;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:#111c26;color:#f4f7fb;font-size:12px;font-weight:700;white-space:nowrap}
+      #${HEADER_ID} .apsh-adminlink:hover,#${HEADER_ID} .apsh-adminlink[aria-current='page']{border-color:#f6a623;color:#ffc35b;background:#18222c}
+      #${HEADER_ID} .apsh-adminbar button.apsh-adminlink{font-family:inherit;cursor:pointer}
       @media(max-width:1120px){#${HEADER_ID} .apsh-inner{gap:14px;padding-left:14px;padding-right:14px}#${HEADER_ID} .apsh-nav{gap:18px}#${HEADER_ID} .apsh-nav a{font-size:12px}#${HEADER_ID} .apsh-brand span{display:none}}
-      @media(max-width:760px){#${HEADER_ID} .apsh-inner{min-height:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;padding:10px 12px}#${HEADER_ID} .apsh-brand{grid-column:1}#${HEADER_ID} .apsh-actions{grid-column:2;justify-self:end}#${HEADER_ID} .apsh-nav{grid-column:1/-1;width:100%;gap:20px;padding-top:2px}#${HEADER_ID} .apsh-nav a{padding:7px 0 5px;font-size:12px}#${HEADER_ID} .apsh-brand img{width:40px;height:40px}#${HEADER_ID} .apsh-brand span{display:inline}#${HEADER_ID} .apsh-btn{min-height:34px;padding:0 10px;font-size:11px}}
-      @media(max-width:480px){#${HEADER_ID} .apsh-brand span{font-size:13px}#${HEADER_ID} .apsh-btn{padding:0 8px;font-size:10.5px}#${HEADER_ID} .apsh-actions{gap:6px}}
+      @media(max-width:760px){#${HEADER_ID} .apsh-inner{min-height:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;padding:10px 12px}#${HEADER_ID} .apsh-brand{grid-column:1}#${HEADER_ID} .apsh-actions{grid-column:2;justify-self:end}#${HEADER_ID} .apsh-nav{grid-column:1/-1;width:100%;gap:20px;padding-top:2px}#${HEADER_ID} .apsh-nav a{padding:7px 0 5px;font-size:12px}#${HEADER_ID} .apsh-brand img{width:40px;height:40px}#${HEADER_ID} .apsh-brand span{display:inline}#${HEADER_ID} .apsh-btn{min-height:34px;padding:0 10px;font-size:11px}#${HEADER_ID} .apsh-adminbar{padding:8px 12px 10px;gap:7px}}
+      @media(max-width:480px){#${HEADER_ID} .apsh-brand span{font-size:13px}#${HEADER_ID} .apsh-btn{padding:0 8px;font-size:10.5px}#${HEADER_ID} .apsh-actions{gap:6px}#${HEADER_ID} .apsh-adminbar-label{font-size:11px}#${HEADER_ID} .apsh-adminlink{font-size:11px;padding:0 10px}}
     `;
     document.head.appendChild(style);
   }
@@ -59,7 +67,7 @@
   }
 
   function currentLink(path){
-    return currentPage()===path.toLowerCase();
+    return currentPageKey()===path.toLowerCase().replace(/\.html$/,'');
   }
 
   function buildHeader(){
@@ -67,11 +75,14 @@
     installStyle();
     hideLegacyHeader();
 
-    const adminLinks=isAdminToolPage()?`
-          <a class="apsh-admin" href="admin.html">จัดการสมาชิก</a>
-          <a class="apsh-admin" href="manual-editor.html">แก้ไขคู่มือ</a>
-          <a class="apsh-admin" href="admin-products.html">แก้ไขรายการสินค้า</a>`:'';
-    const adminRefresh=isAdminToolPage()?'<button id="apshAdminRefresh" class="apsh-btn" type="button">รีเฟรช</button>':'';
+    const adminBar=isAdminToolPage()?`
+      <div class="apsh-adminbar" aria-label="เครื่องมือแอดมิน">
+        <span class="apsh-adminbar-label">เครื่องมือแอดมิน</span>
+        <a class="apsh-adminlink" href="admin.html">สมาชิก</a>
+        <a class="apsh-adminlink" href="admin-products.html">สินค้า</a>
+        <a class="apsh-adminlink" href="manual-editor.html">คู่มือ</a>
+        <button id="apshAdminRefresh" class="apsh-adminlink" type="button">รีเฟรช</button>
+      </div>`:'';
 
     const header=document.createElement('header');
     header.id=HEADER_ID;
@@ -86,17 +97,16 @@
           <a href="products.html">สินค้า</a>
           <a href="ap-cabinet-pro.html">AP Cabinet Pro</a>
           <a href="marketplace.html">Marketplace</a>
-          <a href="index.html#about">เกี่ยวกับเรา</a>${adminLinks}
+          <a href="index.html#about">เกี่ยวกับเรา</a>
         </nav>
         <div class="apsh-actions">
-          ${adminRefresh}
           <a id="apshProfile" class="apsh-btn" href="public-profile.html" hidden>โปรไฟล์ของฉัน</a>
           <a id="apshAccount" class="apsh-btn apsh-accent" href="login.html">เข้าสู่ระบบ/สมัครสมาชิก</a>
         </div>
-      </div>`;
+      </div>${adminBar}`;
     document.body.prepend(header);
 
-    header.querySelectorAll('.apsh-nav a').forEach(a=>{
+    header.querySelectorAll('.apsh-nav a,.apsh-adminbar a').forEach(a=>{
       const href=(a.getAttribute('href')||'').split('#')[0];
       if(href&&currentLink(href))a.setAttribute('aria-current','page');
     });

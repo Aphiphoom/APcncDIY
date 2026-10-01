@@ -75,6 +75,8 @@
     (() => {
       const button = document.getElementById('downloadButton');
       const version = document.getElementById('latestVersion');
+      const releaseFallback = 'https://github.com/Aphiphoom/APcncDIY/releases/tag/AP_Cabinet_Pro';
+
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
         .then((response) => {
           if (!response.ok) throw new Error('version-http-' + response.status);
@@ -86,12 +88,18 @@
           if (data.download_url) {
             button.href = data.download_url;
             button.removeAttribute('aria-disabled');
+            return;
+          }
+          if (data.release_url) {
+            button.textContent = 'เปิดหน้า Release';
+            button.href = data.release_url;
+            button.removeAttribute('aria-disabled');
           }
         })
         .catch(() => {
           version.textContent = 'ไม่สามารถตรวจสอบรุ่นล่าสุดได้ในขณะนี้';
-          button.textContent = 'เปิดหน้า Releases';
-          button.href = 'https://github.com/Aphiphoom/APcncDIY/releases';
+          button.textContent = 'เปิดหน้า Release';
+          button.href = releaseFallback;
           button.removeAttribute('aria-disabled');
         });
     })();

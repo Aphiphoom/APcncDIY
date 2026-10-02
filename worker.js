@@ -7,6 +7,10 @@ const ALLOWED_TYPES = new Map([
   ["image/webp", "webp"],
 ]);
 const ALLOWED_FOLDERS = new Set(["covers", "gallery", "variants"]);
+const MARKET_API_PREFIX = "/api/marketplace-public";
+const MARKET_OBJECT_PREFIX = "marketplace-public/";
+const MARKET_MAX_BYTES = 50 * 1024 * 1024;
+const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"]]);
 
 function json(payload, status = 200) {
   return Response.json(payload, {
@@ -44,6 +48,112 @@ async function requireAdmin(request, env) {
   const profiles = await profileResponse.json();
   if (profiles?.[0]?.role !== "admin") return { error: json({ error: "forbidden" }, 403) };
   return { user };
+}
+
+async function requireMarketplaceSeller(request, env) {
+  const token = bearerToken(request);
+  if (!token) return { error: json({ error: "unauthorized" }, 401) };
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Accept: "application/json",
+  };
+  const authResponse = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, { headers });
+  if (!authResponse.ok) return { error: json({ error: "unauthorized" }, 401) };
+
+  const user = await authResponse.json();
+  if (!user?.id) return { error: json({ error: "unauthorized" }, 401) };
+
+  const profileUrl = new URL(`${env.SUPABASE_URL}/rest/v1/profiles`);
+  profileUrl.searchParams.set("select", "role,status,expires_at,seller_level");
+  profileUrl.searchParams.set("id", `eq.${user.id}`);
+  const profileResponse = await fetch(profileUrl, { headers });
+  if (!profileResponse.ok) return { error: json({ error: "authorization_failed" }, 502) };
+
+  const profile = (await profileResponse.json())?.[0] || {};
+  const admin = profile.role === "admin";
+  const active = admin || (profile.status === "active" && profile.expires_at && Date.parse(profile.expires_at) > Date.now());
+  const seller = admin || Number(profile.seller_level || 0) > 0;
+  if (!active || !seller) return { error: json({ error: "marketplace_seller_required" }, 403) };
+  return { user, admin };
+}
+
+function validUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || "");
+}
+
+async function uploadMarketplacePublic(request, env) {
+  const auth = await requireMarketplaceSeller(request, env);
+  if (auth.error) return auth.error;
+
+  const url = new URL(request.url);
+  const listingId = url.searchParams.get("listing_id") || "";
+  const kind = url.searchParams.get("kind") || "";
+  if (!validUuid(listingId)) return json({ error: "invalid_listing_id" }, 400);
+  if (!["preview","cover","gallery"].includes(kind)) return json({ error: "invalid_kind" }, 400);
+
+  const type = (request.headers.get("Content-Type") || "").split(";", 1)[0].toLowerCase();
+  const extension = MARKET_ALLOWED_TYPES.get(type);
+  if (!extension) return json({ error: "unsupported_file_type" }, 415);
+  if (kind === "preview" && extension !== "glb") return json({ error: "preview_must_be_glb" }, 415);
+  if (kind !== "preview" && extension === "glb") return json({ error: "image_required" }, 415);
+
+  const declaredSize = Number(request.headers.get("Content-Length") || 0);
+  if (Number.isFinite(declaredSize) && declaredSize > MARKET_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+  const body = await request.arrayBuffer();
+  if (!body.byteLength) return json({ error: "empty_file" }, 400);
+  if (body.byteLength > MARKET_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+
+  const base = `${MARKET_OBJECT_PREFIX}${auth.user.id}/${listingId}/`;
+  const key = kind === "preview"
+    ? `${base}preview/model.glb`
+    : `${base}images/${kind}-${crypto.randomUUID()}.${extension}`;
+
+  let originalName = "";
+  try { originalName = decodeURIComponent(request.headers.get("X-File-Name") || "").slice(0, 240); } catch {}
+
+  const object = await env.PRODUCT_IMAGES.put(key, body, {
+    httpMetadata: {
+      contentType: type === "application/octet-stream" && extension === "glb" ? "model/gltf-binary" : type,
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+    customMetadata: { uploadedBy: auth.user.id, listingId, kind, originalName },
+  });
+  if (!object) return json({ error: "upload_conflict" }, 409);
+
+  const publicBase = env.PRODUCT_IMAGE_PUBLIC_BASE.replace(/\/$/, "");
+  const encodedKey = key.split("/").map(encodeURIComponent).join("/");
+  return json({
+    path: `r2:${key}`,
+    key,
+    public_url: `${publicBase}/${encodedKey}`,
+    size: object.size,
+    etag: object.etag,
+  }, 201);
+}
+
+function marketplaceObjectKeyFromUrl(url) {
+  const marker = `${MARKET_API_PREFIX}/object/`;
+  if (!url.pathname.startsWith(marker)) return "";
+  try {
+    const key = url.pathname.slice(marker.length).split("/").map(decodeURIComponent).join("/");
+    if (!key.startsWith(MARKET_OBJECT_PREFIX) || key.includes("..") || key.includes("\\")) return "";
+    return key;
+  } catch {
+    return "";
+  }
+}
+
+async function deleteMarketplacePublic(request, env, key) {
+  const auth = await requireMarketplaceSeller(request, env);
+  if (auth.error) return auth.error;
+  const ownerPrefix = `${MARKET_OBJECT_PREFIX}${auth.user.id}/`;
+  if (!auth.admin && !key.startsWith(ownerPrefix)) return json({ error: "forbidden" }, 403);
+  const existing = await env.PRODUCT_IMAGES.head(key);
+  if (!existing) return json({ error: "not_found" }, 404);
+  await env.PRODUCT_IMAGES.delete(key);
+  return new Response(null, { status: 204 });
 }
 
 function objectKeyFromUrl(url) {
@@ -136,6 +246,17 @@ async function deleteProductImage(request, env, key) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === `${MARKET_API_PREFIX}/upload`) {
+      if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+      return uploadMarketplacePublic(request, env);
+    }
+
+    const marketplaceKey = marketplaceObjectKeyFromUrl(url);
+    if (marketplaceKey) {
+      if (request.method === "DELETE") return deleteMarketplacePublic(request, env, marketplaceKey);
+      return json({ error: "method_not_allowed" }, 405);
+    }
+
     if (url.pathname === `${API_PREFIX}/upload`) {
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
       return uploadProductImage(request, env);

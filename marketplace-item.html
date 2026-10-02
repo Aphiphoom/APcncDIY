@@ -21,11 +21,11 @@
     <aside class="side"><section class="card sidecard"><h2>ผู้ผลิต / เจ้าของผลงาน</h2><div id="sellerName" class="seller-name"></div><div id="sellerTag" class="seller-tag"></div><div id="contact" class="contact"></div><div id="actions" class="actions"></div></section></aside>
   </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script><script src="marketplace-storage.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
-const publicFile=path=>path?`${window.SUPABASE_URL}/storage/v1/object/public/market-public/${String(path).split('/').map(encodeURIComponent).join('/')}`:'';
+const publicFile=path=>window.MarketplaceStorage.url(path);
 const num=v=>Number(v||0).toLocaleString('th-TH');
 function fail(msg){$('loading').textContent=msg;$('loading').classList.add('error')}
 function priceText(m){const a=Number(m.price_min_thb||0),b=Number(m.price_max_thb||0);if(a&&b)return `${num(a)} – ${num(b)} บาท`;if(a)return `เริ่มต้น ${num(a)} บาท`;if(b)return `ไม่เกิน ${num(b)} บาท`;return ''}

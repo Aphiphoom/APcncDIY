@@ -165,3 +165,9 @@ const WRITE_BACKEND="supabase";
 ## ข้อควรระวัง
 
 Custom domain ของ bucket นี้เปิดอ่านแบบ public ดังนั้น bucket `apcncdiy-assets` ควรใช้เฉพาะไฟล์ public เช่นรูปสินค้าเท่านั้น หากย้ายโมเดลหรือไฟล์ Marketplace ที่ต้องจำกัดสิทธิ์ ควรใช้ bucket private แยกต่างหากและอ่านผ่าน Worker ที่ตรวจสิทธิ์
+
+## อัปเดตหลังการย้ายสินค้าทดลอง
+
+วันที่ 2 ตุลาคม 2026 ได้ deploy โค้ดจาก GitHub commit `7811b06` และย้ายรูปที่ใช้งานจริง 3 รูปของสินค้า `ดอกตัด Compression 2 คม` ไปยัง R2 สำเร็จแล้ว ฐานข้อมูลเก็บพาธใหม่ในรูปแบบ `r2:product-images/...` และหน้า production แสดงรูปปกกับรูปตัวเลือกทั้งสองได้ครบ
+
+ไฟล์ต้นฉบับใน Supabase Storage ยังเก็บไว้ทั้งหมดเพื่อ rollback รายละเอียด mapping และ SQL สำหรับย้อนกลับอยู่ใน `CLOUDFLARE_R2_PRODUCT_MIGRATION_2026-10-02.md`

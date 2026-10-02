@@ -80,6 +80,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="auth-client.js"></script>
+  <script src="product-storage.js"></script>
   <script src="site-header.js?v=20261001-2147"></script>
   <script>
   (()=>{
@@ -89,7 +90,7 @@
     const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const slug=v=>String(v||'item').trim().toLowerCase().replace(/[^a-z0-9ก-๙]+/g,'-').replace(/^-|-$/g,'')||('item-'+Date.now());
     const status=(msg,type='ok')=>{const el=$('status');el.textContent=msg;el.className='status show '+type;setTimeout(()=>el.className='status',3500)};
-    const publicUrl=p=>p?`${window.SUPABASE_URL}/storage/v1/object/public/site-products/${String(p).split('/').map(encodeURIComponent).join('/')}`:'';
+    const publicUrl=window.ProductImageStorage.url;
     const catName=id=>cats.find(c=>c.id===id)?.name||'-';
     const childrenOf=id=>cats.filter(c=>c.parent_id===id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.name.localeCompare(b.name,'th'));
     const roots=()=>cats.filter(c=>!c.parent_id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.name.localeCompare(b.name,'th'));
@@ -133,7 +134,7 @@
 
     function resetProduct(){$('productId').value='';$('productFormTitle').textContent='เพิ่มสินค้า';['pName','pShort','pDescription','pPrice','pPriceNote','pSpecs'].forEach(x=>$(x).value='');$('pCategory').value='';$('pSort').value=0;$('pPublished').value='false';$('pCover').value='';$('pImages').value='';resetVariant();renderVariants('')}
     function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$('productId').value=p.id;$('productFormTitle').textContent='แก้ไขสินค้า';$('pName').value=p.name||'';$('pShort').value=p.short_description||'';$('pDescription').value=p.description||'';$('pPrice').value=p.price??'';$('pPriceNote').value=p.price_note||'';$('pSort').value=p.sort_order||0;$('pPublished').value=String(p.is_published);$('pSpecs').value=specsText(p.specs);renderCats();$('pCategory').value=p.category_id||'';resetVariant();renderVariants(id);scrollTo({top:0,behavior:'smooth'})}
-    async function upload(file,prefix){if(!file)return null;if(file.size>15*1024*1024)throw new Error('ไฟล์รูปต้องไม่เกิน 15 MB');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const r=await sb.storage.from('site-products').upload(path,file,{upsert:false});if(r.error)throw r.error;return path}
+    const upload=(file,prefix)=>window.ProductImageStorage.upload(file,prefix,sb);
 
     async function saveProduct(){const name=$('pName').value.trim();if(!name)return status('กรุณาใส่ชื่อสินค้า','err');const categoryId=$('pCategory').value||null;if(categoryId&&childrenOf(categoryId).length)return status('หมวดหลักที่มีหมวดย่อย ไม่สามารถใส่สินค้าโดยตรงได้','err');if(categoryId){const category=cats.find(c=>c.id===categoryId);if(!category)return status('ไม่พบหมวดสินค้าที่เลือก','err');if(category.parent_id&&!cats.some(c=>c.id===category.parent_id&&!c.parent_id))return status('หมวดย่อยนี้ไม่มีหมวดแม่ กรุณาแก้ไขหมวดก่อน','err')}const id=$('productId').value,existing=products.find(x=>x.id===id);$('saveProduct').disabled=true;try{let cover=existing?.cover_path||null;if($('pCover').files[0])cover=await upload($('pCover').files[0],'covers');let images=Array.isArray(existing?.image_paths)?[...existing.image_paths]:[];for(const f of $('pImages').files)images.push(await upload(f,'gallery'));const payload={category_id:categoryId,name,short_description:$('pShort').value.trim()||null,description:$('pDescription').value.trim()||null,price:$('pPrice').value===''?null:Number($('pPrice').value),price_note:$('pPriceNote').value.trim()||null,cover_path:cover,image_paths:images,specs:parseSpecs(),is_published:$('pPublished').value==='true',sort_order:Number($('pSort').value||0),updated_at:new Date().toISOString()};let r;if(id)r=await sb.from('site_products').update(payload).eq('id',id).select().single();else r=await sb.from('site_products').insert({...payload,slug:slug(name)+'-'+Date.now()}).select().single();if(r.error)throw r.error;await reload();editProduct(r.data.id);status(id?'บันทึกสินค้าแล้ว':'บันทึกสินค้าแล้ว สามารถเพิ่มตัวเลือกย่อยได้ด้านล่าง')}finally{$('saveProduct').disabled=false}}
     async function deleteProduct(id){if(!confirm('ลบสินค้านี้และตัวเลือกย่อยทั้งหมดหรือไม่?'))return;const r=await sb.from('site_products').delete().eq('id',id);if(r.error)throw r.error;if($('productId').value===id)resetProduct();await reload();status('ลบสินค้าแล้ว')}

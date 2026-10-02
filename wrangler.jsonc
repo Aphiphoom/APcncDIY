@@ -1,8 +1,22 @@
 {
   "name": "apcncdiy",
   "compatibility_date": "2026-09-25",
+  "main": "worker.js",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "r2_buckets": [
+    {
+      "binding": "PRODUCT_IMAGES",
+      "bucket_name": "apcncdiy-assets"
+    }
+  ],
+  "vars": {
+    "PRODUCT_IMAGE_PUBLIC_BASE": "https://storage.apcncdiy.com",
+    "SUPABASE_URL": "https://modbgnzikhrdvrcxnzqy.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_55FVfkHoyMRlmiAkTjt5LQ_IbqajFqr"
   }
 }
 // deploy refresh 2026-09-30 after product catalog and admin product management update

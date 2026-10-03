@@ -35,6 +35,19 @@
       #${HEADER_ID} .apsh-btn{min-height:38px;padding:0 14px;border:1px solid #405366;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;white-space:nowrap;background:#0f1922;color:#f4f7fb;cursor:pointer}
       #${HEADER_ID} .apsh-btn.apsh-accent{background:#f6a623;border-color:#f6a623;color:#171109}
       #${HEADER_ID} .apsh-btn[hidden]{display:none!important}
+      #${HEADER_ID} .apsh-credit{min-height:38px;padding:0 11px;border:1px solid #5b4a24;border-radius:8px;display:inline-flex;align-items:center;background:#20180d;color:#ffd278;font-size:12px;font-weight:700;white-space:nowrap}
+      #${HEADER_ID} .apsh-credit[hidden]{display:none!important}
+      #${HEADER_ID} .apsh-notify-wrap{position:relative}
+      #${HEADER_ID} .apsh-notify{position:relative;min-width:38px;padding:0 10px}
+      #${HEADER_ID} .apsh-notify-count{position:absolute;right:-5px;top:-7px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#ef6b6b;color:white;font-size:10px;display:grid;place-items:center}
+      #${HEADER_ID} .apsh-notify-count[hidden]{display:none!important}
+      #${HEADER_ID} .apsh-notify-panel{position:absolute;right:0;top:46px;width:min(360px,88vw);max-height:420px;overflow:auto;background:#0f1922;border:1px solid #405366;border-radius:10px;box-shadow:0 18px 45px #000a;padding:8px;z-index:10001}
+      #${HEADER_ID} .apsh-notify-panel[hidden]{display:none!important}
+      #${HEADER_ID} .apsh-notify-item{display:block;width:100%;border:0;border-bottom:1px solid #253646;background:transparent;color:#f4f7fb;text-align:left;padding:10px;border-radius:6px;font:inherit;cursor:pointer}
+      #${HEADER_ID} .apsh-notify-item:hover{background:#172431}
+      #${HEADER_ID} .apsh-notify-item strong{display:block;font-size:12px}
+      #${HEADER_ID} .apsh-notify-item small{display:block;margin-top:3px;color:#9eacba;font-size:11px;line-height:1.45}
+      #${HEADER_ID} .apsh-notify-empty{padding:14px;color:#9eacba;font-size:12px;text-align:center}
       #${HEADER_ID} .apsh-adminbar{display:flex;align-items:center;gap:8px;padding:8px 20px 10px;border-top:1px solid #1d2b38;background:#0c151e;overflow-x:auto;scrollbar-width:none}
       #${HEADER_ID} .apsh-adminbar::-webkit-scrollbar{display:none}
       #${HEADER_ID} .apsh-adminbar-label{flex:0 0 auto;margin-right:3px;color:#f6a623;font-size:12px;font-weight:700;white-space:nowrap}
@@ -100,6 +113,11 @@
           <a href="index.html#about">เกี่ยวกับเรา</a>
         </nav>
         <div class="apsh-actions">
+          <span id="apshCredit" class="apsh-credit" hidden>เครดิต 0</span>
+          <div id="apshNotifyWrap" class="apsh-notify-wrap" hidden>
+            <button id="apshNotify" class="apsh-btn apsh-notify" type="button" aria-label="การแจ้งเตือน">แจ้งเตือน<span id="apshNotifyCount" class="apsh-notify-count" hidden>0</span></button>
+            <div id="apshNotifyPanel" class="apsh-notify-panel" hidden></div>
+          </div>
           <a id="apshProfile" class="apsh-btn" href="public-profile.html" hidden>โปรไฟล์ของฉัน</a>
           <a id="apshAccount" class="apsh-btn apsh-accent" href="login.html">เข้าสู่ระบบ/สมัครสมาชิก</a>
         </div>
@@ -126,28 +144,90 @@
   async function setupAccount(header){
     const profile=header.querySelector('#apshProfile');
     const account=header.querySelector('#apshAccount');
+    const credit=header.querySelector('#apshCredit');
+    const notifyWrap=header.querySelector('#apshNotifyWrap');
+    const notifyButton=header.querySelector('#apshNotify');
+    const notifyCount=header.querySelector('#apshNotifyCount');
+    const notifyPanel=header.querySelector('#apshNotifyPanel');
     if(!profile||!account)return;
 
-    let client=null;
+    let client=null,currentUser=null,notificationTimer=null;
     try{
       if(window.AuthClient?.sb)client=window.AuthClient.sb;
       else if(window.supabase&&window.SUPABASE_URL&&window.SUPABASE_ANON_KEY)client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
     }catch(_e){}
     if(!client)return;
 
-    const render=user=>{
+    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    async function loadCredit(){
+      if(!currentUser||!credit)return;
+      const {data,error}=await client.from('profiles').select('credit_balance').eq('id',currentUser.id).maybeSingle();
+      if(error)return;
+      credit.textContent='เครดิต '+Number(data?.credit_balance||0).toLocaleString('th-TH');
+      credit.hidden=false;
+    }
+
+    async function loadNotifications(){
+      if(!currentUser||!notifyWrap||!notifyPanel||!notifyCount)return;
+      const {data,error}=await client.from('market_notifications')
+        .select('id,kind,title,body,model_id,read_at,created_at')
+        .eq('user_id',currentUser.id)
+        .order('created_at',{ascending:false})
+        .limit(12);
+      if(error){console.warn('load notifications failed',error);return}
+      const rows=data||[];
+      const unread=rows.filter(x=>!x.read_at).length;
+      notifyWrap.hidden=false;
+      notifyCount.hidden=unread===0;
+      notifyCount.textContent=unread>99?'99+':String(unread);
+      notifyPanel.innerHTML=rows.length?rows.map(n=>`<button class="apsh-notify-item" data-notification-id="${esc(n.id)}" data-model-id="${esc(n.model_id||'')}"><strong>${esc(n.title||'แจ้งเตือน')}</strong><small>${esc(n.body||'')}</small></button>`).join(''):'<div class="apsh-notify-empty">ยังไม่มีการแจ้งเตือน</div>';
+    }
+
+    async function markNotificationsRead(){
+      if(!currentUser)return;
+      const now=new Date().toISOString();
+      const {error}=await client.from('market_notifications').update({read_at:now}).eq('user_id',currentUser.id).is('read_at',null);
+      if(!error)loadNotifications();
+    }
+
+    notifyButton?.addEventListener('click',async event=>{
+      event.stopPropagation();
+      if(!notifyPanel)return;
+      const opening=notifyPanel.hidden;
+      notifyPanel.hidden=!notifyPanel.hidden;
+      if(opening)await markNotificationsRead();
+    });
+    notifyPanel?.addEventListener('click',event=>{
+      const item=event.target.closest('[data-notification-id]');
+      if(!item)return;
+      const modelId=item.dataset.modelId;
+      if(modelId)location.href='marketplace-item.html?id='+encodeURIComponent(modelId);
+    });
+    document.addEventListener('click',event=>{
+      if(notifyPanel&&!notifyPanel.hidden&&!event.target.closest('#apshNotifyWrap'))notifyPanel.hidden=true;
+    });
+
+    const render=async user=>{
+      currentUser=user||null;
       if(user){
         profile.hidden=false;
         profile.href='public-profile.html?id='+encodeURIComponent(user.id);
         account.textContent='ออกจากระบบ';
         account.href='#';
         account.dataset.mode='logout';
+        await Promise.all([loadCredit(),loadNotifications()]);
+        if(notificationTimer)clearInterval(notificationTimer);
+        notificationTimer=setInterval(()=>{loadCredit();loadNotifications()},60000);
       }else{
         profile.hidden=true;
         profile.href='public-profile.html';
         account.textContent='เข้าสู่ระบบ/สมัครสมาชิก';
         account.href='login.html';
         account.dataset.mode='login';
+        if(credit)credit.hidden=true;
+        if(notifyWrap)notifyWrap.hidden=true;
+        if(notificationTimer){clearInterval(notificationTimer);notificationTimer=null}
       }
     };
 
@@ -155,14 +235,17 @@
       if(account.dataset.mode!=='logout')return;
       event.preventDefault();
       account.style.pointerEvents='none';
-      try{await client.auth.signOut();render(null)}catch(error){console.warn('logout failed',error)}finally{account.style.pointerEvents=''}
+      try{await client.auth.signOut();await render(null)}catch(error){console.warn('logout failed',error)}finally{account.style.pointerEvents=''}
     });
+
+    window.addEventListener('ap-credit-changed',()=>loadCredit());
+    window.addEventListener('ap-market-notifications-changed',()=>loadNotifications());
 
     try{
       const result=await client.auth.getUser();
-      render(result?.data?.user||null);
+      await render(result?.data?.user||null);
       client.auth.onAuthStateChange?.((_event,session)=>render(session?.user||null));
-    }catch(_e){render(null)}
+    }catch(_e){await render(null)}
   }
 
   const boot=()=>buildHeader();

@@ -132,6 +132,17 @@
           <span id="creditMsg" class="save-indicator"></span>
         </section>
 
+        <section class="credit-tools" id="marketplaceSettingsPanel">
+          <h3>ตั้งค่า Marketplace</h3>
+          <div class="credit-actions" style="grid-template-columns:minmax(150px,220px) minmax(220px,1fr) auto">
+            <label class="fld"><span>ค่าธรรมเนียม GP (%)</span><input type="number" id="marketGpPercent" min="0" max="100" step="0.01" value="0"></label>
+            <label class="fld"><span>ตัวอย่าง</span><input type="text" id="marketGpExample" value="ราคา 100 เครดิต → ผู้ขายได้รับ 100 เครดิต" readonly></label>
+            <button id="btnSaveMarketSettings" class="btn btn-accent">บันทึก GP</button>
+          </div>
+          <small class="seller-hint">ค่า GP นี้ใช้กับการซื้อโมเดลครั้งถัดไปเท่านั้น ไม่คำนวณย้อนหลังกับรายการซื้อเดิม</small>
+          <span id="marketSettingsMsg" class="save-indicator"></span>
+        </section>
+
         <p class="eyebrow" style="margin-top:24px">ประวัติการ Login ล่าสุด</p>
         <div class="login-log-hint">⚠ = Login จากเมืองหรือประเทศต่างกันภายใน 3 ชั่วโมงจากครั้งก่อน</div>
         <div class="table-scroll">
@@ -148,5 +159,6 @@
   <script src="site-header.js?v=20261001-0805"></script>
   <script src="admin.js?v=20260930-1055"></script>
   <script src="admin-seller-level.js?v=20260930-1055"></script>
+  <script src="admin-marketplace-settings.js?v=20261003-1955"></script>
 </body>
 </html>

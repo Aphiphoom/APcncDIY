@@ -10,7 +10,8 @@ const ALLOWED_FOLDERS = new Set(["covers", "gallery", "variants"]);
 const MARKET_API_PREFIX = "/api/marketplace-public";
 const MARKET_OBJECT_PREFIX = "marketplace-public/";
 const MARKET_MAX_BYTES = 50 * 1024 * 1024;
-const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"]]);
+const MARKET_SOURCE_MAX_BYTES = 90 * 1024 * 1024;
+const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"],["application/zip","zip"]]);
 
 function json(payload, status = 200) {
   return Response.json(payload, {
@@ -91,24 +92,28 @@ async function uploadMarketplacePublic(request, env) {
   const listingId = url.searchParams.get("listing_id") || "";
   const kind = url.searchParams.get("kind") || "";
   if (!validUuid(listingId)) return json({ error: "invalid_listing_id" }, 400);
-  if (!["preview","cover","gallery"].includes(kind)) return json({ error: "invalid_kind" }, 400);
+  if (!["preview","cover","gallery","source"].includes(kind)) return json({ error: "invalid_kind" }, 400);
 
   const type = (request.headers.get("Content-Type") || "").split(";", 1)[0].toLowerCase();
   const extension = MARKET_ALLOWED_TYPES.get(type);
   if (!extension) return json({ error: "unsupported_file_type" }, 415);
   if (kind === "preview" && extension !== "glb") return json({ error: "preview_must_be_glb" }, 415);
-  if (kind !== "preview" && extension === "glb") return json({ error: "image_required" }, 415);
+  if (kind === "source" && extension !== "zip") return json({ error: "source_must_be_zip" }, 415);
+  if (!["preview","source"].includes(kind) && (extension === "glb" || extension === "zip")) return json({ error: "image_required" }, 415);
 
+  const sizeLimit = kind === "source" ? MARKET_SOURCE_MAX_BYTES : MARKET_MAX_BYTES;
   const declaredSize = Number(request.headers.get("Content-Length") || 0);
-  if (Number.isFinite(declaredSize) && declaredSize > MARKET_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+  if (Number.isFinite(declaredSize) && declaredSize > sizeLimit) return json({ error: "file_too_large" }, 413);
   const body = await request.arrayBuffer();
   if (!body.byteLength) return json({ error: "empty_file" }, 400);
-  if (body.byteLength > MARKET_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+  if (body.byteLength > sizeLimit) return json({ error: "file_too_large" }, 413);
 
   const base = `${MARKET_OBJECT_PREFIX}${auth.user.id}/${listingId}/`;
   const key = kind === "preview"
     ? `${base}preview/model.glb`
-    : `${base}images/${kind}-${crypto.randomUUID()}.${extension}`;
+    : kind === "source"
+      ? `${base}source/${crypto.randomUUID()}.zip`
+      : `${base}images/${kind}-${crypto.randomUUID()}.${extension}`;
 
   let originalName = "";
   try { originalName = decodeURIComponent(request.headers.get("X-File-Name") || "").slice(0, 240); } catch {}
@@ -116,7 +121,7 @@ async function uploadMarketplacePublic(request, env) {
   const object = await env.PRODUCT_IMAGES.put(key, body, {
     httpMetadata: {
       contentType: type === "application/octet-stream" && extension === "glb" ? "model/gltf-binary" : type,
-      cacheControl: "public, max-age=31536000, immutable",
+      cacheControl: kind === "source" ? "private, no-store" : "public, max-age=31536000, immutable",
     },
     customMetadata: { uploadedBy: auth.user.id, listingId, kind, originalName },
   });
@@ -143,6 +148,36 @@ function marketplaceObjectKeyFromUrl(url) {
   } catch {
     return "";
   }
+}
+
+
+async function readMarketplaceSource(request, env, key) {
+  const token = bearerToken(request);
+  if (!token) return json({ error: "unauthorized" }, 401);
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Accept: "application/json",
+  };
+  const sourceUrl = new URL(`${env.SUPABASE_URL}/rest/v1/market_model_sources`);
+  sourceUrl.searchParams.set("select", "model_id,source_path");
+  sourceUrl.searchParams.set("source_path", `eq.r2:${key}`);
+  sourceUrl.searchParams.set("limit", "1");
+  const allowed = await fetch(sourceUrl, { headers });
+  if (!allowed.ok) return json({ error: "authorization_failed" }, 502);
+  const rows = await allowed.json();
+  if (!rows?.length) return json({ error: "forbidden" }, 403);
+
+  const object = request.method === "HEAD"
+    ? await env.PRODUCT_IMAGES.head(key)
+    : await env.PRODUCT_IMAGES.get(key);
+  if (!object) return json({ error: "not_found" }, 404);
+  const responseHeaders = new Headers();
+  object.writeHttpMetadata(responseHeaders);
+  responseHeaders.set("ETag", object.httpEtag);
+  responseHeaders.set("Cache-Control", "private, no-store");
+  responseHeaders.set("Content-Length", String(object.size));
+  return new Response(request.method === "HEAD" ? null : object.body, { headers: responseHeaders });
 }
 
 async function deleteMarketplacePublic(request, env, key) {
@@ -253,6 +288,9 @@ export default {
 
     const marketplaceKey = marketplaceObjectKeyFromUrl(url);
     if (marketplaceKey) {
+      if ((request.method === "GET" || request.method === "HEAD") && marketplaceKey.includes("/source/")) {
+        return readMarketplaceSource(request, env, marketplaceKey);
+      }
       if (request.method === "DELETE") return deleteMarketplacePublic(request, env, marketplaceKey);
       return json({ error: "method_not_allowed" }, 405);
     }

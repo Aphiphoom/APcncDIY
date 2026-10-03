@@ -21,7 +21,7 @@
     <aside class="side"><section class="card sidecard"><h2>ผู้ผลิต / เจ้าของผลงาน</h2><div id="sellerName" class="seller-name"></div><div id="sellerTag" class="seller-tag"></div><div id="contact" class="contact"></div><div id="actions" class="actions"></div></section></aside>
   </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script><script src="marketplace-storage.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script><script src="auth-client.js"></script><script src="site-header.js"></script><script src="marketplace-storage.js"></script>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
@@ -48,6 +48,7 @@ async function acquireLibraryModel(){
   const result=await sb.rpc('acquire_market_model',{p_model_id:m.id});
   if(result.error){if(button){button.disabled=false;button.textContent='เพิ่มโมเดลเข้า Library'};const msg=String(result.error.message||'');alert(msg.includes('INSUFFICIENT_CREDITS')?'เครดิตไม่เพียงพอ':'ไม่สามารถเพิ่มโมเดลเข้า Library ได้: '+msg);return}
   if(button){button.disabled=true;button.textContent='อยู่ใน Library แล้ว'}
+  window.dispatchEvent(new Event('ap-credit-changed'));
   if(result.data?.restored)alert('เพิ่มโมเดลที่เคยมีสิทธิ์กลับเข้า Library แล้ว โดยไม่หักเครดิตซ้ำ');
   else alert(price>0?'ซื้อโมเดลและเพิ่มเข้า Library สำเร็จ':'เพิ่มโมเดลเข้า Library สำเร็จ');
 }

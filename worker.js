@@ -118,7 +118,9 @@ async function uploadMarketplacePublic(request, env) {
   let originalName = "";
   try { originalName = decodeURIComponent(request.headers.get("X-File-Name") || "").slice(0, 240); } catch {}
 
-  const object = await env.PRODUCT_IMAGES.put(key, body, {
+  const privateSource = kind === "source" && !!env.MARKET_SOURCES;
+  const bucket = privateSource ? env.MARKET_SOURCES : env.PRODUCT_IMAGES;
+  const object = await bucket.put(key, body, {
     httpMetadata: {
       contentType: type === "application/octet-stream" && extension === "glb" ? "model/gltf-binary" : type,
       cacheControl: kind === "source" ? "private, no-store" : "public, max-age=31536000, immutable",
@@ -130,9 +132,10 @@ async function uploadMarketplacePublic(request, env) {
   const publicBase = env.PRODUCT_IMAGE_PUBLIC_BASE.replace(/\/$/, "");
   const encodedKey = key.split("/").map(encodeURIComponent).join("/");
   return json({
-    path: `r2:${key}`,
+    path: `${privateSource ? "r2private:" : "r2:"}${key}`,
     key,
-    public_url: `${publicBase}/${encodedKey}`,
+    public_url: kind === "source" ? null : `${publicBase}/${encodedKey}`,
+    private_source: privateSource,
     size: object.size,
     etag: object.etag,
   }, 201);
@@ -161,16 +164,17 @@ async function readMarketplaceSource(request, env, key) {
   };
   const sourceUrl = new URL(`${env.SUPABASE_URL}/rest/v1/market_model_sources`);
   sourceUrl.searchParams.set("select", "model_id,source_path");
-  sourceUrl.searchParams.set("source_path", `eq.r2:${key}`);
+  sourceUrl.searchParams.set("or", `(source_path.eq.r2private:${key},source_path.eq.r2:${key})`);
   sourceUrl.searchParams.set("limit", "1");
   const allowed = await fetch(sourceUrl, { headers });
   if (!allowed.ok) return json({ error: "authorization_failed" }, 502);
   const rows = await allowed.json();
   if (!rows?.length) return json({ error: "forbidden" }, 403);
 
-  const object = request.method === "HEAD"
-    ? await env.PRODUCT_IMAGES.head(key)
-    : await env.PRODUCT_IMAGES.get(key);
+  const privateSource = String(rows[0].source_path || "").startsWith("r2private:");
+  if (privateSource && !env.MARKET_SOURCES) return json({ error: "private_source_storage_unavailable" }, 503);
+  const bucket = privateSource ? env.MARKET_SOURCES : env.PRODUCT_IMAGES;
+  const object = request.method === "HEAD" ? await bucket.head(key) : await bucket.get(key);
   if (!object) return json({ error: "not_found" }, 404);
   const responseHeaders = new Headers();
   object.writeHttpMetadata(responseHeaders);
@@ -185,10 +189,77 @@ async function deleteMarketplacePublic(request, env, key) {
   if (auth.error) return auth.error;
   const ownerPrefix = `${MARKET_OBJECT_PREFIX}${auth.user.id}/`;
   if (!auth.admin && !key.startsWith(ownerPrefix)) return json({ error: "forbidden" }, 403);
+
+  if (key.includes("/source/") && env.MARKET_SOURCES) {
+    const privateExisting = await env.MARKET_SOURCES.head(key);
+    if (privateExisting) {
+      await env.MARKET_SOURCES.delete(key);
+      return new Response(null, { status: 204 });
+    }
+  }
   const existing = await env.PRODUCT_IMAGES.head(key);
   if (!existing) return json({ error: "not_found" }, 404);
   await env.PRODUCT_IMAGES.delete(key);
   return new Response(null, { status: 204 });
+}
+
+async function supabaseRpc(request, env, functionName, payload) {
+  const token = bearerToken(request);
+  if (!token) return { error: json({ error: "unauthorized" }, 401) };
+  const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: env.SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    return { error: json({ error: "rpc_failed", detail }, response.status) };
+  }
+  return { data: await response.json().catch(() => ({})) };
+}
+
+function pathInfo(value) {
+  const text = String(value || "");
+  if (text.startsWith("r2private:")) return { kind: "private", key: text.slice("r2private:".length) };
+  if (text.startsWith("r2:")) return { kind: "public", key: text.slice("r2:".length) };
+  return null;
+}
+
+async function purgeMarketplaceModel(request, env) {
+  const url = new URL(request.url);
+  const modelId = url.searchParams.get("model_id") || "";
+  if (!validUuid(modelId)) return json({ error: "invalid_model_id" }, 400);
+
+  const manifestResult = await supabaseRpc(request, env, "marketplace_purge_manifest", { p_model_id: modelId });
+  if (manifestResult.error) return manifestResult.error;
+  const manifest = manifestResult.data || {};
+
+  const paths = [
+    manifest.preview_path,
+    manifest.cover_path,
+    ...(Array.isArray(manifest.gallery_paths) ? manifest.gallery_paths : []),
+    manifest.source_path,
+  ].filter(Boolean);
+
+  for (const value of paths) {
+    const info = pathInfo(value);
+    if (!info) continue;
+    if (info.kind === "private") {
+      if (!env.MARKET_SOURCES) return json({ error: "private_source_storage_unavailable" }, 503);
+      await env.MARKET_SOURCES.delete(info.key);
+    } else {
+      await env.PRODUCT_IMAGES.delete(info.key);
+    }
+  }
+
+  const completeResult = await supabaseRpc(request, env, "complete_market_model_purge", { p_model_id: modelId });
+  if (completeResult.error) return completeResult.error;
+  return json({ ok: true, purged: true, model_id: modelId });
 }
 
 function objectKeyFromUrl(url) {
@@ -284,6 +355,10 @@ export default {
     if (url.pathname === `${MARKET_API_PREFIX}/upload`) {
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
       return uploadMarketplacePublic(request, env);
+    }
+    if (url.pathname === `${MARKET_API_PREFIX}/purge`) {
+      if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+      return purgeMarketplaceModel(request, env);
     }
 
     const marketplaceKey = marketplaceObjectKeyFromUrl(url);

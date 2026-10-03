@@ -33,11 +33,12 @@ let marketContext=null;
 async function acquireLibraryModel(){
   const ctx=marketContext;if(!ctx)return;
   const {sb,m}=ctx;
+  const restorable=!!ctx.restorable;
   const sessionResult=await sb.auth.getSession();
   const session=sessionResult.data?.session;
   if(!session){alert('กรุณาเข้าสู่ระบบก่อนเพิ่มโมเดลเข้า Library');return}
   const price=Number(m.price_credits||0);
-  if(price>0){
+  if(price>0&&!restorable){
     const balanceResult=await sb.from('profiles').select('credit_balance').eq('id',session.user.id).maybeSingle();
     if(balanceResult.error){alert('ไม่สามารถตรวจสอบยอดเครดิตได้');return}
     const balance=Number(balanceResult.data?.credit_balance||0);
@@ -91,12 +92,12 @@ async function loadViewer(url){
   }catch(e){console.error(e);msg.hidden=false;msg.textContent='ไม่สามารถโหลด 3D Preview บนอุปกรณ์นี้ได้ กรุณารีเฟรชหน้าอีกครั้ง'}
 }
 async function boot(){try{if(!window.supabase||!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY)throw new Error('Supabase config unavailable');const id=new URLSearchParams(location.search).get('id');if(!id)return fail('ไม่พบรหัสผลงาน');const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);const {data:m,error}=await sb.from('market_models').select('id,seller_id,title,description,category,model_type,placement_type,dimensions_mm,selection_count,cover_path,preview_path,gallery_paths,price_min_thb,price_max_thb,price_note,price_credits').eq('id',id).eq('status','published').maybeSingle();if(error)throw error;if(!m)return fail('ไม่พบผลงานนี้ หรือผลงานไม่ได้เผยแพร่แล้ว');const pr=await sb.from('public_profiles').select('user_id,display_name,tagline,phone,line_id,public_email,about,is_public').eq('user_id',m.seller_id).maybeSingle();const p=pr.data&&pr.data.is_public?pr.data:null,d=m.dimensions_mm||{};document.title=`${m.title} · AP CNC DIY Marketplace`;renderImageSlider([m.cover_path,...(Array.isArray(m.gallery_paths)?m.gallery_paths:[])],m.title);$('chips').innerHTML=[m.category,m.model_type==='parametric'?'ปรับขนาดได้':'แบบอ้างอิง'].filter(Boolean).map(x=>`<span class="chip">${esc(x)}</span>`).join('');$('title').textContent=m.title||'ผลงาน';$('description').textContent=(m.description||'').trim()||'ผลงานชุดตู้นี้เผยแพร่โดยสมาชิก AP Cabinet Pro เพื่อใช้เป็นแนวทางสำหรับลูกค้าที่ต้องการสอบถามและจ้างผลิตงานจริง';const pt=priceText(m);if(pt||m.price_note){$('priceBox').hidden=false;$('priceBox').innerHTML=`${pt?`<strong>${esc(pt)}</strong>`:''}${m.price_note?`<small>${esc(m.price_note)}</small>`:''}`}$('specs').innerHTML=`<div class="spec"><span>ความกว้างอ้างอิง</span><strong>${d.width?num(d.width)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>ความสูงอ้างอิง</span><strong>${d.height?num(d.height)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>ความลึกอ้างอิง</span><strong>${d.depth?num(d.depth)+' มม.':'ไม่ระบุ'}</strong></div><div class="spec"><span>จำนวนองค์ประกอบ</span><strong>${num(m.selection_count||1)}</strong></div>`;$('sellerName').textContent=p?.display_name||'สมาชิก AP Cabinet Pro';$('sellerTag').textContent=p?.tagline||p?.about||'ติดต่อผู้ผลิตเพื่อสอบถามรายละเอียดงานและขอใบเสนอราคา';const c=[];if(p?.phone)c.push(`<div class="contact-row"><small>โทรศัพท์</small><a href="tel:${encodeURIComponent(p.phone)}">${esc(p.phone)}</a></div>`);if(p?.line_id)c.push(`<div class="contact-row"><small>LINE ID</small>${esc(p.line_id)}</div>`);if(p?.public_email)c.push(`<div class="contact-row"><small>อีเมล</small><a href="mailto:${encodeURIComponent(p.public_email)}">${esc(p.public_email)}</a></div>`);$('contact').innerHTML=c.join('');const a=[];if(p?.phone)a.push(`<a class="btn primary" href="tel:${encodeURIComponent(p.phone)}">โทรสอบถามงาน</a>`);if(p?.public_email)a.push(`<a class="btn green" href="mailto:${encodeURIComponent(p.public_email)}?subject=${encodeURIComponent('สอบถามงาน: '+m.title)}">ขอใบเสนอราคา</a>`);
-const sessionResult=await sb.auth.getSession();const session=sessionResult.data?.session;let entitled=false;
-if(session){const er=await sb.from('market_model_entitlements').select('model_id,active').eq('model_id',m.id).eq('user_id',session.user.id).eq('active',true).maybeSingle();entitled=!!er.data}
-marketContext={sb,m};
+const sessionResult=await sb.auth.getSession();const session=sessionResult.data?.session;let entitled=false,restorable=false;
+if(session){const er=await sb.from('market_model_entitlements').select('model_id,active,source').eq('model_id',m.id).eq('user_id',session.user.id).maybeSingle();entitled=!!er.data?.active;restorable=!!er.data&&!er.data.active}
+marketContext={sb,m,restorable};
 const modelPrice=Number(m.price_credits||0);
-a.push(`<button id="addLibraryBtn" class="btn cyan" type="button" onclick="acquireLibraryModel()" ${entitled?'disabled':''}>${entitled?'อยู่ใน Library แล้ว':'เพิ่มโมเดลเข้า Library'}</button>`);
-if(!entitled)a.push(`<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:-3px">${modelPrice>0?`ราคาโมเดล ${num(modelPrice)} เครดิต`:'โมเดลฟรี'}</div>`);
+a.push(`<button id="addLibraryBtn" class="btn cyan" type="button" onclick="acquireLibraryModel()" ${entitled?'disabled':''}>${entitled?'อยู่ใน Library แล้ว':restorable?'เพิ่มโมเดลกลับเข้า Library':'เพิ่มโมเดลเข้า Library'}</button>`);
+if(!entitled)a.push(`<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:-3px">${restorable?'เคยมีสิทธิ์แล้ว · เพิ่มกลับได้โดยไม่หักเครดิต':modelPrice>0?`ราคาโมเดล ${num(modelPrice)} เครดิต`:'โมเดลฟรี'}</div>`);
 a.push(`<a class="btn cyan" href="public-profile.html?id=${encodeURIComponent(m.seller_id)}">ดูโปรไฟล์ผู้ผลิต</a>`);$('actions').innerHTML=a.join('');$('loading').hidden=true;$('page').hidden=false;if(m.preview_path){$('viewerSection').hidden=false;loadViewer(publicFile(m.preview_path))}}catch(e){console.error(e);fail('เกิดข้อผิดพลาดในการโหลดรายละเอียดผลงาน กรุณาลองใหม่ภายหลัง')}}
 boot();
 })();

@@ -1,10 +1,10 @@
 {
   "product": "AP Cabinet Pro",
-  "latest_version": "2.1.213",
-  "file_name": "AP_Cabinet_Pro_V2.1.213.rbz",
-  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.1.213.rbz",
+  "latest_version": "2.1.233",
+  "file_name": "AP_Cabinet_Pro_V2.1.233.rbz",
+  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.1.233.rbz",
   "release_url": "https://github.com/Aphiphoom/APcncDIY/releases/tag/AP_Cabinet_Pro",
   "line_group_url": "https://line.me/ti/g/4v9_7RW5kG",
-  "notes": "AP Cabinet Pro V2.1.213",
-  "published_at": "2026-10-01"
+  "notes": "AP Cabinet Pro V2.1.233 — Move Panel และ Move Product/Group รวมการย้ายและการ refresh/regenerate ที่เกี่ยวข้องให้ Undo ย้อนกลับได้ในครั้งเดียว",
+  "published_at": "2026-10-04"
 }

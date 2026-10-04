@@ -70,7 +70,7 @@ var MarketplacePublish=(function(){
     init:function(data){payload=data||{};$('selectionCount').textContent=fmt(payload.selection_count)+' ชิ้นงาน';var d=payload.dimensions_mm||{};$('dimensions').textContent=fmt(d.width)+' × '+fmt(d.depth)+' × '+fmt(d.height)+' มม.';$('title').value=payload.default_title||'';refreshPrompt()},
     setImages:function(list){images=Array.isArray(list)?list:[];renderImages()},
     cover:function(i){coverIndex=Number(i)||0;renderImages()},
-    setQuota:function(q){var seller=q.admin?'Admin':(q.seller_label||('Seller '+fmt(q.seller_level||0)));$('quota').textContent=q.admin?'Admin · เผยแพร่แล้ว '+fmt(q.published)+' · ไม่จำกัด:seller+' · เผยแพร่แล้ว '+fmt(q.published)+' / '+fmt(q.limit)+' รายการ';if(!q.eligible){$('draftBtn').disabled=true;$('publishBtn').disabled=true}},
+    setQuota:function(q){var seller=q.admin?'Admin':(q.seller_label||('Seller '+fmt(q.seller_level||0)));$('quota').textContent=q.admin?('Admin · เผยแพร่แล้ว '+fmt(q.published)+' · ไม่จำกัด'):(seller+' · เผยแพร่แล้ว '+fmt(q.published)+' / '+fmt(q.limit)+' รายการ');if(!q.eligible){$('draftBtn').disabled=true;$('publishBtn').disabled=true;$('quota').textContent=q.active===false?'ต้องเป็นสมาชิก AP Cabinet Pro ที่ใช้งานอยู่':'บัญชียังไม่ได้รับสิทธิ์ Seller';status(q.active===false?'สมาชิกหมดอายุหรือยังไม่ได้เปิดใช้งาน':'กรุณาติดต่อผู้ดูแลเพื่อกำหนดระดับ Seller','err')}},
     setQuotaError:function(m){$('quota').textContent='ตรวจสอบโควตาไม่สำเร็จ';status(m,'err')},
     showError:function(m){status(m,'err')},
     refreshPrompt:refreshPrompt,copyPrompt:copyPrompt,exportReferences:exportReferences,

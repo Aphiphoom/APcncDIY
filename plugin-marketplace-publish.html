@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เผยแพร่ผลงานไป Marketplace</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+:root{--bg:#0d1218;--p:#161e27;--p2:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--amber:#f6a623;--cyan:#25c8d5;--green:#45c98a;--red:#ff6b6b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Kanit,sans-serif}.shell{padding:20px}.head,.image-head,.footer{display:flex;justify-content:space-between;gap:12px;align-items:center}.head{align-items:flex-start;margin-bottom:16px}.head h1{margin:0;font-size:23px}.head p{margin:5px 0 0;color:var(--muted)}.quota,.card{border:1px solid var(--line);background:var(--p);border-radius:10px}.quota{padding:8px 11px;color:var(--cyan);font-weight:600}.card{padding:16px;margin-bottom:12px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#101820;border:1px solid #2c3947;border-radius:8px;padding:10px}.metric small,.help{color:var(--muted);font-size:12px}.metric strong{display:block;margin-top:3px}.field{margin-bottom:13px}.field:last-child{margin-bottom:0}label{display:block;margin-bottom:6px;font-weight:600}.req{color:var(--amber)}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--p2);color:var(--ink);padding:10px 11px;font:inherit;outline:none}input,select{height:42px}textarea{min-height:116px;resize:vertical;line-height:1.55}.grid2,.ai-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:1px solid var(--line);border-radius:8px;background:var(--p2);color:var(--ink);min-height:40px;padding:0 14px;font-weight:700;font-family:inherit;cursor:pointer}.btn-primary{background:var(--amber);border-color:var(--amber);color:#191106}.btn-cyan{border-color:var(--cyan);color:var(--cyan)}.images{display:grid;gap:7px;margin-top:10px}.image-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;padding:8px 10px;border:1px solid #2f3c49;border-radius:8px;background:#111922}.remove{border:0;background:transparent;color:var(--red);font-weight:700;cursor:pointer}.status{display:none;margin-bottom:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}.status.show{display:block}.status.ok{border-color:#287a58;color:#68dfa8;background:#10251e}.status.err{border-color:#7e3434;color:#ff9c9c;background:#281515}.footer{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 24%);padding:24px 0 4px;justify-content:flex-end}.loading{opacity:.62;pointer-events:none}@media(max-width:560px){.shell{padding:14px}.head{flex-direction:column;align-items:stretch}.summary,.grid2,.ai-options{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div id="app" class="shell">
+<div class="head"><div><h1>เผยแพร่ผลงานไป Marketplace</h1><p>ส่วนหน้าต่างนี้โหลดจาก APcncDIY.com ส่วนงาน SketchUp เช่นถ่ายภาพ ส่งออก ZIP และแพ็กโมเดลยังทำโดยปลั๊กอิน</p></div><div id="quota" class="quota">กำลังตรวจสอบโควตา...</div></div>
+<div class="card summary"><div class="metric"><small>ชิ้นงานที่เลือก</small><strong id="selectionCount">-</strong></div><div class="metric"><small>ขนาดรวม ก×ล×ส</small><strong id="dimensions">-</strong></div><div class="metric"><small>3D Preview</small><strong>สร้างอัตโนมัติ</strong></div></div>
+<div class="card">
+<div class="field"><label>ชื่อผลงาน <span class="req">*</span></label><input id="title" maxlength="120"></div>
+<div class="field"><label>หมวดหมู่</label><select id="category"><option>ชุดครัว</option><option>ตู้เสื้อผ้า</option><option>ตู้ทีวี</option><option>ตู้โชว์</option><option>ตู้สำนักงาน</option><option>เฟอร์นิเจอร์บิวท์อิน</option><option>อื่น ๆ</option></select></div>
+<div class="field"><label>รายละเอียด</label><textarea id="description" maxlength="4000"></textarea></div>
+<div class="grid2"><div class="field"><label>ราคาเริ่มต้น (บาท)</label><input id="priceMin" inputmode="decimal"></div><div class="field"><label>ราคาสูงสุด (บาท)</label><input id="priceMax" inputmode="decimal"></div></div>
+<div class="field"><label>หมายเหตุราคา</label><input id="priceNote" maxlength="240"><div class="help">ราคาอ้างอิงงานผลิต ไม่ใช่ราคาขายไฟล์โมเดล</div></div>
+<div class="field"><label>ราคาดาวน์โหลดโมเดล (เครดิต)</label><input id="modelPriceCredits" type="number" min="0" step="1" value="0"><div class="help">0 = ฟรี · มากกว่า 0 = ชำระเครดิตก่อนเพิ่มเข้า Library</div></div>
+</div>
+<div class="card">
+<div class="image-head"><div><strong>ชุดภาพอ้างอิงสำหรับ AI ภายนอก</strong><div class="help">ปลั๊กอินถ่ายโมเดลจริง 8 มุมเป็น ZIP พร้อม Prompt โดยไม่เรียก Image API</div></div><button id="aiExportBtn" class="btn btn-cyan" onclick="MarketplacePublish.exportReferences()">ส่งออก ZIP 8 ภาพ</button></div>
+<div class="ai-options" style="margin-top:12px">
+<div class="field"><label>AI ที่จะใช้</label><select id="aiProvider" onchange="MarketplacePublish.refreshPrompt()"><option value="chatgpt">ChatGPT</option><option value="gemini">Gemini</option></select></div>
+<div class="field"><label>ชนิดห้อง</label><select id="aiRoom" onchange="MarketplacePublish.refreshPrompt()"><option>ห้องครัว</option><option>ห้องนอน</option><option>ห้องแต่งตัว</option><option>ห้องนั่งเล่น</option><option>ห้องทำงาน</option><option>โชว์รูม</option></select></div>
+<div class="field"><label>โทน / สไตล์</label><select id="aiTone" onchange="MarketplacePublish.refreshPrompt()"><option>Modern warm</option><option>Minimal</option><option>Luxury</option><option>Industrial dark</option><option>Scandinavian</option><option>Japanese</option></select></div>
+<div class="field"><label>แสง</label><select id="aiLight" onchange="MarketplacePublish.refreshPrompt()"><option>Natural daylight</option><option>Warm evening</option><option>Soft studio</option><option>Bright showroom</option></select></div>
+<div class="field"><label>อัตราส่วน</label><select id="aiAspect" onchange="MarketplacePublish.refreshPrompt()"><option value="4:3">4:3</option><option value="1:1">1:1</option><option value="16:9">16:9</option><option value="3:4">3:4 แนวตั้ง</option></select></div>
+<div class="field"><label>จำนวนภาพที่ต้องการ</label><select id="aiImageCount" onchange="MarketplacePublish.refreshPrompt()"><option value="1">1 ภาพ</option><option value="2">2 ภาพ</option><option value="4" selected>4 ภาพ</option><option value="6">6 ภาพ</option><option value="8">8 ภาพ</option></select></div>
+</div>
+<div class="field"><label>รายละเอียดเพิ่มเติม</label><input id="aiExtra" maxlength="500" oninput="MarketplacePublish.refreshPrompt()" placeholder="เช่น พื้นไม้ โทนครีม ของตกแต่งน้อย"></div>
+<div class="field"><label>Prompt สำหรับ AI ภายนอก</label><textarea id="aiPrompt" style="min-height:260px" readonly></textarea><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn" onclick="MarketplacePublish.copyPrompt()">Copy Prompt</button></div><div class="help">อัปโหลดภาพทั้ง 8 ภาพจาก ZIP เข้า ChatGPT/Gemini แล้ววาง Prompt นี้</div></div>
+</div>
+<div class="card"><div class="image-head"><div><strong>รูปภาพผลงาน</strong><div class="help">เพิ่มได้สูงสุด 4 รูป เลือกหนึ่งรูปเป็นภาพปก</div></div><button class="btn btn-cyan" onclick="sketchup.marketplace_pick_image()">+ เพิ่มรูป</button></div><div id="images" class="images"><div class="help">ยังไม่ได้เพิ่มรูปภาพ</div></div></div>
+<div id="status" class="status"></div>
+<div class="footer"><button class="btn" onclick="sketchup.marketplace_close()">ปิด</button><button id="draftBtn" class="btn" onclick="MarketplacePublish.submit('draft')">บันทึกแบบร่าง</button><button id="publishBtn" class="btn btn-primary" onclick="MarketplacePublish.submit('published')">เผยแพร่ Marketplace</button></div>
+</div>
+<script>
+var MarketplacePublish=(function(){
+  var payload={},images=[],coverIndex=0;
+  function $(id){return document.getElementById(id)}
+  function fmt(n){return Number(n||0).toLocaleString('th-TH')}
+  function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function status(msg,kind){var e=$('status');e.textContent=msg||'';e.className='status'+(msg?' show':'')+(kind?' '+kind:'')}
+  function renderImages(){var h=$('images');if(!images.length){h.innerHTML='<div class="help">ยังไม่ได้เพิ่มรูปภาพ</div>';return}if(coverIndex>=images.length)coverIndex=0;h.innerHTML=images.map(function(img,i){return '<div class="image-row"><input type="radio" name="cover" '+(i===coverIndex?'checked':'')+' onchange="MarketplacePublish.cover('+i+')"><div><strong>'+esc(img.name)+'</strong><br><small>'+((img.size||0)/1048576).toFixed(2)+' MB '+(i===coverIndex?'· ภาพปก':'')+'</small></div><button class="remove" onclick="sketchup.marketplace_remove_image('+i+')">ลบ</button></div>'}).join('')}
+  function buildPrompt(){
+    var d=payload.dimensions_mm||{},names=Array.isArray(payload.selection_names)?payload.selection_names:[],provider=$('aiProvider').value==='gemini'?'Gemini':'ChatGPT',count=$('aiImageCount').value,extra=$('aiExtra').value.trim();
+    return [
+      'Use all 8 attached screenshots as reference views of the EXACT SAME real SketchUp furniture model. Create '+count+' photorealistic marketing images suitable for '+provider+'.',
+      'PRODUCT FIDELITY IS THE HIGHEST PRIORITY. Treat the cabinet/furniture geometry as locked and do not redesign it.',
+      'Preserve exactly: overall silhouette and proportions; number and relative widths of cabinet modules; all doors, drawers, shelves, open bays, handles, gaps, rails, panel edges, material boundaries, colors and visible construction details.',
+      'Do NOT add, remove, merge, resize, simplify, restyle or rearrange any cabinet component. Do not invent extra doors, drawers, handles, trims or decorative lines.',
+      'If any detail is uncertain, copy it from the closest reference image rather than inventing a replacement.',
+      'Model type: '+(payload.model_type||'mixed')+'. Overall dimensions: '+(d.width||'?')+' × '+(d.depth||'?')+' × '+(d.height||'?')+' mm.',
+      names.length?'Model/selection names: '+names.join(', ')+'.':'',
+      'Place this exact product in a '+$('aiRoom').value+' interior. Style / color tone: '+$('aiTone').value+'. Lighting: '+$('aiLight').value+'. Target aspect ratio: '+$('aiAspect').value+'.',
+      'Keep the entire furniture clearly visible and dominant. Decor must not cover important cabinet details. Only change the surrounding room, floor, wall, ceiling, lighting and props.',
+      'OUTPUT CONSISTENCY IS REQUIRED ACROSS ALL '+count+' IMAGES. Every output must depict the exact same room/environment, same furniture placement, same wall/floor/ceiling materials, same lighting conditions, same surrounding furniture, same props and decorations, and the same cabinet materials/colors/details.',
+      'Only the camera angle, camera distance and framing may change between images unless explicitly requested otherwise. Do not create a different room design for each image. Treat the outputs as one coordinated real photo session in one unchanged space.',
+      extra?'Additional request (must not override product-preservation or consistency rules): '+extra:'',
+      'Before producing the final images, compare every result against all 8 references and correct any mismatch in module count, door/drawer layout, handles, proportions, material placement or room context.'
+    ].filter(Boolean).join('\n\n');
+  }
+  function refreshPrompt(){$('aiPrompt').value=buildPrompt()}
+  async function copyPrompt(){var t=buildPrompt();$('aiPrompt').value=t;try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(t)}else throw new Error();status('คัดลอก Prompt แล้ว','ok')}catch(e){$('aiPrompt').focus();$('aiPrompt').select();try{document.execCommand('copy');status('คัดลอก Prompt แล้ว','ok')}catch(x){status('คัดลอกอัตโนมัติไม่ได้ กรุณาเลือกข้อความแล้ว Copy','err')}}}
+  function exportReferences(){if(!window.sketchup||typeof window.sketchup.marketplace_ai_export_reference!=='function'){status('ไม่พบระบบส่งออกภาพอ้างอิงของปลั๊กอิน','err');return}var data={provider:$('aiProvider').value,room_type:$('aiRoom').value,style_tone:$('aiTone').value,lighting_style:$('aiLight').value,aspect_ratio:$('aiAspect').value,image_count:Number($('aiImageCount').value||1),prompt_extra:$('aiExtra').value,prompt:buildPrompt(),title:$('title').value.trim()};window.sketchup.marketplace_ai_export_reference(JSON.stringify(data))}
+  function submit(state){try{var title=$('title').value.trim();if(!title){status('กรุณาระบุชื่อผลงาน','err');return}var mp=Number($('modelPriceCredits').value||0);if(!Number.isInteger(mp)||mp<0){status('ราคาดาวน์โหลดโมเดลต้องเป็นจำนวนเครดิตตั้งแต่ 0 ขึ้นไป','err');return}var data={title:title,category:$('category').value,description:$('description').value,price_min_thb:$('priceMin').value,price_max_thb:$('priceMax').value,price_note:$('priceNote').value,price_credits:mp,cover_index:coverIndex,status:state};window.sketchup.marketplace_publish(JSON.stringify(data))}catch(e){status(e.message||String(e),'err')}}
+  return {
+    init:function(data){payload=data||{};$('selectionCount').textContent=fmt(payload.selection_count)+' ชิ้นงาน';var d=payload.dimensions_mm||{};$('dimensions').textContent=fmt(d.width)+' × '+fmt(d.depth)+' × '+fmt(d.height)+' มม.';$('title').value=payload.default_title||'';refreshPrompt()},
+    setImages:function(list){images=Array.isArray(list)?list:[];renderImages()},
+    cover:function(i){coverIndex=Number(i)||0;renderImages()},
+    setQuota:function(q){var seller=q.admin?'Admin':(q.seller_label||('Seller '+fmt(q.seller_level||0)));$('quota').textContent=q.admin?'Admin · เผยแพร่แล้ว '+fmt(q.published)+' · ไม่จำกัด:seller+' · เผยแพร่แล้ว '+fmt(q.published)+' / '+fmt(q.limit)+' รายการ';if(!q.eligible){$('draftBtn').disabled=true;$('publishBtn').disabled=true}},
+    setQuotaError:function(m){$('quota').textContent='ตรวจสอบโควตาไม่สำเร็จ';status(m,'err')},
+    showError:function(m){status(m,'err')},
+    refreshPrompt:refreshPrompt,copyPrompt:copyPrompt,exportReferences:exportReferences,
+    referenceExportBusy:function(on){$('aiExportBtn').disabled=!!on;$('aiExportBtn').textContent=on?'กำลังถ่ายภาพ...':'ส่งออก ZIP 8 ภาพ';if(on)status('กำลังถ่ายภาพอ้างอิง 8 มุม...','')},
+    referenceExportDone:function(ok,m){$('aiExportBtn').disabled=false;$('aiExportBtn').textContent='ส่งออก ZIP 8 ภาพ';status(m,ok?'ok':'')},
+    busy:function(on){$('app').classList.toggle('loading',!!on);$('draftBtn').disabled=!!on;$('publishBtn').disabled=!!on;if(on)status('กำลังสร้าง 3D Preview และอัปโหลดข้อมูล...','')},
+    done:function(ok,m,url){$('app').classList.remove('loading');$('draftBtn').disabled=false;$('publishBtn').disabled=false;status(m,ok?'ok':'err');if(ok&&url&&confirm(m+'\n\nเปิดหน้ารายละเอียดบนเว็บไซต์หรือไม่?'))window.open(url,'_blank')},
+    submit:submit
+  };
+})();
+window.addEventListener('DOMContentLoaded',function(){try{if(window.sketchup&&typeof window.sketchup.marketplace_ui_ready==='function')window.sketchup.marketplace_ui_ready()}catch(e){}});
+window.addEventListener('error',function(e){try{MarketplacePublish.showError('JavaScript: '+(e.message||'Unknown error'));if(window.sketchup&&typeof window.sketchup.marketplace_js_error==='function')window.sketchup.marketplace_js_error(String(e.message||e))}catch(x){}});
+</script>
+</body></html>

@@ -47,7 +47,7 @@ var MarketplacePublish=(function(){
   function buildPrompt(){
     var d=payload.dimensions_mm||{},names=Array.isArray(payload.selection_names)?payload.selection_names:[],provider=$('aiProvider').value==='gemini'?'Gemini':'ChatGPT',count=$('aiImageCount').value,extra=$('aiExtra').value.trim();
     return [
-      'Use all 8 attached screenshots as reference views of the EXACT SAME real SketchUp furniture model. Create '+count+' photorealistic marketing images suitable for '+provider+'.',
+      'Use all 8 attached screenshots as reference views of the EXACT SAME real SketchUp furniture model. Generate exactly '+count+' final photorealistic marketing images suitable for '+provider+'. Return exactly '+count+' images, no more and no fewer.',
       'PRODUCT FIDELITY IS THE HIGHEST PRIORITY. Treat the cabinet/furniture geometry as locked and do not redesign it.',
       'Preserve exactly: overall silhouette and proportions; number and relative widths of cabinet modules; all doors, drawers, shelves, open bays, handles, gaps, rails, panel edges, material boundaries, colors and visible construction details.',
       'Do NOT add, remove, merge, resize, simplify, restyle or rearrange any cabinet component. Do not invent extra doors, drawers, handles, trims or decorative lines.',

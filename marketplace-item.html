@@ -53,6 +53,7 @@ async function acquireLibraryModel(){
   if(result.data?.restored)alert('เพิ่มโมเดลที่เคยมีสิทธิ์กลับเข้า Library แล้ว โดยไม่หักเครดิตซ้ำ');
   else alert(price>0?'ซื้อโมเดลและเพิ่มเข้า Library สำเร็จ':'เพิ่มโมเดลเข้า Library สำเร็จ');
 }
+window.acquireLibraryModel=acquireLibraryModel;
 function renderImageSlider(paths,title){
   const cover=$('cover'),images=[...new Set((paths||[]).filter(Boolean))];
   if(!images.length){cover.innerHTML='<div style="color:#6f7e8d;padding:48px 18px;text-align:center">ยังไม่มีภาพสินค้า</div>';return}

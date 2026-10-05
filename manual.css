@@ -102,6 +102,39 @@ button,input,select,textarea{font-family:'Kanit',sans-serif}
 }
 .manual-content .youtube-hd-link:hover{text-decoration:underline;color:#63dce5}
 
+/* Force readable text for legacy manual HTML that contains old inline colors */
+.manual-content,
+.manual-content section,
+.manual-content div,
+.manual-content article{color:#dbe3eb}
+.manual-content p,
+.manual-content li,
+.manual-content span,
+.manual-content div,
+.manual-content section,
+.manual-content article,
+.manual-content small{
+  color:#dbe3eb !important;
+}
+.manual-content h1{color:#ffffff !important}
+.manual-content h2{color:var(--cyan) !important}
+.manual-content h3,
+.manual-content h4,
+.manual-content h5,
+.manual-content h6{color:#e9f0f6 !important}
+.manual-content strong,
+.manual-content b{color:#ffffff !important}
+.manual-content em,
+.manual-content i{color:#cbd6df !important}
+.manual-content a{color:var(--cyan) !important}
+.manual-content a:hover{color:#63dce5 !important}
+.manual-content code{color:#ffd278 !important}
+.manual-content kbd{color:#ffffff !important}
+.manual-content blockquote,
+.manual-content blockquote *{color:#dbe3eb !important}
+.manual-content th{color:#ffffff !important}
+.manual-content td{color:#dbe3eb !important}
+
 @media(max-width:760px){
   .manual-shell{grid-template-columns:1fr}
   .manual-sidebar{border-right:0;border-bottom:1px solid var(--line);max-height:42vh}

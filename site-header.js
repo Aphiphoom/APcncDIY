@@ -160,6 +160,31 @@
 
     const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+    async function resolveProfileHref(user){
+      if(!user?.id)return 'profile.html';
+      try{
+        const {data:accountRow,error:accountError}=await client.from('profiles')
+          .select('role,status,seller_level')
+          .eq('id',user.id)
+          .maybeSingle();
+        if(accountError)throw accountError;
+        const canSell=accountRow?.role==='admin'||Number(accountRow?.seller_level||0)>0;
+        if(!canSell)return 'profile.html';
+
+        const {data:publicProfile,error:profileError}=await client.from('public_profiles')
+          .select('user_id,profile_slug')
+          .eq('user_id',user.id)
+          .maybeSingle();
+        if(profileError)throw profileError;
+        if(!publicProfile)return 'profile-setup.html';
+        if(publicProfile.profile_slug)return '/u/'+encodeURIComponent(publicProfile.profile_slug);
+        return 'public-profile.html?id='+encodeURIComponent(user.id);
+      }catch(error){
+        console.warn('resolve profile link failed',error);
+        return 'profile.html';
+      }
+    }
+
     async function loadCredit(){
       if(!currentUser||!credit)return;
       const {data,error}=await client.from('profiles').select('credit_balance').eq('id',currentUser.id).maybeSingle();
@@ -212,7 +237,7 @@
       currentUser=user||null;
       if(user){
         profile.hidden=false;
-        profile.href='public-profile.html?id='+encodeURIComponent(user.id);
+        profile.href=await resolveProfileHref(user);
         account.textContent='ออกจากระบบ';
         account.href='#';
         account.dataset.mode='logout';

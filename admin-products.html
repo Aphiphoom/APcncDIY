@@ -65,7 +65,7 @@
             <div class="actions"><button id="saveProduct" class="btn primary">บันทึกสินค้า</button><button id="resetProduct" class="btn">ล้างฟอร์ม</button></div>
           </section>
 
-          <section id="variantCard" class="card variant-card" hidden>
+          <section id="variantCard" class="card variant-card">
             <h2>ตัวเลือกย่อยของสินค้า</h2>
             <div class="field-hint" style="margin-bottom:12px">แต่ละตัวเลือกกำหนดชื่อ ราคา และรูปของตัวเองได้ เช่น 6×26 มม., 6×32 มม. หรือขนาด/รุ่นอื่น</div>
             <div class="variant-form">
@@ -139,8 +139,14 @@
     }
 
     function renderVariants(productId){
-      if(!productId){$('variantCard').hidden=true;return}
       $('variantCard').hidden=false;
+      const controls=['vName','vPrice','vImage','vSort','vActive','saveVariant','resetVariant'];
+      if(!productId){
+        controls.forEach(id=>$(id).disabled=true);
+        $('variantList').innerHTML='<div class="muted">บันทึกสินค้าหลักก่อน แล้วจึงเพิ่มตัวเลือกย่อยของสินค้าได้</div>';
+        return;
+      }
+      controls.forEach(id=>$(id).disabled=false);
       const rows=variantsOf(productId);
       $('variantList').innerHTML=rows.length?rows.map(v=>`<div class="variant-item"><div>${v.image_path?`<img class="variant-thumb" src="${esc(publicUrl(v.image_path))}">`:'<div class="variant-thumb"></div>'}</div><div><div class="variant-name">${esc(v.name)}</div><div class="variant-price">${v.price==null?'ใช้ราคาหลัก':Number(v.price).toLocaleString('th-TH')+' บาท'}</div><div class="variant-badge">${v.is_active?'แสดง':'ซ่อน'}</div></div><div class="actions"><button class="btn" data-edit-variant="${v.id}">แก้ไข</button><button class="btn danger" data-del-variant="${v.id}">ลบ</button></div></div>`).join(''):'<div class="muted">ยังไม่มีตัวเลือกย่อย</div>';
       document.querySelectorAll('[data-edit-variant]').forEach(b=>b.onclick=()=>editVariant(b.dataset.editVariant));document.querySelectorAll('[data-del-variant]').forEach(b=>b.onclick=()=>deleteVariant(b.dataset.delVariant));

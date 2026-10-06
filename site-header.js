@@ -197,7 +197,7 @@
       if(!currentUser||!notifyWrap||!notifyPanel||!notifyCount)return;
       const {data,error}=await client.from('market_notifications')
         .select('id,kind,title,body,model_id,read_at,created_at')
-        .eq('user_id',currentUser.id)
+         .or(`user_id.eq.${currentUser.id},and(user_id.is.null,kind.eq.shop_payment_submitted)`)
         .order('created_at',{ascending:false})
         .limit(12);
       if(error){console.warn('load notifications failed',error);return}

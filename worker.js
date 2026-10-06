@@ -241,6 +241,33 @@ async function anonRpc(env, functionName, payload) {
   return { data };
 }
 
+function hexBytes(hex) {
+  const clean = String(hex || "").trim();
+  if (!/^[0-9a-f]{64}$/i.test(clean)) throw new Error("invalid_encryption_key");
+  const out = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  return out;
+}
+
+async function encryptSlip(buffer, keyHex) {
+  const key = await crypto.subtle.importKey("raw", hexBytes(keyHex), "AES-GCM", false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, buffer));
+  const packed = new Uint8Array(iv.length + encrypted.length);
+  packed.set(iv, 0);
+  packed.set(encrypted, iv.length);
+  return packed;
+}
+
+async function decryptSlip(buffer, keyHex) {
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length < 29) throw new Error("invalid_encrypted_slip");
+  const key = await crypto.subtle.importKey("raw", hexBytes(keyHex), "AES-GCM", false, ["decrypt"]);
+  const iv = bytes.slice(0, 12);
+  const cipher = bytes.slice(12);
+  return crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+}
+
 async function uploadShopSlip(request, env) {
   const url = new URL(request.url);
   const orderId = url.searchParams.get("order_id") || "";
@@ -264,9 +291,15 @@ async function uploadShopSlip(request, env) {
   let originalName = "";
   try { originalName = decodeURIComponent(request.headers.get("X-File-Name") || "").slice(0, 240); } catch {}
 
-  const object = await env.PRODUCT_IMAGES.put(key, body, {
-    httpMetadata: { contentType: type, cacheControl: "private, no-store" },
-    customMetadata: { orderId, kind: "payment-slip", originalName },
+  let encrypted;
+  try {
+    encrypted = await encryptSlip(body, check.data?.slip_key || "");
+  } catch {
+    return json({ error: "slip_encryption_failed" }, 500);
+  }
+  const object = await env.PRODUCT_IMAGES.put(key, encrypted, {
+    httpMetadata: { contentType: "application/octet-stream", cacheControl: "private, no-store" },
+    customMetadata: { orderId, kind: "payment-slip", originalName, encryption: "aes-gcm-v1" },
   });
   if (!object) return json({ error: "upload_conflict" }, 409);
 
@@ -300,7 +333,7 @@ async function readShopSlip(request, env, orderId) {
     Accept: "application/json",
   };
   const query = new URL(`${env.SUPABASE_URL}/rest/v1/shop_orders`);
-  query.searchParams.set("select", "slip_path,slip_content_type,slip_original_name");
+  query.searchParams.set("select", "slip_path,slip_content_type,slip_original_name,slip_key");
   query.searchParams.set("id", `eq.${orderId}`);
   query.searchParams.set("limit", "1");
   const response = await fetch(query, { headers });
@@ -311,12 +344,24 @@ async function readShopSlip(request, env, orderId) {
   const key = path.slice(3);
   const object = await env.PRODUCT_IMAGES.get(key);
   if (!object) return json({ error: "slip_not_found" }, 404);
+  let responseBody = object.body;
+  let responseSize = object.size;
+  if (object.customMetadata?.encryption === "aes-gcm-v1") {
+    try {
+      const packed = await object.arrayBuffer();
+      const plain = await decryptSlip(packed, row?.slip_key || "");
+      responseBody = plain;
+      responseSize = plain.byteLength;
+    } catch {
+      return json({ error: "slip_decryption_failed" }, 500);
+    }
+  }
   const out = new Headers();
-  out.set("Content-Type", row?.slip_content_type || object.httpMetadata?.contentType || "application/octet-stream");
+  out.set("Content-Type", row?.slip_content_type || "application/octet-stream");
   out.set("Cache-Control", "private, no-store");
   out.set("Content-Disposition", `inline; filename="${String(row?.slip_original_name || "slip").replace(/[\\"]/g, "_")}"`);
-  out.set("Content-Length", String(object.size));
-  return new Response(object.body, { headers: out });
+  out.set("Content-Length", String(responseSize));
+  return new Response(responseBody, { headers: out });
 }
 
 function pathInfo(value) {

@@ -11,7 +11,10 @@ const MARKET_API_PREFIX = "/api/marketplace-public";
 const MARKET_OBJECT_PREFIX = "marketplace-public/";
 const MARKET_MAX_BYTES = 50 * 1024 * 1024;
 const MARKET_SOURCE_MAX_BYTES = 90 * 1024 * 1024;
-const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"],["application/zip","zip"]]);\nconst SHOP_SLIP_PREFIX = "order-slips/";\nconst SHOP_SLIP_MAX_BYTES = 12 * 1024 * 1024;\nconst SHOP_SLIP_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["application/pdf","pdf"]]);
+const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"],["application/zip","zip"]]);
+const SHOP_SLIP_PREFIX = "order-slips/";
+const SHOP_SLIP_MAX_BYTES = 12 * 1024 * 1024;
+const SHOP_SLIP_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["application/pdf","pdf"]]);
 
 function json(payload, status = 200) {
   return Response.json(payload, {

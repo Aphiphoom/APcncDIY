@@ -11,7 +11,7 @@ const MARKET_API_PREFIX = "/api/marketplace-public";
 const MARKET_OBJECT_PREFIX = "marketplace-public/";
 const MARKET_MAX_BYTES = 50 * 1024 * 1024;
 const MARKET_SOURCE_MAX_BYTES = 90 * 1024 * 1024;
-const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"],["application/zip","zip"]]);
+const MARKET_ALLOWED_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["model/gltf-binary","glb"],["application/octet-stream","glb"],["application/zip","zip"]]);\nconst SHOP_SLIP_PREFIX = "order-slips/";\nconst SHOP_SLIP_MAX_BYTES = 12 * 1024 * 1024;\nconst SHOP_SLIP_TYPES = new Map([["image/jpeg","jpg"],["image/png","png"],["image/webp","webp"],["application/pdf","pdf"]]);
 
 function json(payload, status = 200) {
   return Response.json(payload, {
@@ -89,6 +89,14 @@ async function uploadMarketplacePublic(request, env) {
   if (auth.error) return auth.error;
 
   const url = new URL(request.url);
+    if (url.pathname === "/api/shop-orders/slip") {
+      if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+      return uploadShopSlip(request, env);
+    }
+    if (url.pathname.startsWith("/api/shop-orders/slip/")) {
+      if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+      return readShopSlip(request, env, url.pathname.slice("/api/shop-orders/slip/".length));
+    }
   const listingId = url.searchParams.get("listing_id") || "";
   const kind = url.searchParams.get("kind") || "";
   if (!validUuid(listingId)) return json({ error: "invalid_listing_id" }, 400);
@@ -221,6 +229,99 @@ async function supabaseRpc(request, env, functionName, payload) {
     return { error: json({ error: "rpc_failed", detail }, response.status) };
   }
   return { data: await response.json().catch(() => ({})) };
+}
+
+async function anonRpc(env, functionName, payload) {
+  const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: {
+      apikey: env.SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload || {}),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return { error: json({ error: "rpc_failed", detail: data }, response.status) };
+  return { data };
+}
+
+async function uploadShopSlip(request, env) {
+  const url = new URL(request.url);
+  const orderId = url.searchParams.get("order_id") || "";
+  const token = url.searchParams.get("token") || "";
+  if (!validUuid(orderId) || token.length < 32) return json({ error: "invalid_order" }, 400);
+
+  const type = (request.headers.get("Content-Type") || "").split(";", 1)[0].toLowerCase();
+  const ext = SHOP_SLIP_TYPES.get(type);
+  if (!ext) return json({ error: "unsupported_file_type" }, 415);
+  const declaredSize = Number(request.headers.get("Content-Length") || 0);
+  if (Number.isFinite(declaredSize) && declaredSize > SHOP_SLIP_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+
+  const check = await anonRpc(env, "shop_guest_order_upload_info", { p_order_id: orderId, p_token: token });
+  if (check.error) return check.error;
+
+  const body = await request.arrayBuffer();
+  if (!body.byteLength) return json({ error: "empty_file" }, 400);
+  if (body.byteLength > SHOP_SLIP_MAX_BYTES) return json({ error: "file_too_large" }, 413);
+
+  const key = `${SHOP_SLIP_PREFIX}${orderId}/${crypto.randomUUID()}.${ext}`;
+  let originalName = "";
+  try { originalName = decodeURIComponent(request.headers.get("X-File-Name") || "").slice(0, 240); } catch {}
+
+  const object = await env.PRODUCT_IMAGES.put(key, body, {
+    httpMetadata: { contentType: type, cacheControl: "private, no-store" },
+    customMetadata: { orderId, kind: "payment-slip", originalName },
+  });
+  if (!object) return json({ error: "upload_conflict" }, 409);
+
+  const saved = await anonRpc(env, "submit_guest_shop_slip", {
+    p_order_id: orderId,
+    p_token: token,
+    p_slip_path: `r2:${key}`,
+    p_original_name: originalName,
+    p_content_type: type,
+  });
+  if (saved.error) {
+    await env.PRODUCT_IMAGES.delete(key);
+    return saved.error;
+  }
+
+  const oldPath = check.data?.previous_slip_path || "";
+  if (typeof oldPath === "string" && oldPath.startsWith("r2:" + SHOP_SLIP_PREFIX)) {
+    await env.PRODUCT_IMAGES.delete(oldPath.slice(3)).catch(() => {});
+  }
+  return json({ ok: true, status: "payment_submitted" }, 201);
+}
+
+async function readShopSlip(request, env, orderId) {
+  if (!validUuid(orderId)) return json({ error: "invalid_order_id" }, 400);
+  const auth = await requireAdmin(request, env);
+  if (auth.error) return auth.error;
+  const token = bearerToken(request);
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    apikey: env.SUPABASE_PUBLISHABLE_KEY,
+    Accept: "application/json",
+  };
+  const query = new URL(`${env.SUPABASE_URL}/rest/v1/shop_orders`);
+  query.searchParams.set("select", "slip_path,slip_content_type,slip_original_name");
+  query.searchParams.set("id", `eq.${orderId}`);
+  query.searchParams.set("limit", "1");
+  const response = await fetch(query, { headers });
+  if (!response.ok) return json({ error: "order_lookup_failed" }, 502);
+  const row = (await response.json())?.[0];
+  const path = String(row?.slip_path || "");
+  if (!path.startsWith("r2:" + SHOP_SLIP_PREFIX)) return json({ error: "slip_not_found" }, 404);
+  const key = path.slice(3);
+  const object = await env.PRODUCT_IMAGES.get(key);
+  if (!object) return json({ error: "slip_not_found" }, 404);
+  const out = new Headers();
+  out.set("Content-Type", row?.slip_content_type || object.httpMetadata?.contentType || "application/octet-stream");
+  out.set("Cache-Control", "private, no-store");
+  out.set("Content-Disposition", `inline; filename="${String(row?.slip_original_name || "slip").replace(/[\\"]/g, "_")}"`);
+  out.set("Content-Length", String(object.size));
+  return new Response(object.body, { headers: out });
 }
 
 function pathInfo(value) {

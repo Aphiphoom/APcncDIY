@@ -272,6 +272,7 @@ async function uploadShopSlip(request, env) {
   const url = new URL(request.url);
   const orderId = url.searchParams.get("order_id") || "";
   const token = url.searchParams.get("token") || "";
+  const transferAt = url.searchParams.get("transfer_at") || "";
   if (!validUuid(orderId) || token.length < 32) return json({ error: "invalid_order" }, 400);
 
   const type = (request.headers.get("Content-Type") || "").split(";", 1)[0].toLowerCase();
@@ -310,6 +311,7 @@ async function uploadShopSlip(request, env) {
     p_original_name: originalName,
     p_content_type: type,
   });
+  if (!saved.error && transferAt) await anonRpc(env, "confirm_guest_shop_payment", { p_order_id: orderId, p_token: token, p_transfer_at: transferAt });
   if (saved.error) {
     await env.PRODUCT_IMAGES.delete(key);
     return saved.error;

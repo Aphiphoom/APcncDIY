@@ -13,7 +13,7 @@
   }
 
   function isAdminToolPage(){
-    return ['admin','admin-products','manual-editor'].includes(currentPageKey());
+    return ['admin','admin-products','admin-shop','manual-editor'].includes(currentPageKey());
   }
 
   function installStyle(){
@@ -93,6 +93,7 @@
         <span class="apsh-adminbar-label">เครื่องมือแอดมิน</span>
         <a class="apsh-adminlink" href="admin.html">สมาชิก</a>
         <a class="apsh-adminlink" href="admin-products.html">สินค้า</a>
+        <a class="apsh-adminlink" href="admin-shop.html">รายการคำสั่งซื้อ</a>
         <a class="apsh-adminlink" href="manual-editor.html">คู่มือ</a>
         <button id="apshAdminRefresh" class="apsh-adminlink" type="button">รีเฟรช</button>
       </div>`:'';
@@ -196,7 +197,7 @@
     async function loadNotifications(){
       if(!currentUser||!notifyWrap||!notifyPanel||!notifyCount)return;
       const {data,error}=await client.from('market_notifications')
-        .select('id,kind,title,body,model_id,read_at,created_at')
+        .select('id,kind,title,body,model_id,purchase_id,read_at,created_at')
          .or(`user_id.eq.${currentUser.id},and(user_id.is.null,kind.eq.shop_payment_submitted)`)
         .order('created_at',{ascending:false})
         .limit(12);
@@ -206,7 +207,7 @@
       notifyWrap.hidden=false;
       notifyCount.hidden=unread===0;
       notifyCount.textContent=unread>99?'99+':String(unread);
-      notifyPanel.innerHTML=rows.length?rows.map(n=>`<button class="apsh-notify-item" data-notification-id="${esc(n.id)}" data-model-id="${esc(n.model_id||'')}"><strong>${esc(n.title||'แจ้งเตือน')}</strong><small>${esc(n.body||'')}</small></button>`).join(''):'<div class="apsh-notify-empty">ยังไม่มีการแจ้งเตือน</div>';
+      notifyPanel.innerHTML=rows.length?rows.map(n=>`<button class="apsh-notify-item" data-notification-id="${esc(n.id)}" data-model-id="${esc(n.model_id||'')}" data-purchase-id="${esc(n.purchase_id||'')}" data-kind="${esc(n.kind||'')}"><strong>${esc(n.title||'แจ้งเตือน')}</strong><small>${esc(n.body||'')}</small></button>`).join(''):'<div class="apsh-notify-empty">ยังไม่มีการแจ้งเตือน</div>';
     }
 
     async function markNotificationsRead(){
@@ -226,7 +227,8 @@
     notifyPanel?.addEventListener('click',event=>{
       const item=event.target.closest('[data-notification-id]');
       if(!item)return;
-      const modelId=item.dataset.modelId;
+      const modelId=item.dataset.modelId,purchaseId=item.dataset.purchaseId,kind=item.dataset.kind;
+      if(kind&&kind.startsWith('shop_')){location.href='admin-shop.html'+(purchaseId?'?order='+encodeURIComponent(purchaseId):'');return}
       if(modelId)location.href='marketplace-item.html?id='+encodeURIComponent(modelId);
     });
     document.addEventListener('click',event=>{

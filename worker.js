@@ -89,14 +89,6 @@ async function uploadMarketplacePublic(request, env) {
   if (auth.error) return auth.error;
 
   const url = new URL(request.url);
-    if (url.pathname === "/api/shop-orders/slip") {
-      if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-      return uploadShopSlip(request, env);
-    }
-    if (url.pathname.startsWith("/api/shop-orders/slip/")) {
-      if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
-      return readShopSlip(request, env, url.pathname.slice("/api/shop-orders/slip/".length));
-    }
   const listingId = url.searchParams.get("listing_id") || "";
   const kind = url.searchParams.get("kind") || "";
   if (!validUuid(listingId)) return json({ error: "invalid_listing_id" }, 400);
@@ -453,6 +445,14 @@ async function deleteProductImage(request, env, key) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/shop-orders/slip") {
+      if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+      return uploadShopSlip(request, env);
+    }
+    if (url.pathname.startsWith("/api/shop-orders/slip/")) {
+      if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);
+      return readShopSlip(request, env, url.pathname.slice("/api/shop-orders/slip/".length));
+    }
     if (url.pathname === `${MARKET_API_PREFIX}/upload`) {
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
       return uploadMarketplacePublic(request, env);

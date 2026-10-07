@@ -19,7 +19,7 @@
     .btn:disabled{opacity:.55}.back{display:inline-block;margin-top:12px;color:var(--cyan);text-decoration:none;font-size:13px}
     .plan{padding:16px;background:#101923;border:1px solid var(--line);border-radius:10px}
     .plan-name{font-size:18px;font-weight:700}.plan-price{margin-top:8px;color:var(--amber);font-size:28px;font-weight:800}
-    .line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #293845}.line:last-child{border-bottom:0}
+    .line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #293845}.line:last-child{border-bottom:0}.bankbox{margin-top:14px;padding:14px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h4{margin:0 0 8px;font-size:14px}.bankrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #293845;font-size:13px}.bankrow:last-child{border-bottom:0}.bankrow span{color:var(--muted)}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{width:100%;margin-top:8px;color:var(--muted)}
     .error{color:var(--red);margin-top:10px;font-size:13px}.note{font-size:12px;line-height:1.65;color:var(--muted);margin-top:12px}
     @media(max-width:760px){.layout{grid-template-columns:1fr}.summary{order:-1}.top h1{font-size:24px}}
   </style>
@@ -35,6 +35,11 @@
       <div class="field"><label>เบอร์โทร *</label><input id="phone" inputmode="tel" autocomplete="tel"></div>
       <div class="field"><label>อีเมลที่ใช้กับ AP Cabinet Pro *</label><input id="email" type="email" autocomplete="email"></div>
       <div class="field"><label>หมายเหตุ</label><textarea id="note" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea></div>
+      <div class="slipbox">
+        <strong>แนบสลิปการโอน *</strong>
+        <div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP หรือ PDF</div>
+        <input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+      </div>
       <button id="submit" class="btn">ยืนยันและสร้างคำสั่งซื้อ</button>
       <div id="msg" class="error"></div>
       <a class="back" href="ap-cabinet-pro.html">← กลับไปเลือกแพ็กเกจ</a>
@@ -58,15 +63,27 @@
   const selected=plans[days];
   if(!selected){location.replace('ap-cabinet-pro.html');return}
   const fmt=v=>Number(v||0).toLocaleString('th-TH',{maximumFractionDigits:2})+' บาท';
-  document.getElementById('plan').innerHTML=
+  const planEl=document.getElementById('plan');
+  planEl.innerHTML=
     '<div class="plan-name">'+selected.name+'</div>'+
     (selected.benefit?'<div class="muted" style="margin-top:5px">'+selected.benefit+'</div>':'')+
     '<div class="line" style="margin-top:10px"><span>ราคา</span><strong>'+fmt(selected.price)+'</strong></div>'+
     '<div class="line"><span>ค่าจัดส่ง</span><strong>0 บาท</strong></div>'+
-    '<div class="plan-price">'+fmt(selected.price)+'</div>';
+    '<div class="plan-price">'+fmt(selected.price)+'</div>'+
+    '<div id="bankbox" class="bankbox"><h4>บัญชีสำหรับโอนเงิน</h4><div class="muted" style="font-size:12px">กำลังโหลดข้อมูลบัญชี...</div></div>';
 
   const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
   const btn=document.getElementById('submit'),msg=document.getElementById('msg');
+  const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  sb.from('shop_settings').select('bank_name,account_name,account_number,promptpay_id').eq('singleton',true).single().then(({data})=>{
+    const box=document.getElementById('bankbox'); if(!box)return;
+    const bank=data?.bank_name||'ออมสิน', account=data?.account_name||'ร้าน AP CNC DIY', number=data?.account_number||'020376680458', promptpay=data?.promptpay_id||'';
+    box.innerHTML='<h4>บัญชีสำหรับโอนเงิน</h4>'+
+      '<div class="bankrow"><span>ธนาคาร</span><strong>'+esc(bank)+'</strong></div>'+
+      '<div class="bankrow"><span>เลขที่บัญชี</span><strong>'+esc(number)+'</strong></div>'+
+      '<div class="bankrow"><span>ชื่อบัญชี</span><strong>'+esc(account)+'</strong></div>'+
+      (promptpay?'<div class="bankrow"><span>PromptPay</span><strong>'+esc(promptpay)+'</strong></div>':'');
+  }).catch(()=>{});
   sb.auth.getSession().then(({data})=>{const e=data?.session?.user?.email;if(e&&!document.getElementById('email').value)document.getElementById('email').value=e}).catch(()=>{});
 
   btn.onclick=async()=>{
@@ -77,12 +94,22 @@
       email:document.getElementById('email').value.trim(),
       note:document.getElementById('note').value.trim()
     };
+    const slip=document.getElementById('slip').files[0];
     if(!customer.name||!customer.phone||!customer.email){msg.textContent='กรุณากรอกชื่อ เบอร์โทร และอีเมลที่ใช้กับ AP Cabinet Pro ให้ครบครับ';return}
+    if(!slip){msg.textContent='กรุณาแนบสลิปการโอนก่อนยืนยันคำสั่งซื้อครับ';return}
     btn.disabled=true;btn.textContent='กำลังสร้างคำสั่งซื้อ...';
     try{
       const {data,error}=await sb.rpc('create_guest_membership_order',{p_customer:customer,p_plan_days:days});
       if(error)throw error;
       localStorage.setItem('apcncdiy_last_order',JSON.stringify(data));
+      btn.textContent='กำลังอัปโหลดสลิป...';
+      const res=await fetch('/api/shop-orders/slip?order_id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token),{
+        method:'POST',
+        headers:{'Content-Type':slip.type,'X-File-Name':encodeURIComponent(slip.name)},
+        body:slip
+      });
+      const uploadData=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(uploadData.error||'slip_upload_failed');
       location.href='order-payment.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token);
     }catch(e){
       console.error(e);

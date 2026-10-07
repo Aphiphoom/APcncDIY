@@ -197,7 +197,7 @@
     async function loadNotifications(){
       if(!currentUser||!notifyWrap||!notifyPanel||!notifyCount)return;
       const {data,error}=await client.from('market_notifications')
-        .select('id,kind,title,body,model_id,purchase_id,read_at,created_at')
+        .select('id,kind,title,body,model_id,purchase_id,shop_order_id,read_at,created_at')
          .or(`user_id.eq.${currentUser.id},and(user_id.is.null,kind.eq.shop_payment_submitted)`)
         .order('created_at',{ascending:false})
         .limit(12);
@@ -207,7 +207,7 @@
       notifyWrap.hidden=false;
       notifyCount.hidden=unread===0;
       notifyCount.textContent=unread>99?'99+':String(unread);
-      notifyPanel.innerHTML=rows.length?rows.map(n=>`<button class="apsh-notify-item" data-notification-id="${esc(n.id)}" data-model-id="${esc(n.model_id||'')}" data-purchase-id="${esc(n.purchase_id||'')}" data-kind="${esc(n.kind||'')}"><strong>${esc(n.title||'แจ้งเตือน')}</strong><small>${esc(n.body||'')}</small></button>`).join(''):'<div class="apsh-notify-empty">ยังไม่มีการแจ้งเตือน</div>';
+      notifyPanel.innerHTML=rows.length?rows.map(n=>`<button class="apsh-notify-item" data-notification-id="${esc(n.id)}" data-model-id="${esc(n.model_id||'')}" data-purchase-id="${esc(n.purchase_id||'')}" data-shop-order-id="${esc(n.shop_order_id||'')}" data-kind="${esc(n.kind||'')}"><strong>${esc(n.title||'แจ้งเตือน')}</strong><small>${esc(n.body||'')}</small></button>`).join(''):'<div class="apsh-notify-empty">ยังไม่มีการแจ้งเตือน</div>';
     }
 
     async function markNotificationsRead(){
@@ -227,8 +227,8 @@
     notifyPanel?.addEventListener('click',event=>{
       const item=event.target.closest('[data-notification-id]');
       if(!item)return;
-      const modelId=item.dataset.modelId,purchaseId=item.dataset.purchaseId,kind=item.dataset.kind;
-      if(kind&&kind.startsWith('shop_')){location.href='admin-shop.html'+(purchaseId?'?order='+encodeURIComponent(purchaseId):'');return}
+      const modelId=item.dataset.modelId,purchaseId=item.dataset.purchaseId,shopOrderId=item.dataset.shopOrderId,kind=item.dataset.kind;
+      if(kind&&kind.startsWith('shop_')){const orderId=shopOrderId||purchaseId;location.href='admin-shop.html'+(orderId?'?order='+encodeURIComponent(orderId):'');return}
       if(modelId)location.href='marketplace-item.html?id='+encodeURIComponent(modelId);
     });
     document.addEventListener('click',event=>{

@@ -34,6 +34,10 @@
         <button id="tabProducts" class="subtab" type="button">จัดการสินค้า</button>
         <button id="tabStock" class="subtab" type="button">สต็อกสินค้า</button>
       </div>
+      <div id="paneStock" class="tabpane">
+        <div class="card"><h2>สต็อกสินค้า</h2><div class="muted" style="font-size:12px;margin-bottom:10px">สินค้าและตัวเลือกแต่ละรายการแสดงเป็นหนึ่งแถว</div>
+        <div style="overflow:auto"><table class="product-table" style="min-width:720px"><thead><tr><th>สินค้า</th><th>ตัวเลือก</th><th>จำกัดสต็อก</th><th>จองแล้ว</th><th>จำนวนจริง</th><th></th></tr></thead><tbody id="stockRows"></tbody></table></div></div>
+      </div>
       <div id="paneCategories" class="tabpane active">
         <div class="grid">
           <div>
@@ -106,14 +110,27 @@
     const variantsOf=id=>variants.filter(v=>v.product_id===id).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)||a.name.localeCompare(b.name,'th'));
 
     function setAdminTab(name){
-      const isCategories=name==='categories';
+      const isCategories=name==='categories',isProducts=name==='products',isStock=name==='stock';
       $('tabCategories').classList.toggle('active',isCategories);
-      $('tabProducts').classList.toggle('active',!isCategories);
+      $('tabProducts').classList.toggle('active',isProducts);
+      $('tabStock').classList.toggle('active',isStock);
       $('paneCategories').classList.toggle('active',isCategories);
-      $('paneProducts').classList.toggle('active',!isCategories);
+      $('paneProducts').classList.toggle('active',isProducts);
+      $('paneStock').classList.toggle('active',isStock);
+      if(isStock)renderStock();
     }
     $('tabCategories').onclick=()=>setAdminTab('categories');
     $('tabProducts').onclick=()=>setAdminTab('products');
+    $('tabStock').onclick=()=>setAdminTab('stock');
+
+    function renderStock(){
+      const rows=[];
+      products.forEach(p=>{const vs=variantsOf(p.id);if(vs.length)vs.forEach((v,i)=>rows.push(`<tr><td><strong>${i?'' : esc(p.name)}</strong></td><td>${esc(v.name)}</td><td>${i?'':`<label><input type="checkbox" data-stock-track="${p.id}" ${p.track_inventory?'checked':''}> ใช้งาน</label>`}</td><td>${Number(v.stock_reserved||0).toLocaleString('th-TH')}</td><td><input data-stock-v="${v.id}" type="number" min="0" value="${v.stock_qty||0}" style="width:90px"></td><td><button class="btn" data-stock-save-v="${v.id}">บันทึก</button></td></tr>`));else rows.push(`<tr><td><strong>${esc(p.name)}</strong></td><td class="muted">—</td><td><label><input type="checkbox" data-stock-track="${p.id}" ${p.track_inventory?'checked':''}> ใช้งาน</label></td><td>${Number(p.stock_reserved||0).toLocaleString('th-TH')}</td><td><input data-stock-p="${p.id}" type="number" min="0" value="${p.stock_qty||0}" style="width:90px"></td><td><button class="btn" data-stock-save-p="${p.id}">บันทึก</button></td></tr>`)});
+      $('stockRows').innerHTML=rows.join('')||'<tr><td colspan="6" class="muted">ยังไม่มีสินค้า</td></tr>';
+      document.querySelectorAll('[data-stock-track]').forEach(x=>x.onchange=async()=>{const {error}=await sb.from('site_products').update({track_inventory:x.checked,updated_at:new Date().toISOString()}).eq('id',x.dataset.stockTrack);if(error)return status(error.message,'err');const p=products.find(y=>y.id===x.dataset.stockTrack);if(p)p.track_inventory=x.checked;status('อัปเดตการจำกัดสต็อกแล้ว')});
+      document.querySelectorAll('[data-stock-save-p]').forEach(b=>b.onclick=async()=>{const input=document.querySelector('[data-stock-p="'+b.dataset.stockSaveP+'"]'),n=Math.max(0,Number(input.value)||0),{error}=await sb.from('site_products').update({stock_qty:n,updated_at:new Date().toISOString()}).eq('id',b.dataset.stockSaveP);if(error)return status(error.message,'err');const p=products.find(x=>x.id===b.dataset.stockSaveP);if(p)p.stock_qty=n;status('บันทึกสต็อกแล้ว')});
+      document.querySelectorAll('[data-stock-save-v]').forEach(b=>b.onclick=async()=>{const input=document.querySelector('[data-stock-v="'+b.dataset.stockSaveV+'"]'),n=Math.max(0,Number(input.value)||0),{error}=await sb.from('site_product_variants').update({stock_qty:n,updated_at:new Date().toISOString()}).eq('id',b.dataset.stockSaveV);if(error)return status(error.message,'err');const v=variants.find(x=>x.id===b.dataset.stockSaveV);if(v)v.stock_qty=n;status('บันทึกสต็อกแล้ว')});
+    }
 
     function parseSpecs(){const out={};$('pSpecs').value.split(/\n+/).map(x=>x.trim()).filter(Boolean).forEach(line=>{const i=line.indexOf(':');if(i>0)out[line.slice(0,i).trim()]=line.slice(i+1).trim();else out[line]=''});return out}
     function specsText(obj){return Object.entries(obj||{}).map(([k,v])=>`${k}: ${v}`).join('\n')}

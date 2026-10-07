@@ -17,7 +17,7 @@
     .brand-logo{width:42px;height:42px;border-radius:9px;background:#fff;object-fit:contain;box-shadow:0 0 10px #fff3;flex:0 0 auto}
     .muted{color:var(--muted)}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 14px 34px #0006}
-    .hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;line-height:1.7}.hero-lead{font-size:18px;color:var(--ink);max-width:850px}.hero-note{margin-top:10px!important;font-size:13px}.info-section{margin-top:18px}.info-section h2{margin:0 0 8px;font-size:24px}.info-section>p{margin:0 0 16px;line-height:1.75}.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cap{background:#121a22;border:1px solid var(--line);border-radius:10px;padding:18px}.cap h3{margin:0 0 7px;color:var(--cyan);font-size:17px}.cap p{margin:0;color:var(--muted);line-height:1.65;font-size:13px}.workflow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.step{padding:16px;background:#10171f;border:1px solid var(--line);border-radius:9px}.step-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#171006;font-weight:800;font-size:12px;margin-bottom:9px}.step strong{display:block;margin-bottom:5px}.step span{display:block;color:var(--muted);font-size:12px;line-height:1.55}.audience{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#10171f;color:#cbd6df;font-size:12px}
+    .hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;line-height:1.7}.hero-lead{font-size:18px;color:var(--ink);max-width:850px}.hero-note{margin-top:10px!important;font-size:13px}.info-section{margin-top:18px}.info-section h2{margin:0 0 8px;font-size:24px}.info-section>p{margin:0 0 16px;line-height:1.75}.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cap{background:#121a22;border:1px solid var(--line);border-radius:10px;padding:18px}.cap h3{margin:0 0 7px;color:var(--cyan);font-size:17px}.cap p{margin:0;color:var(--muted);line-height:1.65;font-size:13px}.workflow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.step{overflow:hidden;background:#10171f;border:1px solid var(--line);border-radius:10px}.step-media{position:relative;aspect-ratio:16/9;background:#080c11;border-bottom:1px solid var(--line)}.step-media video{display:block;width:100%;height:100%;object-fit:cover}.step-copy{padding:15px 16px 17px}.step-heading{display:flex;align-items:center;gap:10px;margin-bottom:7px}.step-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#171006;font-weight:800;font-size:12px;flex:0 0 auto}.step strong{display:block}.step span{display:block;color:var(--muted);font-size:12px;line-height:1.55}.audience{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#10171f;color:#cbd6df;font-size:12px}
     .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
     .feature{display:flex;flex-direction:column;min-height:220px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s,background .15s}
     .feature:hover{border-color:var(--cyan);transform:translateY(-1px);background:#18232e}
@@ -89,10 +89,42 @@
         <h2>Workflow จากแบบไปถึงเครื่อง CNC</h2>
         <p class="muted">ทำงานต่อเนื่องใน SketchUp ตั้งแต่สร้างแบบจนถึงเตรียมไฟล์สำหรับผลิตจริง</p>
         <div class="workflow">
-          <article class="step"><span class="step-num">1</span><strong>ออกแบบตู้</strong><span>สร้างตู้ ปรับขนาด และจัดวางชิ้นงาน</span></article>
-          <article class="step"><span class="step-num">2</span><strong>กำหนดงานผลิต</strong><span>วัสดุ ขอบปิด ฟิตติ้ง งานเจาะ และ machining</span></article>
-          <article class="step"><span class="step-num">3</span><strong>Nesting</strong><span>จัดชิ้นงานลงแผ่น ตรวจสอบ และปรับตำแหน่ง</span></article>
-          <article class="step"><span class="step-num">4</span><strong>ส่งออก CNC</strong><span>สร้างข้อมูลและ G-code พร้อมนำไปผลิต</span></article>
+          <article class="step">
+            <div class="step-media">
+              <video autoplay muted loop playsinline preload="metadata" poster="assets/ap-cabinet-pro-workflow/01-cabinet-design-poster.jpg" aria-label="สาธิตการออกแบบตู้ด้วย AP Cabinet Pro">
+                <source src="assets/ap-cabinet-pro-workflow/01-cabinet-design.webm" type="video/webm">
+                <source src="assets/ap-cabinet-pro-workflow/01-cabinet-design.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="step-copy"><div class="step-heading"><span class="step-num">1</span><strong>ออกแบบตู้</strong></div><span>สร้างตู้ ปรับขนาด และจัดวางชิ้นงาน</span></div>
+          </article>
+          <article class="step">
+            <div class="step-media">
+              <video autoplay muted loop playsinline preload="metadata" poster="assets/ap-cabinet-pro-workflow/02-production-details-poster.jpg" aria-label="สาธิตการกำหนดวัสดุ ขอบ ฟิตติ้ง และงานเจาะ">
+                <source src="assets/ap-cabinet-pro-workflow/02-production-details.webm" type="video/webm">
+                <source src="assets/ap-cabinet-pro-workflow/02-production-details.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="step-copy"><div class="step-heading"><span class="step-num">2</span><strong>กำหนดงานผลิต</strong></div><span>วัสดุ ขอบปิด ฟิตติ้ง งานเจาะ และ machining</span></div>
+          </article>
+          <article class="step">
+            <div class="step-media">
+              <video autoplay muted loop playsinline preload="metadata" poster="assets/ap-cabinet-pro-workflow/03-nesting-poster.jpg" aria-label="สาธิตการจัดชิ้นงานลงแผ่นด้วย Nesting">
+                <source src="assets/ap-cabinet-pro-workflow/03-nesting.webm" type="video/webm">
+                <source src="assets/ap-cabinet-pro-workflow/03-nesting.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="step-copy"><div class="step-heading"><span class="step-num">3</span><strong>Nesting</strong></div><span>จัดชิ้นงานลงแผ่น ตรวจสอบ และปรับตำแหน่ง</span></div>
+          </article>
+          <article class="step">
+            <div class="step-media">
+              <video autoplay muted loop playsinline preload="metadata" poster="assets/ap-cabinet-pro-workflow/04-cnc-gcode-poster.jpg" aria-label="สาธิตการสร้าง Toolpath และ G-code สำหรับ CNC">
+                <source src="assets/ap-cabinet-pro-workflow/04-cnc-gcode.webm" type="video/webm">
+                <source src="assets/ap-cabinet-pro-workflow/04-cnc-gcode.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="step-copy"><div class="step-heading"><span class="step-num">4</span><strong>ส่งออก CNC</strong></div><span>สร้างข้อมูลและ G-code พร้อมนำไปผลิต</span></div>
+          </article>
         </div>
         <div class="audience">
           <span class="chip">SketchUp</span><span class="chip">Cabinet Design</span><span class="chip">Nesting</span><span class="chip">CNC / G-code</span>
@@ -260,6 +292,21 @@
           }
         });
       });
+    })();
+
+    (() => {
+      const videos = Array.from(document.querySelectorAll('.workflow video'));
+      if (!videos.length || !('IntersectionObserver' in window)) return;
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.play().catch(() => {});
+          } else {
+            entry.target.pause();
+          }
+        });
+      }, { threshold: 0.2 });
+      videos.forEach((video) => observer.observe(video));
     })();
   </script>
 </body>

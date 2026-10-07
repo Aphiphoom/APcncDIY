@@ -1,10 +1,10 @@
 {
   "product": "AP Cabinet Pro",
-  "latest_version": "2.1.233",
-  "file_name": "AP_Cabinet_Pro_V2.1.233.rbz",
-  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.1.233.rbz",
+  "latest_version": "2.1.236",
+  "file_name": "AP_Cabinet_Pro_V2.1.236.rbz",
+  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.1.236.rbz",
   "release_url": "https://github.com/Aphiphoom/APcncDIY/releases/tag/AP_Cabinet_Pro",
   "line_group_url": "https://line.me/ti/g/4v9_7RW5kG",
-  "notes": "AP Cabinet Pro V2.1.233 — Move Panel และ Move Product/Group รวมการย้ายและการ refresh/regenerate ที่เกี่ยวข้องให้ Undo ย้อนกลับได้ในครั้งเดียว",
-  "published_at": "2026-10-04"
+  "notes": "AP Cabinet Pro V2.1.236 — แก้ไขการซิงก์จุด Origin ระหว่าง Settings > Nesting กับ CNC preset ให้ Nesting, Manual coordinates, DXF และ G-code ใช้จุด Origin เดียวกัน พร้อมบันทึกค่าอัตโนมัติเมื่อเปลี่ยนมุม",
+  "published_at": "2026-10-07"
 }

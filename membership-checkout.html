@@ -110,7 +110,18 @@
       });
       const uploadData=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(uploadData.error||'slip_upload_failed');
-      location.href='order-payment.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token);
+      localStorage.setItem('apcncdiy_membership_last_order',JSON.stringify({
+        order_id:data.order_id,
+        order_no:data.order_no,
+        token:data.token,
+        total:data.total,
+        plan_days:days,
+        plan_name:selected.name,
+        email:customer.email,
+        name:customer.name,
+        status:'payment_submitted'
+      }));
+      location.href='membership-order-success.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token);
     }catch(e){
       console.error(e);
       const t=String(e.message||e);

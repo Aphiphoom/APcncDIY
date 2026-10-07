@@ -18,7 +18,7 @@
     .muted{color:var(--muted)}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 14px 34px #0006}
     .hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;line-height:1.7}
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
     .feature{display:flex;flex-direction:column;min-height:220px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s,background .15s}
     .feature:hover{border-color:var(--cyan);transform:translateY(-1px);background:#18232e}
     .feature h2{margin:0 0 8px;color:var(--cyan);font-size:21px}.feature p{margin:0;color:var(--muted);line-height:1.65}
@@ -26,8 +26,50 @@
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font-weight:700;text-decoration:none;cursor:pointer;margin-top:18px}
     .btn-accent{background:var(--amber);border-color:var(--amber);color:#1a1206}
     .version{margin-top:8px;color:var(--muted);font-size:11px}
-    @media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature{min-height:0}}
-    @media(max-width:600px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
+    .membership-inline{margin-top:18px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:28px}
+    .membership-brand{text-align:center;margin-bottom:22px}
+    .membership-logo{width:52px;height:52px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;padding:6px;border-radius:8px;background:#fff;box-shadow:0 0 6px rgba(246,166,35,.25)}
+    .membership-logo img{display:block;width:100%;height:100%;object-fit:contain}
+    .membership-brand h2{margin:0 0 6px;font-size:22px;color:var(--ink)}
+    .membership-sub{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+    .plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+    .plans-layout{display:grid;grid-template-columns:minmax(190px,.85fr) minmax(0,1.35fr);gap:14px;align-items:start}
+    .plans-layout:not(.has-selection){display:block}
+    .plans-layout:not(.has-selection) .plans{margin-bottom:22px}
+    .plan-details{display:none;padding:19px;background:var(--bg);border:1px solid var(--line);border-radius:9px}
+    .plans-layout.has-selection .plan-details{display:block}
+    .plan-details h3{margin:0 0 5px;color:var(--amber);font-size:16px}
+    .detail-lead{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.6}
+    .detail-price{display:flex;align-items:baseline;gap:7px;margin-bottom:14px}
+    .detail-price strong{color:var(--amber);font-size:28px}
+    .detail-price span{color:var(--muted);font-size:12px}
+    .detail-benefit{color:var(--green);font-size:12px}
+    .payment-box{padding:13px;background:#10161d;border:1px solid var(--line);border-radius:7px}
+    .payment-box h4{margin:0 0 9px;font-size:13px}
+    .payment-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12px}
+    .payment-row:last-child{border-bottom:0;padding-bottom:0}
+    .payment-row span:first-child{color:var(--muted)}
+    .payment-row strong{text-align:right;color:var(--ink)}
+    .detail-note{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+    .detail-reset{margin-top:14px;border:0;padding:0;color:var(--cyan);background:transparent;cursor:pointer;font:inherit;font-size:11px}
+    .plan{position:relative;min-height:150px;display:flex;flex-direction:column;justify-content:center;padding:20px 16px;text-align:center;background:#1b2530;border:1px solid var(--line);border-radius:9px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+    .plan:hover{border-color:var(--amber);transform:translateY(-2px)}
+    .plan.selected{border-color:var(--amber);background:#202b37;box-shadow:0 0 0 1px rgba(246,166,35,.18)}
+    .plans-layout.has-selection .plans{display:flex;flex-direction:column;margin:0}
+    .plans-layout.has-selection .plan{display:none}
+    .plans-layout.has-selection .plan.selected{display:flex;min-height:218px}
+    .plan.featured{border-color:var(--amber);box-shadow:0 0 0 1px rgba(246,166,35,.18)}
+    .plan-badge{position:absolute;top:9px;right:9px;padding:3px 7px;border-radius:4px;background:var(--amber);color:#1a1206;font-size:9px;font-weight:800}
+    .plan-days{color:var(--muted);font-size:12px;font-weight:600}
+    .plan-price{margin-top:9px;color:var(--amber);font-size:25px;font-weight:800}
+    .plan-unit{margin-top:3px;color:var(--muted);font-size:10px}
+    .plan-benefit{margin-top:10px;color:var(--green);font-size:11px;font-weight:700;line-height:1.45}
+    .contact-box{padding:18px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px}
+    .contact-box h3{margin:0 0 6px;font-size:14px}
+    .contact-box p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.7}
+    .contact-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+    .contact-actions .btn{justify-content:center;min-width:180px;text-decoration:none;margin-top:0}
+    @media(max-width:800px){.grid{grid-template-columns:1fr}.feature{min-height:0}.hero h1{font-size:28px}.plans{grid-template-columns:1fr}.plans-layout{grid-template-columns:1fr}.plans-layout.has-selection .plan.selected{min-height:150px}.membership-inline{padding:22px 16px}}
   </style>
 </head>
 <body>
@@ -53,13 +95,6 @@
           <a id="downloadButton" class="btn btn-accent" href="#" aria-disabled="true">ดาวน์โหลด AP Cabinet Pro</a>
         </section>
 
-        <a class="card feature" href="membership.html">
-          <h2>แพ็กเกจสมาชิก</h2>
-          <p>ดูแพ็กเกจ AP Cabinet Pro สำหรับสมัครสมาชิกหรือต่ออายุ พร้อมรายละเอียดราคาและช่องทางการชำระเงิน</p>
-          <div class="spacer"></div>
-          <span class="btn btn-accent">ดูแพ็กเกจสมาชิก</span>
-        </a>
-
         <a class="card feature" href="manual.html">
           <h2>คู่มือ</h2>
           <p>เปิดคู่มือการติดตั้ง การใช้งาน และรายละเอียดฟังก์ชันของ AP Cabinet Pro</p>
@@ -74,6 +109,42 @@
           <span class="btn btn-accent">เข้าสู่ Marketplace</span>
         </a>
       </div>
+
+      <section class="membership-inline" aria-labelledby="membershipTitle">
+        <header class="membership-brand">
+          <span class="membership-logo"><img src="assets/ap-cnc-diy-logo.jpg" alt="AP CNC DIY"></span>
+          <h2 id="membershipTitle">แพ็กเกจสมาชิก</h2>
+          <p class="membership-sub">เลือกแพ็กเกจที่เหมาะกับการใช้งาน AP Cabinet Pro</p>
+        </header>
+
+        <div class="plans" aria-label="รายการแพ็กเกจสมาชิก">
+          <article class="plan">
+            <div class="plan-days">30 วัน</div>
+            <div class="plan-price">950</div>
+            <div class="plan-unit">บาท</div>
+          </article>
+          <article class="plan">
+            <div class="plan-days">90 วัน</div>
+            <div class="plan-price">2,500</div>
+            <div class="plan-unit">บาท</div>
+          </article>
+          <article class="plan featured">
+            <span class="plan-badge">คุ้มที่สุด</span>
+            <div class="plan-days">365 วัน</div>
+            <div class="plan-price">9,500</div>
+            <div class="plan-unit">บาท</div>
+            <div class="plan-benefit">สอนใช้งานและตั้งค่าออนไลน์ฟรี 1 วัน</div>
+          </article>
+        </div>
+
+        <div class="contact-box">
+          <h3>ติดต่อแอดมินเพื่อสมัครหรือต่ออายุ</h3>
+          <p>แจ้งอีเมลที่ใช้สมัครและแพ็กเกจที่ต้องการผ่านเพจ AP CNC DIY</p>
+          <div class="contact-actions">
+            <a class="btn btn-accent" href="https://www.facebook.com/APCNCDIY/" target="_blank" rel="noopener noreferrer">ติดต่อแอดมินทาง Facebook</a>
+          </div>
+        </div>
+      </section>
     </section>
   </div>
 
@@ -110,6 +181,73 @@
           button.href = releaseFallback;
           button.removeAttribute('aria-disabled');
         });
+    })();
+
+    (() => {
+      const plans = document.querySelector('.membership-inline .plans');
+      if (!plans) return;
+      const layout = document.createElement('div');
+      layout.className = 'plans-layout';
+      plans.parentNode.insertBefore(layout, plans);
+      layout.appendChild(plans);
+
+      const details = document.createElement('section');
+      details.className = 'plan-details';
+      details.setAttribute('aria-live', 'polite');
+      layout.appendChild(details);
+      const originalOrder = Array.from(plans.querySelectorAll('.plan'));
+
+      const showDetails = (plan) => {
+        const days = plan.querySelector('.plan-days')?.textContent.trim() || '';
+        const price = plan.querySelector('.plan-price')?.textContent.trim() || '';
+        const benefit = plan.querySelector('.plan-benefit')?.textContent.trim() || '';
+        details.innerHTML = `<h3>แพ็กเกจ ${days}</h3>
+          <p class="detail-lead">รายละเอียดราคาสำหรับการใช้งาน AP Cabinet Pro</p>
+          <div class="detail-price"><strong>${price}</strong><span>บาท / ${days}</span></div>
+          ${benefit ? `<p class="detail-benefit">✓ ${benefit}</p>` : ''}
+          <div class="payment-box">
+            <h4>ช่องทางการโอนเงิน</h4>
+            <div class="payment-row"><span>ธนาคาร</span><strong>ออมสิน</strong></div>
+            <div class="payment-row"><span>เลขที่บัญชี</span><strong>020376680458</strong></div>
+            <div class="payment-row"><span>ชื่อบัญชี</span><strong>ร้าน AP CNC DIY</strong></div>
+          </div>
+          <p class="detail-note">หลังโอนเงิน กรุณาแจ้งอีเมลและแนบหลักฐานการโอนให้แอดมินทาง Facebook เพื่อเปิดสิทธิ์การใช้งาน</p>
+          <button type="button" class="detail-reset">← เลือกแพ็กเกจอื่น</button>`;
+        details.querySelector('.detail-reset').addEventListener('click', clearSelection);
+      };
+
+      const selectPlan = (plan) => {
+        layout.classList.add('has-selection');
+        originalOrder.forEach(item => {
+          item.classList.toggle('selected', item === plan);
+          item.setAttribute('aria-pressed', item === plan ? 'true' : 'false');
+        });
+        plans.prepend(plan);
+        showDetails(plan);
+      };
+
+      function clearSelection() {
+        layout.classList.remove('has-selection');
+        originalOrder.forEach(item => {
+          item.classList.remove('selected');
+          item.setAttribute('aria-pressed', 'false');
+          plans.appendChild(item);
+        });
+        details.innerHTML = '';
+      }
+
+      originalOrder.forEach(plan => {
+        plan.setAttribute('role', 'button');
+        plan.setAttribute('tabindex', '0');
+        plan.setAttribute('aria-pressed', 'false');
+        plan.addEventListener('click', () => selectPlan(plan));
+        plan.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectPlan(plan);
+          }
+        });
+      });
     })();
   </script>
 </body>

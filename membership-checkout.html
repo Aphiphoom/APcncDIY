@@ -125,7 +125,7 @@
     }catch(e){
       console.error(e);
       const t=String(e.message||e);
-      msg.textContent=t.includes('invalid_email')?'กรุณาตรวจสอบอีเมลอีกครั้งครับ':'สร้างคำสั่งซื้อไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่ครับ';
+      msg.textContent=t.includes('membership_account_not_found')?'ไม่พบอีเมลนี้ในระบบสมาชิก AP Cabinet Pro กรุณาตรวจสอบอีเมลที่ใช้สมัครครับ':t.includes('invalid_email')?'กรุณาตรวจสอบอีเมลอีกครั้งครับ':'สร้างคำสั่งซื้อไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่ครับ';
     }finally{
       btn.disabled=false;btn.textContent='ยืนยันและสร้างคำสั่งซื้อ';
     }

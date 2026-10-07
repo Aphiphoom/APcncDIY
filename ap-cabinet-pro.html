@@ -17,7 +17,7 @@
     .brand-logo{width:42px;height:42px;border-radius:9px;background:#fff;object-fit:contain;box-shadow:0 0 10px #fff3;flex:0 0 auto}
     .muted{color:var(--muted)}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 14px 34px #0006}
-    .hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;line-height:1.7}
+    .hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0;line-height:1.7}.hero-lead{font-size:18px;color:var(--ink);max-width:850px}.hero-note{margin-top:10px!important;font-size:13px}.info-section{margin-top:18px}.info-section h2{margin:0 0 8px;font-size:24px}.info-section>p{margin:0 0 16px;line-height:1.75}.cap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cap{background:#121a22;border:1px solid var(--line);border-radius:10px;padding:18px}.cap h3{margin:0 0 7px;color:var(--cyan);font-size:17px}.cap p{margin:0;color:var(--muted);line-height:1.65;font-size:13px}.workflow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.step{padding:16px;background:#10171f;border:1px solid var(--line);border-radius:9px}.step-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#171006;font-weight:800;font-size:12px;margin-bottom:9px}.step strong{display:block;margin-bottom:5px}.step span{display:block;color:var(--muted);font-size:12px;line-height:1.55}.audience{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.chip{padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:#10171f;color:#cbd6df;font-size:12px}
     .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
     .feature{display:flex;flex-direction:column;min-height:220px;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s,background .15s}
     .feature:hover{border-color:var(--cyan);transform:translateY(-1px);background:#18232e}
@@ -67,7 +67,7 @@
     .contact-box p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.7}
     .contact-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
     .contact-actions .btn{justify-content:center;min-width:180px;text-decoration:none;margin-top:0}
-    @media(max-width:800px){.grid{grid-template-columns:1fr}.feature{min-height:0}.hero h1{font-size:28px}.plans{grid-template-columns:1fr}.plans-layout{grid-template-columns:1fr}.plans-layout.has-selection .plan.selected{min-height:150px}.membership-inline{padding:22px 16px}}
+    @media(max-width:800px){.grid,.cap-grid,.workflow{grid-template-columns:1fr}.feature{min-height:0}.hero h1{font-size:28px}.hero-lead{font-size:16px}.plans{grid-template-columns:1fr}.plans-layout{grid-template-columns:1fr}.plans-layout.has-selection .plan.selected{min-height:150px}.membership-inline{padding:22px 16px}}
   </style>
 </head>
 <body>
@@ -82,7 +82,34 @@
 
     <section class="card hero">
       <h1>AP Cabinet Pro</h1>
-      <p class="muted">เครื่องมือออกแบบตู้สำหรับงานเฟอร์นิเจอร์ใน SketchUp พร้อมระบบสมาชิก คู่มือ และชุดเครื่องมือที่เชื่อมต่อกับงาน CNC</p>
+      <p class="hero-lead">ปลั๊กอินสำหรับออกแบบตู้และเตรียมงานผลิตเฟอร์นิเจอร์ใน SketchUp ตั้งแต่สร้างตู้ จัดการชิ้นส่วนและฟิตติ้ง ไปจนถึง Nesting และส่งออก G-code สำหรับงาน CNC</p>
+      <p class="muted hero-note">ออกแบบมาเพื่อลดขั้นตอนซ้ำ ๆ ระหว่างงานเขียนแบบกับงานผลิต ให้ข้อมูลของชิ้นงานต่อเนื่องอยู่ในโมเดลเดียว</p>
+
+      <section class="info-section">
+        <h2>AP Cabinet Pro ทำอะไรได้บ้าง</h2>
+        <p class="muted">เครื่องมือหลักถูกออกแบบให้ครอบคลุม workflow ของงานตู้บิลต์อินและงานแผ่น ตั้งแต่การสร้างโมเดลใน SketchUp ไปจนถึงการเตรียมชิ้นงานสำหรับเครื่อง CNC</p>
+        <div class="cap-grid">
+          <article class="cap"><h3>ออกแบบและปรับขนาดตู้</h3><p>สร้างและแก้ไขตู้ใน SketchUp พร้อมเครื่องมือปรับขนาดชิ้นส่วนและโครงตู้ โดยคงความสัมพันธ์ของชิ้นงานที่เกี่ยวข้องไว้ให้มากที่สุด</p></article>
+          <article class="cap"><h3>จัดการแผ่นและขอบปิด</h3><p>รองรับแผ่นตู้ แผ่นอิสระ และข้อมูล Edge banding เพื่อให้ข้อมูลที่ใช้ในแบบสามารถส่งต่อไปยังขั้นตอนผลิตและฉลากชิ้นงานได้</p></article>
+          <article class="cap"><h3>ฟิตติ้งและงานเจาะ</h3><p>กำหนดฟิตติ้งและตำแหน่งงานเจาะจากโมเดล ช่วยลดการคำนวณตำแหน่งซ้ำเมื่อเตรียมชิ้นงานสำหรับการผลิตจริง</p></article>
+          <article class="cap"><h3>Nesting แผ่นงาน</h3><p>จัดวางชิ้นงานลงบนแผ่นวัสดุ รองรับการปรับตำแหน่งแบบ Manual และบันทึกข้อมูล Nesting เพื่อกลับมาแก้ไขงานต่อได้</p></article>
+          <article class="cap"><h3>เตรียมงาน CNC และ G-code</h3><p>เชื่อมข้อมูลชิ้นงาน เครื่องมือ เครื่องจักร และ Post Processing เพื่อสร้างไฟล์สำหรับนำไปใช้งานกับกระบวนการ CNC</p></article>
+          <article class="cap"><h3>ข้อมูลอยู่กับโมเดล</h3><p>รายละเอียดสำคัญของชิ้นงาน เช่น machining, edge, fitting และข้อมูลที่ใช้ในการผลิต ถูกจัดเก็บร่วมกับโมเดลเพื่อลดการกรอกข้อมูลซ้ำ</p></article>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h2>Workflow จากแบบไปถึงเครื่อง CNC</h2>
+        <div class="workflow">
+          <article class="step"><span class="step-num">1</span><strong>ออกแบบ</strong><span>สร้างตู้และจัดวางชิ้นงานใน SketchUp</span></article>
+          <article class="step"><span class="step-num">2</span><strong>กำหนดรายละเอียด</strong><span>ตั้งวัสดุ ขอบปิด ฟิตติ้ง และข้อมูล machining</span></article>
+          <article class="step"><span class="step-num">3</span><strong>Nesting</strong><span>จัดวางชิ้นงานลงบนแผ่นและตรวจสอบก่อนผลิต</span></article>
+          <article class="step"><span class="step-num">4</span><strong>ผลิต</strong><span>ส่งออกข้อมูลและ G-code เพื่อนำไปใช้กับ CNC</span></article>
+        </div>
+        <div class="audience">
+          <span class="chip">ช่างเฟอร์นิเจอร์</span><span class="chip">โรงงานตู้บิลต์อิน</span><span class="chip">ผู้ใช้ SketchUp</span><span class="chip">ผู้ใช้ CNC Router</span>
+        </div>
+      </section>
 
       <div class="grid">
         <section class="card feature">

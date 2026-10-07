@@ -19,7 +19,7 @@
     .btn:disabled{opacity:.55}.back{display:inline-block;margin-top:12px;color:var(--cyan);text-decoration:none;font-size:13px}
     .plan{padding:16px;background:#101923;border:1px solid var(--line);border-radius:10px}
     .plan-name{font-size:18px;font-weight:700}.plan-price{margin-top:8px;color:var(--amber);font-size:28px;font-weight:800}
-    .line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #293845}.line:last-child{border-bottom:0}.bankbox{margin-top:14px;padding:14px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h4{margin:0 0 8px;font-size:14px}.bankrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #293845;font-size:13px}.bankrow:last-child{border-bottom:0}.bankrow span{color:var(--muted)}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{width:100%;margin-top:8px;color:var(--muted)}
+    .line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #293845}.line:last-child{border-bottom:0}.bankbox{margin-top:14px;padding:16px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h4{margin:0 0 10px;font-size:16px}.bankrow{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #293845;font-size:13px}.bankrow:last-child{border-bottom:0}.bankrow span{color:var(--muted)}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{width:100%;margin-top:8px;color:var(--muted)}
     .error{color:var(--red);margin-top:10px;font-size:13px}.note{font-size:12px;line-height:1.65;color:var(--muted);margin-top:12px}
     @media(max-width:760px){.layout{grid-template-columns:1fr}.summary{order:-1}.top h1{font-size:24px}}
   </style>
@@ -70,7 +70,7 @@
     '<div class="line" style="margin-top:10px"><span>ราคา</span><strong>'+fmt(selected.price)+'</strong></div>'+
     '<div class="line"><span>ค่าจัดส่ง</span><strong>0 บาท</strong></div>'+
     '<div class="plan-price">'+fmt(selected.price)+'</div>'+
-    '<div id="bankbox" class="bankbox"><h4>บัญชีสำหรับโอนเงิน</h4><div class="muted" style="font-size:12px">กำลังโหลดข้อมูลบัญชี...</div></div>';
+    '<div id="bankbox" class="bankbox"><h4>ช่องทางการโอนเงิน</h4><div class="muted" style="font-size:12px">กำลังโหลดข้อมูลบัญชี...</div></div>';
 
   const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
   const btn=document.getElementById('submit'),msg=document.getElementById('msg');
@@ -78,7 +78,7 @@
   sb.from('shop_settings').select('bank_name,account_name,account_number,promptpay_id').eq('singleton',true).single().then(({data})=>{
     const box=document.getElementById('bankbox'); if(!box)return;
     const bank=data?.bank_name||'ออมสิน', account=data?.account_name||'ร้าน AP CNC DIY', number=data?.account_number||'020376680458', promptpay=data?.promptpay_id||'';
-    box.innerHTML='<h4>บัญชีสำหรับโอนเงิน</h4>'+
+    box.innerHTML='<h4>ช่องทางการโอนเงิน</h4>'+
       '<div class="bankrow"><span>ธนาคาร</span><strong>'+esc(bank)+'</strong></div>'+
       '<div class="bankrow"><span>เลขที่บัญชี</span><strong>'+esc(number)+'</strong></div>'+
       '<div class="bankrow"><span>ชื่อบัญชี</span><strong>'+esc(account)+'</strong></div>'+

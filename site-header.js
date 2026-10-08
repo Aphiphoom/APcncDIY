@@ -111,7 +111,7 @@
           <a href="products.html">สินค้า</a>
           <a href="ap-cabinet-pro.html">AP Cabinet Pro</a>
           <a href="marketplace.html">Marketplace</a>
-          <a href="index.html#about">เกี่ยวกับเรา</a>
+          <a href="about.html">เกี่ยวกับเรา</a>
         </nav>
         <div class="apsh-actions">
           <span id="apshCredit" class="apsh-credit" hidden>เครดิต 0</span>

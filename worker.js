@@ -268,7 +268,7 @@ async function decryptSlip(buffer, keyHex) {
   return crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
 }
 
-async function uploadShopSlip(request, env) {
+async function uploadShopSlip(request, env, executionContext) {
   const url = new URL(request.url);
   const orderId = url.searchParams.get("order_id") || "";
   const token = url.searchParams.get("token") || "";
@@ -321,6 +321,17 @@ async function uploadShopSlip(request, env) {
   if (typeof oldPath === "string" && oldPath.startsWith("r2:" + SHOP_SLIP_PREFIX)) {
     await env.PRODUCT_IMAGES.delete(oldPath.slice(3)).catch(() => {});
   }
+  // Send only after the slip is saved; do not delay or fail the customer's checkout.
+  // The Edge Function verifies the guest order token and deduplicates by order ID.
+  const notifyTask = fetch(env.SUPABASE_URL + "/functions/v1/telegram-order-notify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: env.SUPABASE_PUBLISHABLE_KEY },
+    body: JSON.stringify({ order_id: orderId, order_token: token }),
+  }).then(async response => {
+    if (!response.ok) console.error("membership_telegram_notify_failed", response.status);
+  }).catch(error => console.error("membership_telegram_notify_error", String(error)));
+  if (executionContext?.waitUntil) executionContext.waitUntil(notifyTask);
+  else await notifyTask;
   return json({ ok: true, status: "payment_submitted" }, 201);
 }
 
@@ -493,11 +504,11 @@ async function deleteProductImage(request, env, key) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, executionContext) {
     const url = new URL(request.url);
     if (url.pathname === "/api/shop-orders/slip") {
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-      return uploadShopSlip(request, env);
+      return uploadShopSlip(request, env, executionContext);
     }
     if (url.pathname.startsWith("/api/shop-orders/slip/")) {
       if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405);

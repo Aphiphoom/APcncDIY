@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AP CNC DIY</title>
   <script>
-    if (location.hash === '#products') {
+    // Supabase may fall back to the configured Site URL after email verification.
+    // Forward password-recovery callbacks to the reset form before loading AuthClient.
+    const query = new URLSearchParams(location.search);
+    const fragment = new URLSearchParams(location.hash.slice(1));
+    const recovery = query.get('auth_recovery') === '1' ||
+      query.get('type') === 'recovery' ||
+      fragment.get('type') === 'recovery' ||
+      (query.has('code') && query.get('auth_recovery') === '1');
+    if (recovery) {
+      const destination = new URL('login.html', location.href);
+      destination.search = '?mode=reset';
+      destination.hash = location.hash;
+      if (query.has('code')) destination.searchParams.set('code', query.get('code'));
+      if (query.has('error')) destination.searchParams.set('error', query.get('error'));
+      if (query.has('error_description')) destination.searchParams.set('error_description', query.get('error_description'));
+      location.replace(destination.href);
+    } else if (location.hash === '#products') {
       location.replace('products.html');
     } else if (location.hash === '#about') {
       location.replace('about.html');

@@ -9,3 +9,7 @@ wrangler.jsonc
 .assetsignore
 worker.js
 *.md
+supabase
+supabase/**
+tools
+tools/**

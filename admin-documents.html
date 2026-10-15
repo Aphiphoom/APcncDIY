@@ -56,9 +56,12 @@
   .card h3::before{content:"";width:6px;height:16px;border-radius:3px;background:var(--brand)}
   .grid{display:grid;gap:10px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
   @media (max-width:520px){.g2,.g3{grid-template-columns:1fr}}
-  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
   .fld label{font-size:11.5px;color:var(--muted);font-weight:600}
-  .fld input,.fld textarea,.fld select{border:1px solid var(--field-border);background:var(--field);border-radius:7px;padding:8px 10px;font-size:13.5px;color:var(--ink);width:100%}
+  .fld input,.fld textarea,.fld select{border:1px solid var(--field-border);background:var(--field);border-radius:7px;padding:8px 10px;font-size:13.5px;color:var(--ink);width:100%;max-width:100%;min-width:0}
+  /* iOS Safari date controls have an intrinsic minimum width; constrain them to the grid cell. */
+  .fld input[type="date"]{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+  .grid > *{min-width:0}
   .fld textarea{resize:vertical;min-height:64px;line-height:1.5}
   .fld input:focus,.fld textarea:focus,.fld select:focus{outline:2px solid rgba(31,95,168,.35);border-color:var(--brand)}
 

@@ -92,6 +92,7 @@
       <div class="apsh-adminbar" aria-label="เครื่องมือแอดมิน">
         <span class="apsh-adminbar-label">เครื่องมือแอดมิน</span>
         <a class="apsh-adminlink" href="admin.html">สมาชิก</a>
+        <a class="apsh-adminlink" href="admin-documents.html">ออกเอกสาร</a>
         <a class="apsh-adminlink" href="admin-products.html">สินค้า</a>
         <a class="apsh-adminlink" href="admin-shop.html">รายการคำสั่งซื้อ</a>
         <a class="apsh-adminlink" href="manual-editor.html">คู่มือ</a>

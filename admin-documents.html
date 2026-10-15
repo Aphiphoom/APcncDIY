@@ -252,12 +252,50 @@
   .num-row input[type=text],.num-row input[type=number]{border:1px solid var(--field-border);border-radius:6px;padding:6px;font-size:12.5px;width:100%}
   .num-prev{font-style:normal;font-weight:700;color:var(--brand-deep);font-size:12px;text-align:right}
 
+  /* mobile layout: keep the document controls usable without horizontal scrolling */
+  @media screen and (max-width:700px){
+    html,body{width:100%;max-width:100%;overflow-x:hidden}
+    body{font-size:14px}
+    .topbar{position:relative;top:auto;width:100%;max-width:100%;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:12px}
+    .topbar .brand{width:100%;min-width:0}
+    .topbar .brand small{font-size:11px}
+    .typewrap{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px}
+    .doctype{width:100%;min-width:0;font-size:16px;padding:10px 12px}
+    .topbar>.spacer{display:none}
+    .actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .actions .btn{width:100%;min-width:0;min-height:42px;justify-content:center;padding:8px 5px;font-size:12.5px;line-height:1.25;text-align:center;white-space:normal}
+    .actions .btn.primary{grid-column:1/-1}
+    .workspace{display:block;width:100%;min-width:0}
+    .form{width:100%;min-width:0;padding:12px 10px 40px;overflow:visible}
+    .card{padding:12px;margin-bottom:10px}
+    .g2,.g3{grid-template-columns:minmax(0,1fr)}
+    .fld input,.fld textarea,.fld select,.search{font-size:16px;min-width:0}
+    .ocr-zone{padding:12px;align-items:flex-start}
+    .ocr-zone .ocr-ic{font-size:22px}
+    .ocr-cta b{font-size:13px}.ocr-cta span{font-size:11px}
+    .ocr-body{flex-direction:column}.ocr-prev{width:100%;max-height:150px}
+    .item{padding:11px 9px}
+    .item .row{grid-template-columns:minmax(54px,.7fr) minmax(54px,.7fr) minmax(88px,1.6fr) 36px;gap:6px}
+    .terms-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px;gap:6px}
+    .terms-row>input:first-child{grid-column:1/-1}
+    .preview-wrap{width:100%;max-width:100%;padding:12px 10px 30px;overflow:hidden;align-items:center}
+    .zoombar{justify-content:space-between}
+    .zoombar select{font-size:14px}
+    .overlay{padding:12px 8px}
+    .modal{max-width:100%;border-radius:11px}
+    .modal-head{padding:12px}.modal-body{padding:12px;max-height:78vh}
+    .hist-row{align-items:flex-start;flex-wrap:wrap}
+    .hist-main{min-width:180px}
+    .hist-actions{width:100%;justify-content:flex-start;padding-left:32px}
+    .num-grid,.vat-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  }
+
   @media print{
     @page{size:A4;margin:0}
     body{background:#fff}
     .topbar,.form,.zoombar{display:none!important}
     .workspace,.preview-wrap{display:block;padding:0}
-    .scaler{transform:none!important}
+    .scaler{transform:none!important;zoom:1!important}
     .sheet{box-shadow:none;margin:0;width:210mm;min-height:297mm;page-break-after:always}
   }
 </style>
@@ -385,7 +423,7 @@
 
   <div class="preview-wrap">
     <div class="zoombar"><span>ตัวอย่างเอกสาร (A4)</span>
-      <select id="zoom"><option value="0.6">60%</option><option value="0.75" selected>75%</option><option value="0.9">90%</option><option value="1">100%</option></select>
+      <select id="zoom"><option value="fit">พอดีหน้าจอ</option><option value="0.6">60%</option><option value="0.75" selected>75%</option><option value="0.9">90%</option><option value="1">100%</option></select>
     </div>
     <div class="scaler" id="scaler"><div class="sheet" id="sheet"></div></div>
   </div>
@@ -862,8 +900,24 @@ $('#form').addEventListener('click',e=>{ const el=e.target;
 $('#addItem').onclick=()=>{ state.items.push({detail:'',qty:1,unit:'',price:0}); renderItemsEditor(); renderPreview(); };
 $('#addTerm').onclick=()=>{ state.payment.terms.push({label:'',amount:0}); renderTermsEditor(); renderPreview(); };
 $('#docType').onchange=e=>{ state.docType=e.target.value; state.doc.number=genNumber(groupOf(state.docType),state.doc.date); toggleConditionalFields(); syncInputs(); renderPreview(); };
-$('#zoom').onchange=e=>{ $('#scaler').style.transform=`scale(${e.target.value})`; };
-$('#scaler').style.transform='scale(0.75)';
+function applyPreviewZoom(){
+  const scaler=$('#scaler'),sheet=$('#sheet'),select=$('#zoom'); if(!scaler||!sheet||!select)return;
+  const raw=select.value;
+  let scale=Number(raw)||.75;
+  if(raw==='fit'){
+    const available=Math.max(280,document.documentElement.clientWidth-20);
+    scale=Math.min(.75,available/(sheet.offsetWidth||794));
+  }
+  if(window.innerWidth<=700||raw==='fit'){
+    scaler.style.transform='none'; scaler.style.zoom=String(scale);
+  }else{
+    scaler.style.zoom='1'; scaler.style.transform=`scale(${scale})`;
+  }
+}
+$('#zoom').onchange=applyPreviewZoom;
+if(window.innerWidth<=700)$('#zoom').value='fit';
+applyPreviewZoom();
+window.addEventListener('resize',()=>{ if($('#zoom').value==='fit')applyPreviewZoom(); });
 
 function newQuotation(silent){
   const seller=structuredClone(state.seller), sign=structuredClone(state.sign), numbering=structuredClone(state.numbering), pay={bank:state.payment.bank,accountNo:state.payment.accountNo,accountName:state.payment.accountName};

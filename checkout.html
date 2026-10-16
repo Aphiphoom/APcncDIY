@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Checkout · AP CNC DIY</title>
-<style>@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');:root{--bg:#0d1218;--panel:#161e27;--soft:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--cyan:#25c8d5;--amber:#f6a623;--red:#ff9a9a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}.shell{width:min(1050px,calc(100% - 28px));margin:auto;padding:26px 0 50px}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px}.field{display:grid;gap:6px;margin-bottom:11px}.field input,.field textarea{width:100%;border:1px solid var(--line);background:#101923;color:var(--ink);border-radius:8px;padding:10px 11px;font:inherit}.field textarea{min-height:110px}.muted{color:var(--muted)}.btn{width:100%;min-height:44px;border:1px solid var(--amber);border-radius:8px;background:var(--amber);color:#171006;font:700 16px Kanit;cursor:pointer}.btn:disabled{opacity:.55}.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #293845}.error{color:var(--red);margin-top:10px}.total{font-size:22px;color:var(--amber);font-weight:700}@media(max-width:760px){.layout{grid-template-columns:1fr}}.bankbox{margin-top:14px;padding:15px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h3{margin:0 0 10px;font-size:17px}.bankrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #293845;font-size:14px}.bankrow:last-child{border-bottom:0}.bankrow>span{color:var(--muted)}.bankrow strong{overflow-wrap:anywhere;text-align:right}.copy-account{border:1px solid #52697d;border-radius:7px;background:#1e2b39;color:var(--ink);font:600 14px Kanit;cursor:pointer;padding:8px 10px;display:inline-flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;max-width:100%}.copy-account small{font-weight:400;color:var(--cyan);white-space:nowrap}.copy-feedback{font-size:12px;color:#45c98a;min-height:18px;margin-top:8px}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{display:block;margin-top:8px;width:100%;color:var(--ink);font:inherit;min-width:0}.pay-note{font-size:12px;line-height:1.6;color:var(--muted)}.layout>*{min-width:0}@media(max-width:760px){.shell{width:calc(100% - 20px);padding-top:16px}.card{padding:14px}.bankrow.bank-account-row{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.copy-account{width:100%}.copy-account small{font-size:11px}.line{min-width:0}.line>div{min-width:0;overflow-wrap:anywhere}}
+<style>@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');:root{--bg:#0d1218;--panel:#161e27;--soft:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--cyan:#25c8d5;--amber:#f6a623;--red:#ff9a9a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}.shell{width:min(1050px,calc(100% - 28px));margin:auto;padding:26px 0 50px}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px}.field{display:grid;gap:6px;margin-bottom:11px}.field input,.field textarea{width:100%;border:1px solid var(--line);background:#101923;color:var(--ink);border-radius:8px;padding:10px 11px;font:inherit}.field textarea{min-height:110px}.muted{color:var(--muted)}.btn{width:100%;min-height:44px;border:1px solid var(--amber);border-radius:8px;background:var(--amber);color:#171006;font:700 16px Kanit;cursor:pointer}.btn:disabled{opacity:.55}.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #293845}.error{color:var(--red);margin-top:10px}.total{font-size:22px;color:var(--amber);font-weight:700}@media(max-width:760px){.layout{grid-template-columns:1fr}}.bankbox{margin-top:14px;padding:15px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h3{margin:0 0 10px;font-size:17px}.bankrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #293845;font-size:14px}.bankrow:last-child{border-bottom:0}.bankrow>span{color:var(--muted)}.bankrow strong{overflow-wrap:anywhere;text-align:right}.copy-account{border:1px solid #52697d;border-radius:7px;background:#1e2b39;color:var(--ink);font:600 14px Kanit;cursor:pointer;padding:8px 10px;display:inline-flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;max-width:100%}.copy-account small{font-weight:400;color:var(--cyan);white-space:nowrap}.copy-feedback{font-size:12px;color:#45c98a;min-height:18px;margin-top:8px}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{display:block;margin-top:8px;width:100%;color:var(--ink);font:inherit;min-width:0}.pay-note{font-size:12px;line-height:1.6;color:var(--muted)}.tax-options{margin:14px 0;padding:15px;border:1px solid var(--line);border-radius:9px;background:#101923}.tax-check{display:flex;align-items:center;gap:9px;cursor:pointer}.tax-check input{width:18px;height:18px;accent-color:var(--amber)}.tax-fields{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.tax-fields[hidden]{display:none}.tax-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tax-field-note{font-size:12px;color:var(--muted);margin:4px 0 9px}@media(max-width:600px){.tax-row{grid-template-columns:1fr}}.layout>*{min-width:0}@media(max-width:760px){.shell{width:calc(100% - 20px);padding-top:16px}.card{padding:14px}.bankrow.bank-account-row{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.copy-account{width:100%}.copy-account small{font-size:11px}.line{min-width:0}.line>div{min-width:0;overflow-wrap:anywhere}}
 [data-checkout-only][hidden]{display:none!important}.checkout-note{font-size:12px;color:var(--muted);margin-top:10px}.back-link{color:var(--cyan);text-decoration:none;display:inline-block;margin-top:12px}.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}@media(max-width:760px){.layout{grid-template-columns:1fr}.order-summary{order:-1}}
 </style></head>
 <body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
@@ -14,7 +14,13 @@
 <div class="field"><label id="emailLabel" for="email">อีเมล</label><input id="email" type="email" autocomplete="email"></div>
 <div class="field" data-checkout-only="shop"><label for="address">ที่อยู่จัดส่ง *</label><textarea id="address" autocomplete="street-address"></textarea></div>
 <div class="field"><label for="note">หมายเหตุ</label><textarea id="note"></textarea></div>
-<div class="slipbox"><strong>แนบสลิปการโอน *</strong><div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP และ PDF ไม่เกิน 10 MB</div><input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></div>
+<div class="tax-options"><label class="tax-check"><input id="taxInvoiceRequested" type="checkbox"><strong>ต้องการใบกำกับภาษีเต็มรูปแบบ</strong></label><div class="tax-field-note">ราคาทุกออเดอร์คิด VAT 7% ไม่ว่าต้องการใบกำกับภาษีเต็มรูปแบบหรือไม่</div>
+<div id="taxFields" class="tax-fields" hidden>
+<div class="field"><label for="taxName">ชื่อบุคคล / ชื่อนิติบุคคลสำหรับออกใบกำกับภาษี *</label><input id="taxName" maxlength="160" autocomplete="organization"></div>
+<div class="tax-row"><div class="field"><label for="taxId">เลขประจำตัวผู้เสียภาษี 13 หลัก *</label><input id="taxId" inputmode="numeric" maxlength="13"></div><div class="field"><label for="taxBranch">สำนักงานใหญ่ / สาขา</label><input id="taxBranch" placeholder="สำนักงานใหญ่ หรือสาขาที่ 00001" maxlength="80"></div></div>
+<div class="field"><label for="taxAddress">ที่อยู่สำหรับออกใบกำกับภาษี *</label><textarea id="taxAddress" maxlength="1500"></textarea></div>
+<div class="field"><label for="taxEmail">อีเมลสำหรับติดต่อเรื่องใบกำกับภาษี (ถ้ามี)</label><input id="taxEmail" type="email" maxlength="254"></div>
+</div></div><div class="slipbox"><strong>แนบสลิปการโอน *</strong><div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP และ PDF ไม่เกิน 10 MB</div><input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></div>
 <button id="submit" class="btn" disabled>ยืนยันและสร้างคำสั่งซื้อ</button><div id="msg" class="error" role="alert"></div>
 <a id="back" class="back-link" href="cart.html">← กลับไปตะกร้า</a>
 </section></div></div>
@@ -32,6 +38,8 @@
   const byId=id=>document.getElementById(id);
   const btn=byId('submit'),msg=byId('msg'),fmt=v=>Number(v||0).toLocaleString('th-TH',{maximumFractionDigits:2})+' บาท';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const taxCheck=byId('taxInvoiceRequested');taxCheck.addEventListener('change',()=>{byId('taxFields').hidden=!taxCheck.checked});
+  const taxSummary=(amount)=>'<div class="line"><span>VAT 7%</span><strong>'+fmt(Math.round(amount*7)/100)+'</strong></div><div class="line"><strong>ยอดชำระรวมภาษี</strong><span class="total">'+fmt(Math.round(amount*107)/100)+'</span></div>';
   if(membership){
     document.title='Checkout สมาชิก · AP Cabinet Pro';
     byId('summaryTitle').textContent='สรุปแพ็กเกจ';
@@ -41,11 +49,11 @@
     byId('back').href='ap-cabinet-pro.html';
     byId('back').textContent='← กลับไปเลือกแพ็กเกจ';
     byId('address').closest('[data-checkout-only]').hidden=true;
-    byId('summary').innerHTML='<div class="line"><span>'+esc(plan.name)+'</span><strong>'+fmt(plan.price)+'</strong></div>'+(plan.benefit?'<div class="checkout-note">'+esc(plan.benefit)+'</div>':'')+'<div class="line"><span>ค่าจัดส่ง</span><strong>0 บาท</strong></div><div class="line"><strong>รวม</strong><span class="total">'+fmt(plan.price)+'</span></div>';
+    byId('summary').innerHTML='<div class="line"><span>'+esc(plan.name)+'</span><strong>'+fmt(plan.price)+'</strong></div>'+(plan.benefit?'<div class="checkout-note">'+esc(plan.benefit)+'</div>':'')+'<div class="line"><span>ค่าจัดส่ง</span><strong>0 บาท</strong></div>'+taxSummary(plan.price);
     sb.auth.getSession().then(({data})=>{const email=data?.session?.user?.email;if(email&&!byId('email').value)byId('email').value=email}).catch(()=>{});
   }else{
     let estimate=0;
-    byId('summary').innerHTML=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return '<div class="line"><div>'+esc(x.product_name)+(x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':'')+' × '+q+'</div><strong>'+fmt(q*p)+'</strong></div>'}).join('')+'<div class="line"><span>ค่าจัดส่ง</span><strong>ฟรี (0 บาท)</strong></div><div class="line"><strong>รวม</strong><span class="total">'+fmt(estimate)+'</span></div><div class="checkout-note">ราคาสินค้าจะถูกตรวจสอบจากฐานข้อมูลเมื่อสร้างคำสั่งซื้อ</div>';
+    byId('summary').innerHTML=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return '<div class="line"><div>'+esc(x.product_name)+(x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':'')+' × '+q+'</div><strong>'+fmt(q*p)+'</strong></div>'}).join('')+'<div class="line"><span>ค่าจัดส่ง</span><strong>ฟรี (0 บาท)</strong></div>'+taxSummary(estimate)+'<div class="checkout-note">ราคาสินค้าจะถูกตรวจสอบจากฐานข้อมูลเมื่อสร้างคำสั่งซื้อ</div>';
   }
   APCheckout.bank(sb,byId('bankbox'),btn).then(ok=>{if(ok)btn.disabled=false});
   btn.onclick=async()=>{
@@ -57,6 +65,17 @@
     }else{
       customer.address=byId('address').value.trim();
       if(!customer.address){msg.textContent='กรุณากรอกที่อยู่จัดส่ง';return}
+    }
+    customer.tax_invoice_requested=taxCheck.checked;
+    if(taxCheck.checked){
+      customer.tax_invoice_name=byId('taxName').value.trim();
+      customer.tax_invoice_tax_id=byId('taxId').value.trim();
+      customer.tax_invoice_branch=byId('taxBranch').value.trim();
+      customer.tax_invoice_address=byId('taxAddress').value.trim();
+      customer.tax_invoice_email=byId('taxEmail').value.trim();
+      if(customer.tax_invoice_name.length<2||!/^[0-9]{13}$/.test(customer.tax_invoice_tax_id)||customer.tax_invoice_address.length<5){
+        msg.textContent='กรุณากรอกชื่อผู้รับใบกำกับภาษี เลขประจำตัวผู้เสียภาษี 13 หลัก และที่อยู่ให้ครบถ้วน';return;
+      }
     }
     await APCheckout.submit({
       button:btn,message:msg,slip:byId('slip').files[0],

@@ -992,7 +992,7 @@ function vatRows(month){ return history.filter(h=>{
 }).sort((a,b)=>(a.data.doc.date||'').localeCompare(b.data.doc.date||'')||(a.number||'').localeCompare(b.number||'','th',{numeric:true})).map((h,i)=>{
   const d=h.data,t=calc(d),buyer=d.buyer||{},text=((buyer.name||'')+' '+(buyer.address||''));
   const bm=text.match(/สาขา(?:ที่)?\s*([0-9]+)/i), branch=bm?bm[1]:'';
-  return {seq:i+1,date:d.doc.date,number:h.number,buyer:buyer.name||h.buyerName||'',taxId:buyer.taxId||'',headOffice:branch?'':'✓',branch,base:round2(t.base),vat:round2(t.vat),grand:round2(t.grand)};
+  return {seq:i+1,date:d.doc.date,number:h.number,buyer:DOC_TYPES[h.docType]?.compact?'':buyer.name||h.buyerName||'',taxId:DOC_TYPES[h.docType]?.compact?'':buyer.taxId||'',headOffice:DOC_TYPES[h.docType]?.compact?'':branch?'':'✓',branch:DOC_TYPES[h.docType]?.compact?'':branch,base:round2(t.base),vat:round2(t.vat),grand:round2(t.grand)};
 }); }
 function monthThai(month){ const [y,m]=String(month||'').split('-').map(Number); return y&&m?`${TH_MONTHS[m-1]} ${y+543}`:''; }
 function renderVatReport(){ const month=$('#vatMonth').value||todayISO().slice(0,7), rows=vatRows(month), totalBase=round2(rows.reduce((s,r)=>s+r.base,0)), totalVat=round2(rows.reduce((s,r)=>s+r.vat,0)), totalGrand=round2(rows.reduce((s,r)=>s+r.grand,0));
@@ -1068,7 +1068,7 @@ $('#btnHistory').onclick=async()=>{ await syncShared(false); renderHistory($('#h
 $('#btnVatReport').onclick=async()=>{ await syncShared(false); $('#vatMonth').value=latestVatMonth(); renderVatReport(); show('#vatOverlay'); };
 $('#vatMonth').onchange=renderVatReport;
 $('#btnVatExcel').onclick=async()=>{ await syncShared(false); renderVatReport(); downloadVatExcel(); };
-$('#btnSaveHist').onclick=async()=>{ await syncShared(false); saveToHistory(); commitNumber(); await syncShared(true); };
+$('#btnSaveHist').onclick=async()=>{ await syncShared(false); if(saveToHistory()===false)return; commitNumber(); await syncShared(true); };
 $('#histSearch').oninput=e=>renderHistory(e.target.value);
 $('#btnSettings').onclick=async()=>{ await syncShared(false); renderSettings(); show('#setOverlay'); };
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModals);
@@ -1253,7 +1253,7 @@ async function writeExcel(){ try{ if(excelHandle&&await ensurePermission(excelHa
 function downloadExcel(){ try{ const blob=new Blob([excelBytes()],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='APCNC-database.xlsx'; a.click(); URL.revokeObjectURL(a.href); }catch(e){ toast('สร้างไฟล์ Excel ไม่สำเร็จ'); } }
 async function autoExcel(){ try{ if(excelHandle){ await writeExcel(); return; } if(window.showSaveFilePicker){ await chooseExcelLocation(); } }catch(e){} }
 
-$('#btnPrint').onclick=async()=>{ await syncShared(false); rememberCustomer(); rememberProducts(); saveToHistory(true); commitNumber(); fillItemsTable(); const synced=await autoBackup(); if(!synced&&!confirm('ยังซิงก์ไฟล์ข้อมูลกลางไม่สำเร็จ ต้องการพิมพ์ต่อหรือไม่?'))return; await autoExcel(); fillItemsTable(); window.print(); };
+$('#btnPrint').onclick=async()=>{ await syncShared(false); rememberCustomer(); rememberProducts(); if(saveToHistory(true)===false)return; commitNumber(); fillItemsTable(); const synced=await autoBackup(); if(!synced&&!confirm('ยังซิงก์ไฟล์ข้อมูลกลางไม่สำเร็จ ต้องการพิมพ์ต่อหรือไม่?'))return; await autoExcel(); fillItemsTable(); window.print(); };
 
 /* ===== toast ===== */
 function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2200); }

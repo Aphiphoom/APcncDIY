@@ -22,7 +22,7 @@
   sessionStorage.setItem('apcnc_order_tax_handoff',JSON.stringify(payload));
   const title=full?'ใบกำกับภาษีเต็มรูปแบบ':'ใบกำกับภาษีอย่างย่อ';
   if(confirm('ยืนยันรับชำระแล้ว — เปิดตัวอย่าง'+title+' เพื่อพิมพ์ตอนนี้หรือไม่?')){
-    location.href='admin-documents.html?from_order='+encodeURIComponent(o.id);
+    location.href='admin-order-tax-invoice.html?from_order='+encodeURIComponent(o.id);
   }else{
     notify('ยืนยันชำระแล้ว สามารถเปิดใบกำกับภาษีจากออเดอร์ที่ชำระแล้วได้');
   }

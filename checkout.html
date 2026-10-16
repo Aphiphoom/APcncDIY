@@ -17,7 +17,7 @@
 <div class="tax-options"><label class="tax-check"><input id="taxInvoiceRequested" type="checkbox"><strong>ต้องการใบกำกับภาษีเต็มรูปแบบ</strong></label><div class="tax-field-note">ราคาทุกออเดอร์คิด VAT 7% ไม่ว่าต้องการใบกำกับภาษีเต็มรูปแบบหรือไม่</div>
 <div id="taxFields" class="tax-fields" hidden>
 <div class="field"><label for="taxName">ชื่อบุคคล / ชื่อนิติบุคคลสำหรับออกใบกำกับภาษี *</label><input id="taxName" maxlength="160" autocomplete="organization"></div>
-<div class="tax-row"><div class="field"><label for="taxId">เลขประจำตัวผู้เสียภาษี 13 หลัก *</label><input id="taxId" inputmode="numeric" maxlength="13"></div><div class="field"><label for="taxBranch">สำนักงานใหญ่ / สาขา</label><input id="taxBranch" placeholder="สำนักงานใหญ่ หรือสาขาที่ 00001" maxlength="80"></div></div>
+<div class="tax-row"><div class="field"><label for="taxId">เลขประจำตัวผู้เสียภาษี 13 หลัก (ถ้ามี)</label><input id="taxId" inputmode="numeric" maxlength="13" pattern="[0-9]{13}" placeholder="ไม่บังคับกรอก"><div class="tax-field-note">หากจด VAT อย่าลืมระบุเลขประจำตัวผู้เสียภาษีและข้อมูลสาขาครับ</div></div><div class="field"><label for="taxBranch">สำนักงานใหญ่ / สาขา</label><input id="taxBranch" placeholder="สำนักงานใหญ่ หรือสาขาที่ 00001" maxlength="80"></div></div>
 <div class="field"><label for="taxAddress">ที่อยู่สำหรับออกใบกำกับภาษี *</label><textarea id="taxAddress" maxlength="1500"></textarea></div>
 <div class="field"><label for="taxEmail">อีเมลสำหรับติดต่อเรื่องใบกำกับภาษี (ถ้ามี)</label><input id="taxEmail" type="email" maxlength="254"></div>
 </div></div><div class="slipbox"><strong>แนบสลิปการโอน *</strong><div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP และ PDF ไม่เกิน 10 MB</div><input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></div>
@@ -73,8 +73,11 @@
       customer.tax_invoice_branch=byId('taxBranch').value.trim();
       customer.tax_invoice_address=byId('taxAddress').value.trim();
       customer.tax_invoice_email=byId('taxEmail').value.trim();
-      if(customer.tax_invoice_name.length<2||!/^[0-9]{13}$/.test(customer.tax_invoice_tax_id)||customer.tax_invoice_address.length<5){
-        msg.textContent='กรุณากรอกชื่อผู้รับใบกำกับภาษี เลขประจำตัวผู้เสียภาษี 13 หลัก และที่อยู่ให้ครบถ้วน';return;
+      if(customer.tax_invoice_name.length<2||customer.tax_invoice_address.length<5){
+        msg.textContent='กรุณากรอกชื่อผู้รับใบกำกับภาษีและที่อยู่ให้ครบถ้วน';return;
+      }
+      if(customer.tax_invoice_tax_id && !/^[0-9]{13}$/.test(customer.tax_invoice_tax_id)){
+        msg.textContent='หากกรอกเลขประจำตัวผู้เสียภาษี กรุณาระบุตัวเลขให้ครบ 13 หลัก';return;
       }
     }
     await APCheckout.submit({

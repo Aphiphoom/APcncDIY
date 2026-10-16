@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ใบกำกับภาษีจากออเดอร์ · AP CNC DIY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box}body{font-family:Kanit,sans-serif;margin:0;background:#121a22;color:#e9eef5}header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#202d38;padding:14px max(20px,calc((100vw - 960px)/2))}button,a.action{border:1px solid #8c9ba7;background:#213242;color:white;border-radius:8px;padding:9px 15px;cursor:pointer;text-decoration:none;font:inherit}button.primary{background:#c89a42;color:#161616}button:disabled{opacity:.5}#status{margin:14px auto;max-width:900px;color:#ffca80;padding:0 12px}.sheet{width:min(210mm,calc(100% - 20px));min-height:270mm;margin:12px auto 35px;background:white;color:#151515;padding:18mm 16mm;box-shadow:0 5px 30px #0006}h1{font-size:24px;margin:0}h2{font-size:19px;margin:0 0 14px}.meta{display:flex;justify-content:space-between;gap:20px}.meta section{width:50%}.muted{color:#555}.bill{border-top:2px solid #222;border-bottom:1px solid #555;margin:18px 0;padding:12px 0}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #ccc;text-align:left;padding:8px 5px;vertical-align:top}th{background:#efefef}td.num,th.num{text-align:right}.totals{margin:15px 0 0 auto;max-width:360px}.totals div{display:flex;justify-content:space-between;padding:5px 2px}.totals .grand{border-top:2px solid #222;font-size:19px;font-weight:600}footer{font-size:12px;color:#555;margin-top:36px}@media print{body{background:white}header,#status{display:none}.sheet{box-shadow:none;margin:0;width:100%;min-height:0;padding:12mm 12mm}@page{size:A4;margin:5mm}}
+</style></head><body>
+<header><a class="action" href="admin-shop.html">← ออเดอร์</a><strong>เครื่องมือออกเอกสาร · ใบกำกับภาษีจากออเดอร์</strong><button id="print" class="primary" disabled>พิมพ์ใบกำกับภาษี</button><a class="action" href="admin-documents.html">ประวัติเอกสาร</a></header>
+<div id="status">กำลังตรวจสอบออเดอร์และเลขเอกสาร...</div><main id="paper" class="sheet" hidden></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="auth-client.js"></script>
+<script>
+(async()=>{
+'use strict';
+const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),num=v=>Number(v)||0,round=v=>Math.round(v*100)/100,fmt=v=>num(v).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+function fail(e){$('status').textContent='ไม่สามารถออกใบกำกับภาษีได้: '+String(e.message||e)}
+try{
+const sb=window.AuthClient?.sb;if(!sb)throw Error('ระบบยืนยันตัวตนไม่พร้อม');
+const user=await window.AuthClient.requireLogin();if(!user)return;
+const role=await sb.from('profiles').select('role').eq('id',user.id).single();if(role.error||String(role.data?.role).toLowerCase()!=='admin')throw Error('เฉพาะแอดมินเท่านั้น');
+const orderId=new URLSearchParams(location.search).get('from_order');
+const input=JSON.parse(sessionStorage.getItem('apcnc_order_tax_handoff')||'null');
+if(!orderId||!input||input.version!==1||input.orderId!==orderId)throw Error('ข้อมูลออเดอร์ไม่ครบ กรุณาเปิดใบกำกับภาษีจากหน้าออเดอร์');
+const orderRes=await sb.from('shop_orders').select('*').eq('id',orderId).single();
+if(orderRes.error)throw orderRes.error;const o=orderRes.data;
+if(o.status!=='paid'&&!['preparing','shipped','completed'].includes(o.status))throw Error('ออเดอร์ยังไม่ได้รับการยืนยันเงิน');
+const full=o.tax_invoice_requested===true||o.tax_invoice_requested==='true';
+const type=full?'taxinvoice':'taxinvoice_short';
+const itemsRes=await sb.from('shop_order_items').select('*').eq('order_id',orderId).order('created_at');
+if(itemsRes.error)throw itemsRes.error;
+const lines=(itemsRes.data||[]).map(i=>({detail:[i.product_name,i.variant_name].filter(Boolean).join(' / '),qty:num(i.quantity),unit:'',price:num(i.unit_price)}));
+if(!lines.length||lines.some(i=>i.qty<=0||i.price<0))throw Error('รายการสินค้าไม่ถูกต้อง');
+const customer=full?{name:o.tax_invoice_name,address:o.tax_invoice_address,taxId:o.tax_invoice_tax_id,contact:o.tax_invoice_email||o.email||''}:{name:'',address:'',taxId:'',contact:''};
+if(full&&(!customer.name||!customer.address||!/^[0-9]{13}$/.test(String(customer.taxId||''))))throw Error('ข้อมูลใบกำกับภาษีเต็มรูปแบบไม่ครบ');
+const base=round(num(o.total)/1.07);const vat=round(num(o.total)-base);const amount=round(lines.reduce((v,i)=>v+i.qty*i.price,0));let discount=round(amount-base);
+if(discount<-.03||Math.abs(round((amount-Math.max(0,discount))*1.07)-num(o.total))>.04)throw Error('ยอดรายการสินค้าและยอดออเดอร์ไม่ตรง กรุณาตรวจสอบ');
+discount=Math.max(0,discount);
+let stored, entry, issued=false;
+for(let attempt=0;attempt<4;attempt++){
+ const res=await sb.from('apcnc_document_store').select('payload,revision').eq('id',1).single();
+ if(res.error)throw res.error;
+ stored=res.data.payload;
+ if(stored?.app!=='APCNC'||!Array.isArray(stored.history))throw Error('ข้อมูลเอกสารกลางไม่ถูกต้อง');
+ const key='SHOP:'+orderId;
+ entry=stored.history.find(h=>h.data?.doc?.ref===key&&['taxinvoice','taxinvoice_short'].includes(h.docType));
+ if(entry){issued=true;break}
+ const seller=stored.profile?.seller||{};
+ if(!String(seller.taxId||'').trim()||!String(seller.name||'').trim()||!String(seller.address||'').trim())throw Error('โปรดตั้งชื่อ ที่อยู่ และเลขประจำตัวผู้เสียภาษีของผู้ขายในเครื่องมือออกเอกสารก่อน');
+ const date=new Date();const iso=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+ const n=stored.numbering?.tax||{prefix:'TX',year:true,pad:4,next:1};
+ const numberUsed=new Set(stored.history.filter(h=>['taxinvoice','taxinvoice_short','delivery_tax','invoice_tax','receipt_tax'].includes(h.docType)).map(h=>h.number));
+ let next=Math.max(1,num(n.next)),number='';
+ for(let x=0;x<100000;x++){number=(n.prefix||'')+(n.year?iso.slice(2,4):'')+'-'+String(next).padStart(n.pad||4,'0');if(!numberUsed.has(number))break;next++}
+ const state={docType:type,copy:'ต้นฉบับ',seller, buyer:customer,doc:{number,date:iso,dateFmt:'thai-long',validDays:'30',ref:key},receipt:{method:'เงินโอน',ref:o.order_no||''},
+  items:lines,discountType:'amount',discountValue:discount,vatMode:'exclude',vatRate:7,
+  payment:{...(stored.profile?.payment||{}),terms:[],note:''},sign:stored.profile?.sign||{org:'',name:''},numbering:stored.numbering};
+ entry={id:number+'|'+type,savedAt:new Date().toISOString(),docType:type,number,buyerName:customer.name,grandTotal:num(o.total),data:state};
+ stored.history.unshift(entry);stored.numbering.tax={...n,next:next+1};
+ stored.savedAt=new Date().toISOString();
+ const saved=await sb.rpc('apcnc_save_document_store',{p_payload:stored,p_expected_revision:res.data.revision});
+ if(!saved.error){issued=true;break}
+ if(saved.error.code!=='40001')throw saved.error;
+}
+if(!issued)throw Error('เลขเอกสารถูกใช้งานพร้อมกัน กรุณาลองอีกครั้ง');
+const seller=entry.data.seller||{},buyer=entry.data.buyer||{}, d=entry.data;
+const sellerText=[seller.name,seller.address,'เลขผู้เสียภาษี '+(seller.taxId||''),seller.branch||'',seller.phone||''].filter(Boolean);
+const customerText=type==='taxinvoice'?[buyer.name,buyer.address,'เลขประจำตัวผู้เสียภาษี '+buyer.taxId, 'สาขา '+(o.tax_invoice_branch||'สำนักงานใหญ่')].filter(Boolean):['ลูกค้าทั่วไป'];
+const rowHtml=d.items.map((i,k)=>'<tr><td>'+(k+1)+'</td><td>'+esc(i.detail)+'</td><td class="num">'+fmt(i.qty)+'</td><td class="num">'+fmt(i.price)+'</td><td class="num">'+fmt(i.qty*i.price)+'</td></tr>').join('');
+$('paper').innerHTML='<div class="meta"><section><h1>'+esc(seller.name||'AP CNC DIY')+'</h1><p>'+sellerText.slice(1).map(esc).join('<br>')+'</p></section><section style="text-align:right"><h2>'+(type==='taxinvoice'?'ใบกำกับภาษี':'ใบกำกับภาษีอย่างย่อ')+'</h2><div>เลขที่ '+esc(entry.number)+'</div><div>วันที่ '+esc(d.doc.date)+'</div><div>อ้างอิงออเดอร์ '+esc(o.order_no||'')+'</div></section></div><div class="bill"><strong>ผู้ซื้อ</strong><br>'+customerText.map(esc).join('<br>')+'</div><table><thead><tr><th>ลำดับ</th><th>รายการ</th><th class="num">จำนวน</th><th class="num">ราคาต่อหน่วย</th><th class="num">จำนวนเงิน</th></tr></thead><tbody>'+rowHtml+'</tbody></table><div class="totals"><div><span>มูลค่าสินค้า</span><span>'+fmt(amount)+'</span></div>'+(discount>0?'<div><span>ส่วนลด</span><span>'+fmt(discount)+'</span></div>':'')+'<div><span>มูลค่าก่อน VAT</span><span>'+fmt(base)+'</span></div><div><span>ภาษีมูลค่าเพิ่ม 7%</span><span>'+fmt(vat)+'</span></div><div class="grand"><span>ยอดสุทธิ</span><span>'+fmt(o.total)+'</span></div></div><footer>ราคาสุทธิรวมภาษีมูลค่าเพิ่มแล้ว • เอกสารนี้อ้างอิงคำสั่งซื้อ '+esc(o.order_no||'')+'</footer>';
+$('paper').hidden=false;$('print').disabled=false;
+$('print').onclick=()=>window.print();
+$('status').textContent='สร้างเอกสารและบันทึกเลขที่ '+entry.number+' ในประวัติเรียบร้อยแล้ว กรุณาตรวจตัวอย่างก่อนพิมพ์';
+sessionStorage.removeItem('apcnc_order_tax_handoff');
+}catch(e){console.error('tax invoice',e);fail(e)}
+})();
+</script></body></html>

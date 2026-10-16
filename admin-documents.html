@@ -514,6 +514,7 @@ const DOC_TYPES = {
   invoice:      {th:'ใบแจ้งหนี้', short:'แจ้งหนี้', en:'INVOICE', valid:true, signers:['ผู้วางบิล','ผู้รับวางบิล']},
   receipt:      {th:'ใบเสร็จรับเงิน', short:'ใบเสร็จ', en:'RECEIPT', receipt:true, signers:['ผู้รับเงิน','ผู้มีอำนาจลงนาม']},
   taxinvoice:   {th:'ใบกำกับภาษี', short:'ใบกำกับภาษี', en:'TAX INVOICE', tax:true, signers:['ผู้รับเงิน','ผู้มีอำนาจลงนาม']},
+  taxinvoice_short: {th:'ใบกำกับภาษีอย่างย่อ', short:'ภาษีอย่างย่อ', en:'ABBREVIATED TAX INVOICE', tax:true, compact:true, signers:['ผู้รับเงิน','ผู้มีอำนาจลงนาม']},
   delivery_tax: {th:'ใบส่งของ / ใบกำกับภาษี', short:'ส่งของ+ภาษี', en:'DELIVERY NOTE / TAX INVOICE', tax:true, signers:['ผู้ส่งของ','ผู้รับสินค้า']},
   invoice_tax:  {th:'ใบแจ้งหนี้ / ใบกำกับภาษี', short:'แจ้งหนี้+ภาษี', en:'INVOICE / TAX INVOICE', tax:true, valid:true, signers:['ผู้วางบิล','ผู้รับวางบิล']},
   receipt_tax:  {th:'ใบเสร็จรับเงิน / ใบกำกับภาษี', short:'เสร็จ+ภาษี', en:'RECEIPT / TAX INVOICE', tax:true, receipt:true, signers:['ผู้รับเงิน','ผู้มีอำนาจลงนาม']},
@@ -824,7 +825,7 @@ function renderPreview(){
     </div>${copyTag}</div>
     <div class="title-box"><div class="th">${escapeHtml(cfg.th)}</div><div class="en">${cfg.en}</div></div>
     <div class="parties">
-      <div class="buyer-box">
+      <div class="buyer-box" style="${cfg.compact?'display:none':''}">
         <div><span class="lbl">นามลูกค้า</span> <span class="val">${escapeHtml(b.name)}</span></div>
         <div class="addr-row"><span class="lbl">ที่อยู่</span> <span class="val addr3">${escapeHtml(b.address)}</span></div>
         <div><span class="lbl">เลขผู้เสียภาษี</span> <span class="val">${escapeHtml(b.taxId)}</span></div>
@@ -857,6 +858,7 @@ function renderPreview(){
         ${t.discount>0?`<div class="r"><span class="k">${discLabel}</span><span class="v">${fmt(t.discount)}</span></div>`:''}
         ${vatRows}
         <div class="r grand"><span class="k">ยอดรวมสุทธิ <small>GRAND TOTAL</small></span><span class="v">${fmt(t.grand)}</span></div>
+        ${cfg.compact?'<div class="r"><span class="k">ราคาสุทธิรวมภาษีมูลค่าเพิ่มแล้ว (VAT INCLUDED)</span></div>':''}
       </div>
     </div>
     ${receiptStrip}
@@ -902,7 +904,7 @@ $('#form').addEventListener('click',e=>{ const el=e.target;
 });
 $('#addItem').onclick=()=>{ state.items.push({detail:'',qty:1,unit:'',price:0}); renderItemsEditor(); renderPreview(); };
 $('#addTerm').onclick=()=>{ state.payment.terms.push({label:'',amount:0}); renderTermsEditor(); renderPreview(); };
-$('#docType').onchange=e=>{ state.docType=e.target.value; state.doc.number=genNumber(groupOf(state.docType),state.doc.date); toggleConditionalFields(); syncInputs(); renderPreview(); };
+$('#docType').onchange=e=>{ state.docType=e.target.value; if(DOC_TYPES[state.docType].compact&&state.vatMode==='none'){state.vatMode='exclude';state.vatRate=7;} state.doc.number=genNumber(groupOf(state.docType),state.doc.date); toggleConditionalFields(); syncInputs(); renderPreview(); };
 function applyPreviewZoom(){
   const scaler=$('#scaler'),sheet=$('#sheet'),select=$('#zoom'); if(!scaler||!sheet||!select)return;
   const raw=select.value;
@@ -938,13 +940,13 @@ $('#btnNew').onclick=async()=>{ if(!confirm('เริ่มเอกสาร�
 function updateHistCount(){ const c=$('#histCount'); if(!c)return; if(history.length){c.style.display='';c.textContent=history.length;}else c.style.display='none'; }
 function snapshot(){ const s=structuredClone(state); s.seller.logo=''; return s; }
 function histById(id){ return history.find(h=>h.id===id); }
-function saveToHistory(silent){ if(!state.doc.number){ if(!silent)toast('กรุณาใส่เลขที่เอกสารก่อน'); return; }
+function saveToHistory(silent){ if(DOC_TYPES[state.docType]?.compact && (!String(state.seller.taxId||'').trim() || state.vatMode==='none' || !state.items.some(i=>String(i.detail||'').trim()))){toast('ใบกำกับภาษีอย่างย่อต้องมีเลขผู้เสียภาษีของผู้ขาย รายการสินค้า และ VAT');return false;} if(!state.doc.number){ if(!silent)toast('กรุณาใส่เลขที่เอกสารก่อน'); return; }
   let candidate=state.doc.number+'|'+state.docType;
   if(currentHistoryId!==candidate&&history.some(h=>h.number===state.doc.number)){ syncNextFromHistory(groupOf(state.docType)); state.doc.number=genNumber(groupOf(state.docType),state.doc.date); candidate=state.doc.number+'|'+state.docType; syncInputs(); renderPreview(); }
   const t=calc(); const entry={ id:state.doc.number+'|'+state.docType, savedAt:new Date().toISOString(),
     docType:state.docType, number:state.doc.number, buyerName:state.buyer.name, grandTotal:t.grand, data:snapshot() };
   const idx=history.findIndex(h=>h.id===entry.id); if(idx>=0)history[idx]=entry; else history.unshift(entry);
-  currentHistoryId=entry.id; history.sort((a,b)=>b.savedAt.localeCompare(a.savedAt)); persistAll(); if(!silent)toast('บันทึกลงประวัติแล้ว'); }
+  currentHistoryId=entry.id; history.sort((a,b)=>b.savedAt.localeCompare(a.savedAt)); persistAll(); if(!silent)toast('บันทึกลงประวัติแล้ว'); return true; }
 function badgeClass(t){ return groupOf(t)==='quotation'?'q':groupOf(t)==='delivery'?'d':groupOf(t)==='invoice'?'i':groupOf(t)==='receipt'?'r':'t'; }
 function fmtHistDate(iso){ const d=new Date(iso); return d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',hourCycle:'h23'}); }
 function matchHist(h,f){ return (h.number||'').toLowerCase().includes(f)||(h.buyerName||'').toLowerCase().includes(f); }
@@ -1024,7 +1026,7 @@ function renderConvStep1(h){ $('#convTitle').textContent='ออกเอกส�
   $('#convBody').innerHTML=`<p class="conv-note">เลือกชนิดเอกสารที่จะสร้าง ระบบจะดึงข้อมูลลูกค้า/รายการจาก ${escapeHtml(h.number)} มาให้ และออกเลขใหม่ในชุดของเอกสารนั้นเอง</p>
     <div class="conv-grid">${targets.map(([k,v])=>`<button data-target="${k}">${v.th}<small>เลขใหม่: ${escapeHtml(genNumber(groupOf(k),todayISO()))}</small></button>`).join('')}</div>`; }
 function chooseTarget(target){ convCtx.target=target; const h=histById(convCtx.sourceId);
-  const askAmount=(target==='receipt'||target==='receipt_tax'||target==='taxinvoice')&&h.docType==='quotation';
+  const askAmount=(target==='receipt'||target==='receipt_tax'||target==='taxinvoice'||target==='taxinvoice_short')&&h.docType==='quotation';
   if(askAmount)renderConvStep2(h,target); else doConvertFull(target); }
 function renderConvStep2(h,target){ const terms=(h.data.payment.terms||[]).filter(t=>t.amount||t.label); const t=calc(h.data);
   $('#convTitle').textContent=DOC_TYPES[target].th+' จาก '+h.number;

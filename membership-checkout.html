@@ -29,6 +29,7 @@
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
+<script src="checkout-shared.js"></script>
 <div class="shell">
   <div class="top"><h1>ยืนยันการสั่งซื้อ</h1><div class="muted">AP Cabinet Pro Membership</div></div>
   <div class="layout">
@@ -77,82 +78,19 @@
   const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
   const btn=document.getElementById('submit'),msg=document.getElementById('msg');
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  sb.from('shop_settings').select('bank_name,account_name,account_number,promptpay_id').eq('singleton',true).single().then(({data})=>{
-    const box=document.getElementById('bankbox'); if(!box)return;
-    const bank=data?.bank_name||'ออมสิน', account=data?.account_name||'ร้าน AP CNC DIY', number=data?.account_number||'020376680458', promptpay=data?.promptpay_id||'';
-    box.innerHTML='<h4>ช่องทางการโอนเงิน</h4>'+
-      '<div class="bankrow"><span>ธนาคาร</span><strong>'+esc(bank)+'</strong></div>'+
-      '<div class="bankrow bank-account-row"><span>เลขที่บัญชี</span><button class="copy-account" id="copyBankAccount" type="button" data-account="'+esc(number)+'" aria-label="คัดลอกเลขที่บัญชี '+esc(number)+'"><span class="account-number">'+esc(number)+'</span><small>แตะเพื่อคัดลอก</small></button></div>'+
-      '<div class="bankrow"><span>ชื่อบัญชี</span><strong>'+esc(account)+'</strong></div>'+
-      (promptpay?'<div class="bankrow"><span>PromptPay</span><strong>'+esc(promptpay)+'</strong></div>':'')+
-      '<div id="bankCopyStatus" class="bank-copy-status" role="status" aria-live="polite"></div>';
-  }).catch(()=>{});
-  async function copyAccountNumber(value){
-    if(navigator.clipboard && window.isSecureContext){
-      try{await navigator.clipboard.writeText(value);return true}catch(_e){}
-    }
-    const temp=document.createElement('textarea');
-    temp.value=value;temp.setAttribute('readonly','');temp.style.position='fixed';temp.style.opacity='0';
-    document.body.appendChild(temp);temp.focus();temp.select();
-    let copied=false;
-    try{copied=document.execCommand('copy')}catch(_e){}
-    temp.remove();return copied;
-  }
-  document.getElementById('plan').addEventListener('click',async event=>{
-    const button=event.target.closest('#copyBankAccount');
-    if(!button)return;
-    const value=button.dataset.account;
-    const copied=await copyAccountNumber(value);
-    const status=document.getElementById('bankCopyStatus');
-    if(status){status.textContent=copied?'คัดลอกเลขที่บัญชีแล้ว':'คัดลอกอัตโนมัติไม่สำเร็จ กรุณากดค้างที่เลขบัญชีเพื่อคัดลอก';status.style.color=copied?'var(--green)':'var(--red)'}
-    const hint=button.querySelector('small');
-    if(hint && copied)hint.textContent='คัดลอกแล้ว';
-  });
+  APCheckout.bank(sb,document.getElementById('bankbox'),btn);
   sb.auth.getSession().then(({data})=>{const e=data?.session?.user?.email;if(e&&!document.getElementById('email').value)document.getElementById('email').value=e}).catch(()=>{});
 
   btn.onclick=async()=>{
     msg.textContent='';
-    const customer={
-      name:document.getElementById('name').value.trim(),
-      phone:document.getElementById('phone').value.trim(),
-      email:document.getElementById('email').value.trim(),
-      note:document.getElementById('note').value.trim()
-    };
-    const slip=document.getElementById('slip').files[0];
+    const customer={name:document.getElementById('name').value.trim(),phone:document.getElementById('phone').value.trim(),email:document.getElementById('email').value.trim(),note:document.getElementById('note').value.trim()};
     if(!customer.name||!customer.phone||!customer.email){msg.textContent='กรุณากรอกชื่อ เบอร์โทร และอีเมลที่ใช้กับ AP Cabinet Pro ให้ครบครับ';return}
-    if(!slip){msg.textContent='กรุณาแนบสลิปการโอนก่อนยืนยันคำสั่งซื้อครับ';return}
-    btn.disabled=true;btn.textContent='กำลังสร้างคำสั่งซื้อ...';
-    try{
-      const {data,error}=await sb.rpc('create_guest_membership_order',{p_customer:customer,p_plan_days:days});
-      if(error)throw error;
-      localStorage.setItem('apcncdiy_last_order',JSON.stringify(data));
-      btn.textContent='กำลังอัปโหลดสลิป...';
-      const res=await fetch('/api/shop-orders/slip?order_id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token),{
-        method:'POST',
-        headers:{'Content-Type':slip.type,'X-File-Name':encodeURIComponent(slip.name)},
-        body:slip
-      });
-      const uploadData=await res.json().catch(()=>({}));
-      if(!res.ok)throw new Error(uploadData.error||'slip_upload_failed');
-      localStorage.setItem('apcncdiy_membership_last_order',JSON.stringify({
-        order_id:data.order_id,
-        order_no:data.order_no,
-        token:data.token,
-        total:data.total,
-        plan_days:days,
-        plan_name:selected.name,
-        email:customer.email,
-        name:customer.name,
-        status:'payment_submitted'
-      }));
-      location.href='membership-order-success.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token);
-    }catch(e){
-      console.error(e);
-      const t=String(e.message||e);
-      msg.textContent=t.includes('membership_account_not_found')?'ไม่พบอีเมลนี้ในระบบสมาชิก AP Cabinet Pro กรุณาตรวจสอบอีเมลที่ใช้สมัครครับ':t.includes('invalid_email')?'กรุณาตรวจสอบอีเมลอีกครั้งครับ':'สร้างคำสั่งซื้อไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่ครับ';
-    }finally{
-      btn.disabled=false;btn.textContent='ยืนยันและสร้างคำสั่งซื้อ';
-    }
+    await APCheckout.submit({
+      button:btn,message:msg,slip:document.getElementById('slip').files[0],
+      createOrder:async()=>{const {data,error}=await sb.rpc('create_guest_membership_order',{p_customer:customer,p_plan_days:days});if(error){const t=String(error.message||error);throw new Error(t.includes('membership_account_not_found')?'ไม่พบอีเมลนี้ในระบบสมาชิก AP Cabinet Pro กรุณาตรวจสอบอีเมลที่ใช้สมัครครับ':t.includes('invalid_email')?'กรุณาตรวจสอบอีเมลอีกครั้งครับ':'สร้างคำสั่งซื้อไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่ครับ')}return data},
+      afterCreate:data=>localStorage.setItem('apcncdiy_membership_last_order',JSON.stringify({order_id:data.order_id,order_no:data.order_no,token:data.token,total:data.total,plan_days:days,plan_name:selected.name,email:customer.email,name:customer.name,status:'pending_payment'})),
+      successUrl:data=>'membership-order-success.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token)
+    });
   };
 })();
 </script>

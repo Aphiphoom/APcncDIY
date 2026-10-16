@@ -1,4 +1,81 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สั่งซื้อสินค้า · AP CNC DIY</title>
-<style>@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');:root{--bg:#0d1218;--panel:#161e27;--soft:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--cyan:#25c8d5;--amber:#f6a623;--red:#ff9a9a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}.shell{width:min(1050px,calc(100% - 28px));margin:auto;padding:26px 0 50px}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px}.field{display:grid;gap:6px;margin-bottom:11px}.field input,.field textarea{width:100%;border:1px solid var(--line);background:#101923;color:var(--ink);border-radius:8px;padding:10px 11px;font:inherit}.field textarea{min-height:110px}.muted{color:var(--muted)}.btn{width:100%;min-height:44px;border:1px solid var(--amber);border-radius:8px;background:var(--amber);color:#171006;font:700 16px Kanit;cursor:pointer}.btn:disabled{opacity:.55}.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #293845}.error{color:var(--red);margin-top:10px}.total{font-size:22px;color:var(--amber);font-weight:700}@media(max-width:760px){.layout{grid-template-columns:1fr}}.bankbox{margin-top:14px;padding:15px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h3{margin:0 0 10px;font-size:17px}.bankrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #293845;font-size:14px}.bankrow:last-child{border-bottom:0}.bankrow>span{color:var(--muted)}.bankrow strong{overflow-wrap:anywhere;text-align:right}.copy-account{border:1px solid #52697d;border-radius:7px;background:#1e2b39;color:var(--ink);font:600 14px Kanit;cursor:pointer;padding:8px 10px;display:inline-flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;max-width:100%}.copy-account small{font-weight:400;color:var(--cyan);white-space:nowrap}.copy-feedback{font-size:12px;color:#45c98a;min-height:18px;margin-top:8px}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{display:block;margin-top:8px;width:100%;color:var(--ink);font:inherit;min-width:0}.pay-note{font-size:12px;line-height:1.6;color:var(--muted)}.layout>*{min-width:0}@media(max-width:760px){.shell{width:calc(100% - 20px);padding-top:16px}.card{padding:14px}.bankrow.bank-account-row{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.copy-account{width:100%}.copy-account small{font-size:11px}.line{min-width:0}.line>div{min-width:0;overflow-wrap:anywhere}}</style></head>
-<body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script><script src="config.js"></script><script src="shop-cart.js"></script><script src="checkout-shared.js"></script><div class="shell"><h1>ยืนยันคำสั่งซื้อ</h1><div class="layout"><aside class="card"><h3 style="margin-top:0">สรุปสินค้า</h3><div id="summary"></div><div id="bankbox" class="bankbox"><h3>ช่องทางการโอนเงิน</h3><div class="muted">กำลังโหลดข้อมูลบัญชี...</div></div></aside><section class="card"><h2 style="margin:0 0 14px;font-size:21px">ข้อมูลจัดส่ง</h2><div class="field"><label>ชื่อผู้รับ *</label><input id="name" autocomplete="name"></div><div class="field"><label>เบอร์โทร *</label><input id="phone" inputmode="tel" autocomplete="tel"></div><div class="field"><label>อีเมล</label><input id="email" type="email" autocomplete="email"></div><div class="field"><label>ที่อยู่จัดส่ง *</label><textarea id="address" autocomplete="street-address"></textarea></div><div class="field"><label>หมายเหตุ</label><textarea id="note"></textarea></div><div class="slipbox"><strong>แนบสลิปการโอน *</strong><div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP และ PDF</div><input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></div><button id="submit" class="btn">ยืนยันและสร้างคำสั่งซื้อ</button><div id="msg" class="error"></div></section></div></div>
-<script>(()=>{const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY),items=ShopCart.read(),summary=document.getElementById('summary'),msg=document.getElementById('msg'),btn=document.getElementById('submit'),fmt=v=>Number(v||0).toLocaleString('th-TH',{maximumFractionDigits:2})+' บาท',esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));if(!items.length){location.replace('cart.html');return}let estimate=0;summary.innerHTML=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return `<div class="line"><div>${esc(x.product_name)}${x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':''} × ${q}</div><strong>${fmt(q*p)}</strong></div>`}).join('')+`<div class="line"><span>ค่าจัดส่ง</span><strong style="color:#45c98a">ฟรี (0 บาท)</strong></div><div class="line"><strong>ราคารวม</strong><span class="total">${fmt(estimate)}</span></div><div class="muted" style="font-size:12px;margin-top:10px">ราคาสินค้าจะถูกตรวจสอบอีกครั้งจากราคาปัจจุบันเมื่อสร้างคำสั่งซื้อครับ</div>`;APCheckout.bank(sb,document.getElementById('bankbox'),btn);btn.onclick=async()=>{msg.textContent='';const slip=document.getElementById('slip').files[0];const customer={name:document.getElementById('name').value.trim(),phone:document.getElementById('phone').value.trim(),email:document.getElementById('email').value.trim(),address:document.getElementById('address').value.trim(),note:document.getElementById('note').value.trim()};if(!customer.name||!customer.phone||!customer.address){msg.textContent='กรุณากรอกชื่อ เบอร์โทร และที่อยู่จัดส่งให้ครบครับ';return}await APCheckout.submit({button:btn,message:msg,slip,createOrder:async()=>{const payload=items.map(x=>({product_id:x.product_id,variant_id:x.variant_id||null,quantity:Number(x.quantity)||1}));const {data,error}=await sb.rpc('create_guest_shop_order',{p_customer:customer,p_items:payload});if(error)throw error;return data},afterCreate:()=>ShopCart.clear(),successUrl:data=>'shop-order-success.html?id='+encodeURIComponent(data.order_id)+'&token='+encodeURIComponent(data.token)})};})();</script></body></html>
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Checkout · AP CNC DIY</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');:root{--bg:#0d1218;--panel:#161e27;--soft:#202b37;--line:#364454;--ink:#f4f7fb;--muted:#9eacba;--cyan:#25c8d5;--amber:#f6a623;--red:#ff9a9a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}.shell{width:min(1050px,calc(100% - 28px));margin:auto;padding:26px 0 50px}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px}.field{display:grid;gap:6px;margin-bottom:11px}.field input,.field textarea{width:100%;border:1px solid var(--line);background:#101923;color:var(--ink);border-radius:8px;padding:10px 11px;font:inherit}.field textarea{min-height:110px}.muted{color:var(--muted)}.btn{width:100%;min-height:44px;border:1px solid var(--amber);border-radius:8px;background:var(--amber);color:#171006;font:700 16px Kanit;cursor:pointer}.btn:disabled{opacity:.55}.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #293845}.error{color:var(--red);margin-top:10px}.total{font-size:22px;color:var(--amber);font-weight:700}@media(max-width:760px){.layout{grid-template-columns:1fr}}.bankbox{margin-top:14px;padding:15px;background:#0d151d;border:1px solid var(--line);border-radius:9px}.bankbox h3{margin:0 0 10px;font-size:17px}.bankrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #293845;font-size:14px}.bankrow:last-child{border-bottom:0}.bankrow>span{color:var(--muted)}.bankrow strong{overflow-wrap:anywhere;text-align:right}.copy-account{border:1px solid #52697d;border-radius:7px;background:#1e2b39;color:var(--ink);font:600 14px Kanit;cursor:pointer;padding:8px 10px;display:inline-flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;max-width:100%}.copy-account small{font-weight:400;color:var(--cyan);white-space:nowrap}.copy-feedback{font-size:12px;color:#45c98a;min-height:18px;margin-top:8px}.slipbox{margin:14px 0;padding:14px;border:1px dashed #52697d;border-radius:9px;background:#101923}.slipbox input{display:block;margin-top:8px;width:100%;color:var(--ink);font:inherit;min-width:0}.pay-note{font-size:12px;line-height:1.6;color:var(--muted)}.layout>*{min-width:0}@media(max-width:760px){.shell{width:calc(100% - 20px);padding-top:16px}.card{padding:14px}.bankrow.bank-account-row{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.copy-account{width:100%}.copy-account small{font-size:11px}.line{min-width:0}.line>div{min-width:0;overflow-wrap:anywhere}}
+[data-checkout-only][hidden]{display:none!important}.checkout-note{font-size:12px;color:var(--muted);margin-top:10px}.back-link{color:var(--cyan);text-decoration:none;display:inline-block;margin-top:12px}.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}@media(max-width:760px){.layout{grid-template-columns:1fr}.order-summary{order:-1}}
+</style></head>
+<body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
+<script src="config.js"></script><script src="shop-cart.js"></script><script src="checkout-shared.js"></script>
+<div class="shell"><h1>ยืนยันคำสั่งซื้อ</h1><div class="layout">
+<aside class="card order-summary"><h3 id="summaryTitle" style="margin-top:0">สรุปสินค้า</h3><div id="summary"></div>
+<div id="bankbox" class="bankbox"><h3>ช่องทางการโอนเงิน</h3><div class="muted">กำลังโหลดข้อมูลบัญชี...</div></div></aside>
+<section class="card"><h2 id="formTitle" style="margin:0 0 14px;font-size:21px">ข้อมูลจัดส่ง</h2>
+<div class="field"><label id="nameLabel" for="name">ชื่อผู้รับ *</label><input id="name" autocomplete="name"></div>
+<div class="field"><label for="phone">เบอร์โทร *</label><input id="phone" inputmode="tel" autocomplete="tel"></div>
+<div class="field"><label id="emailLabel" for="email">อีเมล</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field" data-checkout-only="shop"><label for="address">ที่อยู่จัดส่ง *</label><textarea id="address" autocomplete="street-address"></textarea></div>
+<div class="field"><label for="note">หมายเหตุ</label><textarea id="note"></textarea></div>
+<div class="slipbox"><strong>แนบสลิปการโอน *</strong><div class="muted" style="font-size:12px;margin-top:3px">รองรับ JPG, PNG, WebP และ PDF ไม่เกิน 10 MB</div><input id="slip" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></div>
+<button id="submit" class="btn" disabled>ยืนยันและสร้างคำสั่งซื้อ</button><div id="msg" class="error" role="alert"></div>
+<a id="back" class="back-link" href="cart.html">← กลับไปตะกร้า</a>
+</section></div></div>
+<script>
+(()=>{
+  const qs=new URLSearchParams(location.search);
+  const membership=qs.get('type')==='membership'||qs.has('days');
+  const days=Number(qs.get('days'));
+  const plans={30:{name:'แพ็กเกจ 30 วัน',price:950},90:{name:'แพ็กเกจ 90 วัน',price:2500},365:{name:'แพ็กเกจ 365 วัน',price:9500,benefit:'สอนใช้งานและตั้งค่าออนไลน์ฟรี 1 วัน'}};
+  const plan=plans[days];
+  if(membership&&!plan){location.replace('ap-cabinet-pro.html');return}
+  const items=membership?[]:ShopCart.read();
+  if(!membership&&!items.length){location.replace('cart.html');return}
+  const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+  const byId=id=>document.getElementById(id);
+  const btn=byId('submit'),msg=byId('msg'),fmt=v=>Number(v||0).toLocaleString('th-TH',{maximumFractionDigits:2})+' บาท';
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(membership){
+    document.title='Checkout สมาชิก · AP Cabinet Pro';
+    byId('summaryTitle').textContent='สรุปแพ็กเกจ';
+    byId('formTitle').textContent='ข้อมูลผู้สั่งซื้อ';
+    byId('nameLabel').textContent='ชื่อผู้สั่งซื้อ *';
+    byId('emailLabel').textContent='อีเมลที่ใช้กับ AP Cabinet Pro *';
+    byId('back').href='ap-cabinet-pro.html';
+    byId('back').textContent='← กลับไปเลือกแพ็กเกจ';
+    byId('address').closest('[data-checkout-only]').hidden=true;
+    byId('summary').innerHTML='<div class="line"><span>'+esc(plan.name)+'</span><strong>'+fmt(plan.price)+'</strong></div>'+(plan.benefit?'<div class="checkout-note">'+esc(plan.benefit)+'</div>':'')+'<div class="line"><span>ค่าจัดส่ง</span><strong>0 บาท</strong></div><div class="line"><strong>รวม</strong><span class="total">'+fmt(plan.price)+'</span></div>';
+    sb.auth.getSession().then(({data})=>{const email=data?.session?.user?.email;if(email&&!byId('email').value)byId('email').value=email}).catch(()=>{});
+  }else{
+    let estimate=0;
+    byId('summary').innerHTML=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return '<div class="line"><div>'+esc(x.product_name)+(x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':'')+' × '+q+'</div><strong>'+fmt(q*p)+'</strong></div>'}).join('')+'<div class="line"><span>ค่าจัดส่ง</span><strong>ฟรี (0 บาท)</strong></div><div class="line"><strong>รวม</strong><span class="total">'+fmt(estimate)+'</span></div><div class="checkout-note">ราคาสินค้าจะถูกตรวจสอบจากฐานข้อมูลเมื่อสร้างคำสั่งซื้อ</div>';
+  }
+  APCheckout.bank(sb,byId('bankbox'),btn).then(ok=>{if(ok)btn.disabled=false});
+  btn.onclick=async()=>{
+    msg.textContent='';
+    const customer={name:byId('name').value.trim(),phone:byId('phone').value.trim(),email:byId('email').value.trim(),note:byId('note').value.trim()};
+    if(!customer.name||!customer.phone||(membership&&!customer.email)){msg.textContent=membership?'กรุณากรอกชื่อ เบอร์โทร และอีเมลที่ใช้กับ AP Cabinet Pro ให้ครบครับ':'กรุณากรอกชื่อและเบอร์โทรให้ครบครับ';return}
+    if(membership){
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)){msg.textContent='กรุณาระบุอีเมลสมาชิกให้ถูกต้อง';return}
+    }else{
+      customer.address=byId('address').value.trim();
+      if(!customer.address){msg.textContent='กรุณากรอกที่อยู่จัดส่ง';return}
+    }
+    await APCheckout.submit({
+      button:btn,message:msg,slip:byId('slip').files[0],
+      createOrder:async()=>{
+        let result;
+        if(membership)result=await sb.rpc('create_guest_membership_order',{p_customer:customer,p_plan_days:days});
+        else result=await sb.rpc('create_guest_shop_order',{p_customer:customer,p_items:items.map(x=>({product_id:x.product_id,variant_id:x.variant_id||null,quantity:Number(x.quantity)||1}))});
+        if(result.error){
+          const t=String(result.error.message||result.error);
+          throw new Error(t.includes('membership_account_not_found')?'ไม่พบอีเมลนี้ในระบบสมาชิก AP Cabinet Pro':t.includes('insufficient_stock')?'สินค้าบางรายการมีสต็อกไม่เพียงพอ':t.includes('price_not_available')?'สินค้าบางรายการยังไม่มีราคา':t.includes('invalid_email')?'กรุณาตรวจสอบอีเมลอีกครั้ง':'สร้างคำสั่งซื้อไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่');
+        }
+        return result.data;
+      },
+      afterCreate:order=>{
+        if(membership)localStorage.setItem('apcncdiy_membership_last_order',JSON.stringify({order_id:order.order_id,order_no:order.order_no,token:order.token,total:order.total,plan_days:days,plan_name:plan.name,email:customer.email,name:customer.name,status:'pending_payment'}));
+        else ShopCart.clear();
+      },
+      successUrl:order=>(membership?'membership-order-success.html':'shop-order-success.html')+'?id='+encodeURIComponent(order.order_id)+'&token='+encodeURIComponent(order.token)
+    });
+  };
+})();
+</script></body></html>

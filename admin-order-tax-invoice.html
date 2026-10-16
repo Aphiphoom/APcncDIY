@@ -7,7 +7,7 @@
 </style></head><body>
 <header><a class="action" href="admin-shop.html">← ออเดอร์</a><strong>เครื่องมือออกเอกสาร · ใบกำกับภาษีจากออเดอร์</strong><button id="print" class="primary" disabled>พิมพ์ใบกำกับภาษี</button><a class="action" href="admin-documents.html">ประวัติเอกสาร</a></header>
 <div id="status">กำลังตรวจสอบออเดอร์และเลขเอกสาร...</div><main id="paper" class="sheet" hidden></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
 <script src="config.js"></script><script src="auth-client.js"></script>
 <script>
 (async()=>{
@@ -29,6 +29,7 @@ const type=full?'taxinvoice':'taxinvoice_short';
 const itemsRes=await sb.from('shop_order_items').select('*').eq('order_id',orderId).order('created_at');
 if(itemsRes.error)throw itemsRes.error;
 const lines=(itemsRes.data||[]).map(i=>({detail:[i.product_name,i.variant_name].filter(Boolean).join(' / '),qty:num(i.quantity),unit:'',price:num(i.unit_price)}));
+if(num(o.shipping_fee)>0)lines.push({detail:'ค่าจัดส่ง',qty:1,unit:'',price:num(o.shipping_fee)});
 if(!lines.length||lines.some(i=>i.qty<=0||i.price<0))throw Error('รายการสินค้าไม่ถูกต้อง');
 const customer=full?{name:o.tax_invoice_name,address:o.tax_invoice_address,taxId:o.tax_invoice_tax_id,contact:o.tax_invoice_email||o.email||''}:{name:'',address:'',taxId:'',contact:''};
 if(full&&(!customer.name||!customer.address||!/^[0-9]{13}$/.test(String(customer.taxId||''))))throw Error('ข้อมูลใบกำกับภาษีเต็มรูปแบบไม่ครบ');

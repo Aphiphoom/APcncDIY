@@ -964,25 +964,44 @@ function rowInner(h,childCount){ return `
     <button class="mini-btn danger" data-delh="${h.id}">ลบ</button>
   </div>`; }
 
+function historyDateKey(h){
+  // Document date determines ordering; savedAt is only a fallback for legacy records.
+  const date=h?.data?.doc?.date;
+  return /^\\d{4}-\\d{2}-\\d{2}$/.test(String(date||'')) ? date : String(h?.savedAt||'').slice(0,10);
+}
+function compareHistoryNewest(a,b){
+  return historyDateKey(b).localeCompare(historyDateKey(a)) ||
+    String(b.savedAt||'').localeCompare(String(a.savedAt||'')) ||
+    String(b.number||'').localeCompare(String(a.number||''),'th',{numeric:true});
+}
 function renderHistory(filter){ const f=(filter||'').trim().toLowerCase(), list=$('#histList');
   if(!history.length){ list.innerHTML='<div class="hist-empty">ยังไม่มีประวัติ<br>กด “บันทึกประวัติ” หรือพิมพ์เอกสาร เพื่อบันทึกไว้ที่นี่</div>'; return; }
-  if(f){ const items=history.filter(h=>matchHist(h,f));
+  if(f){ const items=history.filter(h=>matchHist(h,f)).sort(compareHistoryNewest);
     list.innerHTML=items.length?items.map(h=>`<div class="hist-row orphan">${rowInner(h,0)}</div>`).join(''):'<div class="hist-empty">ไม่พบเอกสารที่ค้นหา</div>'; return; }
-  // tree
-  const quotations=history.filter(h=>groupOf(h.docType)==='quotation').slice().sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
-  const others=history.filter(h=>groupOf(h.docType)!=='quotation');
-  const kids={}; quotations.forEach(q=>kids[q.number]=[]); const orphans=[];
-  others.forEach(o=>{ const ref=o.data&&o.data.doc&&o.data.doc.ref; if(ref&&kids[ref])kids[ref].push(o); else orphans.push(o); });
-  let html='';
-  quotations.forEach(q=>{ const ch=(kids[q.number]||[]).slice().sort((a,b)=>a.savedAt.localeCompare(b.savedAt)); const open=expanded.has(q.id);
-    html+=`<div class="tree-parent"><div class="hist-row parent">
-      <button class="twisty ${ch.length?'':'empty'}" data-toggle="${q.id}">${ch.length?(open?'▾':'▸'):'•'}</button>
-      ${rowInner(q,ch.length)}</div>
-      <div class="tree-children" style="display:${open?'block':'none'}">${ch.map(k=>`<div class="hist-row child">${rowInner(k,0)}</div>`).join('')}</div>
-    </div>`; });
-  if(orphans.length){ orphans.sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
-    html+=`<div class="tree-sep">เอกสารอื่น (ไม่อ้างอิงใบเสนอราคา)</div>`+orphans.map(o=>`<div class="hist-row orphan">${rowInner(o,0)}</div>`).join(''); }
-  list.innerHTML=html;
+  // Group follow-up documents under their quotation, and sort each group by its newest document date.
+  const quotations=history.filter(h=>groupOf(h.docType)==='quotation');
+  const kids=new Map(quotations.map(q=>[q.number,[]]));
+  const orphans=[];
+  history.filter(h=>groupOf(h.docType)!=='quotation').forEach(h=>{
+    const ref=h.data?.doc?.ref;
+    if(ref&&kids.has(ref))kids.get(ref).push(h); else orphans.push(h);
+  });
+  const groups=quotations.map(q=>{
+    const children=kids.get(q.number).sort(compareHistoryNewest);
+    const newest=[q,...children].sort(compareHistoryNewest)[0];
+    return {parent:q,children,newest};
+  });
+  orphans.forEach(h=>groups.push({parent:h,children:[],newest:h}));
+  groups.sort((a,b)=>compareHistoryNewest(a.newest,b.newest));
+  list.innerHTML=groups.map(({parent,children})=>{
+    if(groupOf(parent.docType)!=='quotation')return `<div class="hist-row orphan">${rowInner(parent,0)}</div>`;
+    const open=expanded.has(parent.id);
+    return `<div class="tree-parent"><div class="hist-row parent">
+      <button class="twisty ${children.length?'':'empty'}" data-toggle="${parent.id}">${children.length?(open?'▾':'▸'):'•'}</button>
+      ${rowInner(parent,children.length)}</div>
+      <div class="tree-children" style="display:${open?'block':'none'}">${children.map(k=>`<div class="hist-row child">${rowInner(k,0)}</div>`).join('')}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ===== monthly VAT sales report ===== */

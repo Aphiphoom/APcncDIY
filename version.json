@@ -1,10 +1,10 @@
 {
   "product": "AP Cabinet Pro",
-  "latest_version": "2.1.236",
-  "file_name": "AP_Cabinet_Pro_V2.1.236.rbz",
-  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.1.236.rbz",
+  "latest_version": "2.2.003",
+  "file_name": "AP_Cabinet_Pro_V2.2.003.rbz",
+  "download_url": "https://github.com/Aphiphoom/APcncDIY/releases/download/AP_Cabinet_Pro/AP_Cabinet_Pro_V2.2.003.rbz",
   "release_url": "https://github.com/Aphiphoom/APcncDIY/releases/tag/AP_Cabinet_Pro",
   "line_group_url": "https://line.me/ti/g/4v9_7RW5kG",
-  "notes": "AP Cabinet Pro V2.1.236 — แก้ไขการซิงก์จุด Origin ระหว่าง Settings > Nesting กับ CNC preset ให้ Nesting, Manual coordinates, DXF และ G-code ใช้จุด Origin เดียวกัน พร้อมบันทึกค่าอัตโนมัติเมื่อเปลี่ยนมุม",
-  "published_at": "2026-10-07"
+  "notes": "AP Cabinet Pro V2.2.003 — เพิ่มเครื่องมือ Custom Panel และการแก้ไขแผ่นคัสตอมผ่าน Web Editor, ตรวจสิทธิ์สมาชิก Active สำหรับ Custom Panel เช่นเดียวกับ Nesting, และแก้ไขการออกจากระบบจากหน้า Membership เพื่อกลับเข้าสู่ระบบด้วยบัญชีอื่น",
+  "published_at": "2026-10-18"
 }

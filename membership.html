@@ -334,7 +334,7 @@
         </div>
       </div>
 
-      <a class="back-link" href="login.html">← กลับไปหน้าเข้าสู่ระบบ</a>
+      <a class="back-link" href="login.html?logout=1" id="membership-back-to-login">← ออกจากระบบ / กลับไปหน้าเข้าสู่ระบบ</a>
     </section>
   </main>
 <script>
@@ -404,6 +404,17 @@
     });
   });
 })();
+</script>
+<script>
+document.getElementById('membership-back-to-login')?.addEventListener('click', function(event) {
+  if (window.sketchup && typeof window.sketchup.account_logout_to_login === 'function') {
+    event.preventDefault();
+    window.sketchup.account_logout_to_login();
+  } else if (window.sketchup && typeof window.sketchup.account_clear_session === 'function') {
+    // Backward compatibility with older plugin versions.
+    window.sketchup.account_clear_session();
+  }
+});
 </script>
 </body>
 </html>

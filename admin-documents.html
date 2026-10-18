@@ -1272,6 +1272,14 @@ async function bootstrap(){
     }catch(e){ $('#cloudGateMsg').textContent='เปิดเครื่องมือไม่สำเร็จ: '+e.message; return; }
   }
   buildDocTypeSelect(); newQuotation(true); updateHistCount();
+  // Orders use the same preview/print implementation and the existing issued TX number.
+  const issuedOrder=new URLSearchParams(location.search).get('issued_order');
+  if(issuedOrder){
+    const entry=history.find(h=>h.data?.doc?.ref==='SHOP:'+issuedOrder&&
+      ['taxinvoice','taxinvoice_short'].includes(h.docType));
+    if(entry){ openDoc(entry.id); }
+    else { $('#cloudGateMsg').textContent='ไม่พบใบกำกับภาษีของออเดอร์นี้ในประวัติเอกสาร'; return; }
+  }
   document.body.classList.remove('cloud-loading'); $('#cloudGate').hidden=true;
   if(SERVER_MODE){ updateBackupUI(); await syncShared(false); }
   else if(!CLOUD_MODE){ const h=await idbGet('backupHandle'); if(h){ backupHandle=h; updateBackupUI(); await syncShared(false); } }

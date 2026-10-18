@@ -63,15 +63,10 @@ for(let attempt=0;attempt<4;attempt++){
  if(saved.error.code!=='40001')throw saved.error;
 }
 if(!issued)throw Error('เลขเอกสารถูกใช้งานพร้อมกัน กรุณาลองอีกครั้ง');
-const seller=entry.data.seller||{},buyer=entry.data.buyer||{}, d=entry.data;
-const sellerText=[seller.name,seller.address,'เลขผู้เสียภาษี '+(seller.taxId||''),seller.branch||'',seller.phone||''].filter(Boolean);
-const customerText=type==='taxinvoice'?[buyer.name,buyer.address,'เลขประจำตัวผู้เสียภาษี '+buyer.taxId, 'สาขา '+(o.tax_invoice_branch||'สำนักงานใหญ่')].filter(Boolean):['ลูกค้าทั่วไป'];
-const rowHtml=d.items.map((i,k)=>'<tr><td>'+(k+1)+'</td><td>'+esc(i.detail)+'</td><td class="num">'+fmt(i.qty)+'</td><td class="num">'+fmt(i.price)+'</td><td class="num">'+fmt(i.qty*i.price)+'</td></tr>').join('');
-$('paper').innerHTML='<div class="meta"><section><h1>'+esc(seller.name||'AP CNC DIY')+'</h1><p>'+sellerText.slice(1).map(esc).join('<br>')+'</p></section><section style="text-align:right"><h2>'+(type==='taxinvoice'?'ใบกำกับภาษี':'ใบกำกับภาษีอย่างย่อ')+'</h2><div>เลขที่ '+esc(entry.number)+'</div><div>วันที่ '+esc(d.doc.date)+'</div><div>อ้างอิงออเดอร์ '+esc(o.order_no||'')+'</div></section></div><div class="bill"><strong>ผู้ซื้อ</strong><br>'+customerText.map(esc).join('<br>')+'</div><table><thead><tr><th>ลำดับ</th><th>รายการ</th><th class="num">จำนวน</th><th class="num">ราคาต่อหน่วย</th><th class="num">จำนวนเงิน</th></tr></thead><tbody>'+rowHtml+'</tbody></table><div class="totals"><div><span>มูลค่าสินค้า</span><span>'+fmt(amount)+'</span></div>'+(discount>0?'<div><span>ส่วนลด</span><span>'+fmt(discount)+'</span></div>':'')+'<div><span>มูลค่าก่อน VAT</span><span>'+fmt(base)+'</span></div><div><span>ภาษีมูลค่าเพิ่ม 7%</span><span>'+fmt(vat)+'</span></div><div class="grand"><span>ยอดสุทธิ</span><span>'+fmt(o.total)+'</span></div></div><footer>ราคาสุทธิรวมภาษีมูลค่าเพิ่มแล้ว • เอกสารนี้อ้างอิงคำสั่งซื้อ '+esc(o.order_no||'')+'</footer>';
-$('paper').hidden=false;$('print').disabled=false;
-$('print').onclick=()=>window.print();
-$('status').textContent='สร้างเอกสารและบันทึกเลขที่ '+entry.number+' ในประวัติเรียบร้อยแล้ว กรุณาตรวจตัวอย่างก่อนพิมพ์';
-sessionStorage.removeItem('apcnc_order_tax_handoff');
+// The invoice has already been issued with a shared TX number and stored history.
+// Reuse the exact A4 renderer used for manually created documents.
+location.replace('admin-documents.html?issued_order='+encodeURIComponent(orderId));
+
 }catch(e){console.error('tax invoice',e);fail(e)}
 })();
 </script></body></html>

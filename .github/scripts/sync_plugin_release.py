@@ -75,7 +75,8 @@ def main():
         print("Release is older than version.json; refusing to downgrade")
         return
 
-    version = ".".join(map(str, newest_version))
+    # Preserve the release filename's zero-padded version (e.g. 2.2.009).
+    version = asset["name"][len("AP_Cabinet_Pro_V"):-len(".rbz")]
     desired = {
         "latest_version": version,
         "file_name": asset["name"],

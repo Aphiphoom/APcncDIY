@@ -1,9 +1,14 @@
 name: Sync AP Cabinet Pro release version
 
+# Reliable post-upload trigger: the uploader dispatches apcp-rbz-uploaded
+# only after GitHub confirms the RBZ asset state is "uploaded".
+# Scheduled polling remains a fallback; GitHub may delay scheduled runs.
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [apcp-rbz-uploaded]
   release:
-    types: [published, edited]
+    types: [published, edited, released]
   schedule:
     - cron: '*/15 * * * *'
 

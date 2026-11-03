@@ -1272,7 +1272,7 @@ async function writeExcel(){ try{ if(excelHandle&&await ensurePermission(excelHa
 function downloadExcel(){ try{ const blob=new Blob([excelBytes()],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='APCNC-database.xlsx'; a.click(); URL.revokeObjectURL(a.href); }catch(e){ toast('สร้างไฟล์ Excel ไม่สำเร็จ'); } }
 async function autoExcel(){ try{ if(excelHandle){ await writeExcel(); return; } if(window.showSaveFilePicker){ await chooseExcelLocation(); } }catch(e){} }
 
-$('#btnPrint').onclick=async()=>{ await syncShared(false); rememberCustomer(); rememberProducts(); if(saveToHistory(true)===false)return; commitNumber(); fillItemsTable(); const synced=await autoBackup(); if(!synced&&!confirm('ยังซิงก์ไฟล์ข้อมูลกลางไม่สำเร็จ ต้องการพิมพ์ต่อหรือไม่?'))return; await autoExcel(); fillItemsTable(); window.print(); };
+$('#btnPrint').onclick=async()=>{ await syncShared(false); rememberCustomer(); rememberProducts(); if(saveToHistory(true)===false)return; commitNumber(); fillItemsTable(); const synced=await autoBackup(); if(!synced&&!confirm('ยังซิงก์ไฟล์ข้อมูลกลางไม่สำเร็จ ต้องการพิมพ์ต่อหรือไม่?'))return; fillItemsTable(); window.print(); };
 
 /* ===== toast ===== */
 function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2200); }

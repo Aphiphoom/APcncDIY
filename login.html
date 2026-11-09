@@ -50,15 +50,60 @@
  async function latestConfig(){try{const r=await fetch(VERSION_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error();const v=await r.json();lineGroupUrl=v.line_group_url||''}catch(_e){lineGroupUrl=''}renderLineGroup()}
  latestConfig();
  function setMode(value){mode=value;const login=value==='login',signup=value==='signup',forgot=value==='forgot',reset=value==='reset';$('authTabLogin').classList.toggle('active',login);$('authTabSignup').classList.toggle('active',signup);$('authTabLogin').parentElement.classList.toggle('auth-hidden',forgot||reset);$('authEmailWrap').classList.toggle('auth-hidden',reset);$('authPasswordWrap').classList.toggle('auth-hidden',forgot);$('authPassword2Wrap').classList.toggle('auth-hidden',!(signup||reset));$('authPasswordLabel').textContent=reset?'รหัสผ่านใหม่':'รหัสผ่าน';$('authPassword2Label').textContent=reset?'รหัสผ่านใหม่อีกครั้ง':'ยืนยันรหัสผ่าน';$('authPassword').autocomplete=signup||reset?'new-password':'current-password';$('authPassword2').autocomplete='new-password';$('authSubmit').textContent={login:'เข้าสู่ระบบ',signup:'สมัครสมาชิก',forgot:'ส่งลิงก์เปลี่ยนรหัสผ่าน',reset:'บันทึกรหัสผ่านใหม่'}[value]||'เข้าสู่ระบบ';$('authForgot').textContent=forgot||reset?'← กลับไปเข้าสู่ระบบ':'ลืมรหัสผ่าน?';status('authLoginStatus','')}
+ const EXPIRED_REDIRECT_DELAY_MS=10000;
+ let expiredRedirectTimer=null,expiredCountdownTimer=null,expiredRedirectUserId=null,expiredRedirectDeadline=0;
+ function cancelExpiredRedirect(){
+   if(expiredRedirectTimer!==null)clearTimeout(expiredRedirectTimer);
+   if(expiredCountdownTimer!==null)clearInterval(expiredCountdownTimer);
+   expiredRedirectTimer=null;expiredCountdownTimer=null;expiredRedirectUserId=null;expiredRedirectDeadline=0;
+ }
+ function scheduleExpiredRedirect(userId){
+   if(!userId)return;
+   if(expiredRedirectTimer!==null&&expiredRedirectUserId===userId)return;
+   cancelExpiredRedirect();
+   expiredRedirectUserId=userId;
+   expiredRedirectDeadline=Date.now()+EXPIRED_REDIRECT_DELAY_MS;
+   const update=()=>{
+     if(!user||user.id!==userId){cancelExpiredRedirect();return}
+     const remaining=Math.max(0,Math.ceil((expiredRedirectDeadline-Date.now())/1000));
+     $('authMemberMessage').textContent='สมาชิกหมดอายุ · กำลังเปิดหน้าต่ออายุใน '+remaining+' วินาที';
+   };
+   update();
+   expiredCountdownTimer=setInterval(update,250);
+   expiredRedirectTimer=setTimeout(()=>{
+     if(!user||user.id!==userId)return cancelExpiredRedirect();
+     cancelExpiredRedirect();
+     if(inSketchup)sketchup.account_open_membership();
+     else location.href=MEMBERSHIP_URL;
+   },EXPIRED_REDIRECT_DELAY_MS);
+ }
  function compact(session){if(!session||!session.access_token||!session.refresh_token)return null;return{access_token:session.access_token,refresh_token:session.refresh_token,expires_at:session.expires_at||null,email:session.user&&session.user.email||''}}
  function persist(session){const saved=compact(session);if(!saved)return;if(inSketchup)sketchup.account_save_session(JSON.stringify(session))}
- function clearStored(){if(inSketchup)sketchup.account_clear_session()}
+ function clearStored(){cancelExpiredRedirect();if(inSketchup)sketchup.account_clear_session()}
  function info(profile){const expiry=profile&&profile.expires_at?Date.parse(profile.expires_at):0;return{expiry,active:!!(profile&&(profile.role==='admin'||profile.status==='active'&&(!expiry||expiry>=Date.now()))),status:profile&&profile.status||'ไม่ระบุ'}}
  function setAdminEntry(isAdmin){const button=$('authAdmin');if(!button)return;button.classList.toggle('auth-hidden',!isAdmin);button.onclick=isAdmin?()=>{if(window.sketchup&&typeof window.sketchup.account_open_admin==='function')window.sketchup.account_open_admin();else window.open('admin.html','_self')}:null}
- async function showMember(session){user=session&&session.user;if(!user){memberActive=false;setAdminEntry(false);renderLineGroup();$('authLogin').classList.remove('auth-hidden');$('authMember').classList.add('auth-hidden');return null}$('authLogin').classList.add('auth-hidden');$('authMember').classList.remove('auth-hidden');$('authMemberEmail').textContent=user.email||'-';const result=await sb.from('profiles').select('status,expires_at,role').eq('id',user.id).maybeSingle(),data=result.data||{},x=info(data);setAdminEntry(data.role==='admin');memberActive=x.active;renderLineGroup();$('authMemberStatus').textContent=x.active?'ใช้งานได้':x.status==='suspended'?'ระงับการใช้งาน':x.expiry&&x.expiry<Date.now()?'หมดอายุ':'รออนุมัติ';$('authMemberStatus').className=x.active?'active':x.status==='suspended'||x.expiry&&x.expiry<Date.now()?'expired':'';$('authMemberDays').textContent=!x.expiry?'ไม่จำกัด':x.expiry<Date.now()?'หมดอายุแล้ว':Math.max(0,Math.ceil((x.expiry-Date.now())/86400000))+' วัน';$('authMemberExpiry').textContent=!x.expiry?'ไม่กำหนด':new Date(x.expiry).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});$('authMemberMessage').textContent=x.active?'บัญชีพร้อมใช้งานแล้ว':'กรุณาซื้อหรือต่ออายุสิทธิ์เพื่อใช้งานต่อ';if(inSketchup&&x.active)syncSettings();if(inSketchup&&x.expiry&&x.expiry<Date.now())setTimeout(()=>sketchup.account_open_membership(),150);return x}
+ async function showMember(session){
+   user=session&&session.user;
+   if(!user){cancelExpiredRedirect();memberActive=false;setAdminEntry(false);renderLineGroup();$('authLogin').classList.remove('auth-hidden');$('authMember').classList.add('auth-hidden');return null}
+   const accountId=user.id;
+   $('authLogin').classList.add('auth-hidden');$('authMember').classList.remove('auth-hidden');$('authMemberEmail').textContent=user.email||'-';
+   const result=await sb.from('profiles').select('status,expires_at,role').eq('id',accountId).maybeSingle();
+   if(!user||user.id!==accountId)return null;
+   const data=result.data||{},x=info(data);
+   setAdminEntry(data.role==='admin');memberActive=x.active;renderLineGroup();
+   $('authMemberStatus').textContent=x.active?'ใช้งานได้':x.status==='suspended'?'ระงับการใช้งาน':x.expiry&&x.expiry<Date.now()?'หมดอายุ':'รออนุมัติ';
+   $('authMemberStatus').className=x.active?'active':x.status==='suspended'||x.expiry&&x.expiry<Date.now()?'expired':'';
+   $('authMemberDays').textContent=!x.expiry?'ไม่จำกัด':x.expiry<Date.now()?'หมดอายุแล้ว':Math.max(0,Math.ceil((x.expiry-Date.now())/86400000))+' วัน';
+   $('authMemberExpiry').textContent=!x.expiry?'ไม่กำหนด':new Date(x.expiry).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+   $('authMemberMessage').textContent=x.active?'บัญชีพร้อมใช้งานแล้ว':'กรุณาซื้อหรือต่ออายุสิทธิ์เพื่อใช้งานต่อ';
+   if(inSketchup&&x.active)syncSettings();
+   if(x.expiry&&x.expiry<Date.now())scheduleExpiredRedirect(accountId);
+   else cancelExpiredRedirect();
+   return x;
+ }
  async function syncSettings(){if(syncStarted||!user)return;syncStarted=true;$('authMemberMessage').textContent='กำลังตรวจสอบการตั้งค่าล่าสุด...';const r=await sb.from('user_settings').select('plugin_settings').eq('user_id',user.id).maybeSingle();if(r.error){$('authMemberMessage').textContent='เข้าสู่ระบบแล้ว';return}cloudPayload=r.data&&r.data.plugin_settings&&Object.keys(r.data.plugin_settings).length?r.data.plugin_settings:null;sketchup.account_request_local_settings()}
  async function uploadSettings(local){const r=await sb.from('user_settings').upsert({user_id:user.id,plugin_settings:local,plugin_schema_version:local.schema_version||1,plugin_version:initialPayload&&initialPayload.plugin_version,updated_at:new Date().toISOString()},{onConflict:'user_id'});$('authMemberMessage').textContent=r.error?'เข้าสู่ระบบแล้ว (ยังซิงก์การตั้งค่าไม่ได้)':'บัญชีพร้อมใช้งาน · การตั้งค่าเป็นข้อมูลล่าสุดแล้ว'}
- async function afterAuth(session){persist(session);const x=await showMember(session);if(inSketchup)return;if(x&&x.active){setTimeout(()=>{location.href=next},350)}else if(x&&x.expiry&&x.expiry<Date.now()){setTimeout(()=>{location.href=MEMBERSHIP_URL},350)}}
+ async function afterAuth(session){persist(session);const x=await showMember(session);if(inSketchup)return;if(x&&x.active){setTimeout(()=>{location.href=next},350)}}
  function versionParts(v){const m=String(v||'').match(/(?:^|[^0-9])(\d+)\.(\d+)\.(\d+)(?:$|[^0-9])/);return m?[Number(m[1]),Number(m[2]),Number(m[3])]:null}
  function checkUpdate(){const overlay=$('authUpdateOverlay');if(!overlay||updateDismissed||!downloadUrl)return;const shown=$('authInstalledVersion')?.textContent||'';const detected=versionParts(installedPluginVersion)||(/AP Cabinet Pro/i.test(shown)?versionParts(shown):null);const current=detected,newest=versionParts(latestRelease);if(!current||!newest)return;const newer=newest.some((n,i)=>n>current[i]&&newest.slice(0,i).every((p,j)=>p===current[j]));if(!newer)return;const currentText=String(versionParts(installedPluginVersion)?installedPluginVersion:shown).match(/(\d+\.\d+\.\d+)/);const latestText=String(latestRelease).match(/(\d+\.\d+\.\d+)/);$('authUpdateCurrent').textContent='V'+(currentText?currentText[1]:current.join('.'));$('authUpdateLatest').textContent='V'+(latestText?latestText[1]:newest.join('.'));overlay.classList.remove('auth-hidden')}
  $('authUpdateLater').onclick=()=>{updateDismissed=true;$('authUpdateOverlay').classList.add('auth-hidden')};

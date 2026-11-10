@@ -150,7 +150,7 @@
     }
 
     function renderProducts(){
-      $('productRows').innerHTML=products.map(p=>{const vs=variantsOf(p.id),price=vs.length?`ตัวเลือก ${vs.length} รายการ`:p.price==null?'-':Number(p.price).toLocaleString('th-TH');return `<tr><td>${p.cover_path?`<img class="thumb" src="${esc(publicUrl(p.cover_path))}">`:'-'}</td><td><strong>${esc(p.name)}</strong><br><small class="muted">${esc(p.short_description||'')}</small></td><td>${esc(catName(p.category_id))}</td><td>${price}</td><td>${p.is_published?'เผยแพร่':'แบบร่าง'}</td><td><div class="actions"><button class="btn" data-edit-product="${p.id}">แก้ไข</button><button class="btn danger" data-del-product="${p.id}">ลบ</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="muted">ยังไม่มีสินค้า</td></tr>';
+      $('productRows').innerHTML=products.map(p=>{const vs=variantsOf(p.id),price=vs.length?`ตัวเลือก ${vs.length} รายการ`:p.price==null?'-':Number(p.price).toLocaleString('th-TH');return `<tr><td>${p.cover_path?`<img class="thumb" src="${esc(publicUrl(p.cover_path))}">`:'-'}</td><td><strong>${esc(p.name)}</strong></td><td>${esc(catName(p.category_id))}</td><td>${price}</td><td>${p.is_published?'เผยแพร่':'แบบร่าง'}</td><td><div class="actions"><button class="btn" data-edit-product="${p.id}">แก้ไข</button><button class="btn danger" data-del-product="${p.id}">ลบ</button></div></td></tr>`}).join('')||'<tr><td colspan="6" class="muted">ยังไม่มีสินค้า</td></tr>';
       document.querySelectorAll('[data-edit-product]').forEach(b=>b.onclick=()=>editProduct(b.dataset.editProduct));document.querySelectorAll('[data-del-product]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delProduct));
     }
 

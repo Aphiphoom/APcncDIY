@@ -40,6 +40,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const taxCheck=byId('taxInvoiceRequested');taxCheck.addEventListener('change',()=>{byId('taxFields').hidden=!taxCheck.checked});
   const taxSummary=(amount)=>'<div class="line"><span>VAT 7%</span><strong>'+fmt(Math.round(amount*7)/100)+'</strong></div><div class="line"><strong>ยอดชำระรวมภาษี</strong><span class="total">'+fmt(Math.round(amount*107)/100)+'</span></div>';
+  let shippingReady=Promise.resolve(true);
   if(membership){
     document.title='Checkout สมาชิก · AP Cabinet Pro';
     byId('summaryTitle').textContent='สรุปแพ็กเกจ';
@@ -53,9 +54,21 @@
     sb.auth.getSession().then(({data})=>{const email=data?.session?.user?.email;if(email&&!byId('email').value)byId('email').value=email}).catch(()=>{});
   }else{
     let estimate=0;
-    byId('summary').innerHTML=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return '<div class="line"><div>'+esc(x.product_name)+(x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':'')+' × '+q+'</div><strong>'+fmt(q*p)+'</strong></div>'}).join('')+'<div class="line"><span>ค่าจัดส่ง</span><strong>ฟรี (0 บาท)</strong></div>'+taxSummary(estimate)+'<div class="checkout-note">ราคาสินค้าจะถูกตรวจสอบจากฐานข้อมูลเมื่อสร้างคำสั่งซื้อ</div>';
+    const itemLines=items.map(x=>{const q=Number(x.quantity)||1,p=Number(x.price)||0;estimate+=q*p;return '<div class="line"><div>'+esc(x.product_name)+(x.variant_name?'<div class="muted">'+esc(x.variant_name)+'</div>':'')+' × '+q+'</div><strong>'+fmt(q*p)+'</strong></div>'}).join('');
+    byId('summary').innerHTML=itemLines+'<div class="line"><span>ค่าจัดส่ง</span><strong>กำลังคำนวณ...</strong></div>';
+    shippingReady=sb.from('shop_settings').select('shipping_fee').eq('singleton',true).single().then(({data,error})=>{
+      if(error||!data)throw error||new Error('missing_shipping_settings');
+      const shipping=estimate<2500?Number(data.shipping_fee||0):0;
+      if(!Number.isFinite(shipping)||shipping<0)throw new Error('invalid_shipping_fee');
+      byId('summary').innerHTML=itemLines+
+        '<div class="line"><span>ยอดรวมสินค้า</span><strong>'+fmt(estimate)+'</strong></div>'+
+        '<div class="line"><span>ค่าจัดส่ง</span><strong>'+(shipping===0?'ฟรี (0 บาท)':fmt(shipping))+'</strong></div>'+
+        taxSummary(estimate+shipping)+
+        '<div class="checkout-note">จัดส่งฟรีเมื่อยอดสินค้า 2,500 บาทขึ้นไป (ก่อน VAT และค่าส่ง) ราคาจะถูกตรวจสอบอีกครั้งเมื่อสร้างคำสั่งซื้อ</div>';
+      return true;
+    }).catch(e=>{console.error(e);byId('summary').innerHTML=itemLines+'<div class="error">ไม่สามารถคำนวณค่าจัดส่งได้ กรุณาโหลดหน้าใหม่</div>';return false});
   }
-  APCheckout.bank(sb,byId('bankbox'),btn).then(ok=>{if(ok)btn.disabled=false});
+  Promise.all([APCheckout.bank(sb,byId('bankbox'),btn),shippingReady]).then(([bankOk,shippingOk])=>{if(bankOk&&shippingOk)btn.disabled=false});
   btn.onclick=async()=>{
     msg.textContent='';
     const customer={name:byId('name').value.trim(),phone:byId('phone').value.trim(),email:byId('email').value.trim(),note:byId('note').value.trim()};

@@ -503,9 +503,123 @@ async function deleteProductImage(request, env, key) {
   return new Response(null, { status: 204 });
 }
 
+
+// SEO for published catalog entries. Existing product selection/checkout still runs client-side.
+const SEO_ORIGIN = "https://apcncdiy.com";
+const SEO_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const seoEsc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const seoJson = value => JSON.stringify(value).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+const seoImage = (path, env) => {
+  if (!path) return "";
+  const value = String(path);
+  if (value.startsWith("r2:")) return (env.PRODUCT_IMAGE_PUBLIC_BASE || "https://storage.apcncdiy.com").replace(/\/$/, "") + "/" + value.slice(3).split("/").map(encodeURIComponent).join("/");
+  return env.SUPABASE_URL.replace(/\/$/, "") + "/storage/v1/object/public/site-products/" + value.split("/").map(encodeURIComponent).join("/");
+};
+async function seoRead(env, table, params) {
+  const u = new URL(env.SUPABASE_URL + "/rest/v1/" + table);
+  for (const [k,v] of Object.entries(params)) u.searchParams.set(k, String(v));
+  const res = await fetch(u, {headers: {"apikey":env.SUPABASE_PUBLISHABLE_KEY,"Accept":"application/json"}});
+  if (!res.ok) throw new Error("seo_catalog_unavailable_" + res.status);
+  return res.json();
+}
+function seoResponse(body, type, status=200) {
+  return new Response(body, {status, headers: {"Content-Type":type,"Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"}});
+}
+async function productSeoResponse(request, env, url) {
+  const id = url.searchParams.get("id");
+  const canonical = SEO_ORIGIN + "/product-detail.html?id=" + encodeURIComponent(id || "");
+  const asset = await env.ASSETS.fetch(request);
+  if (!asset.ok || !id || !SEO_UUID.test(id)) return asset;
+  try {
+    const products = await seoRead(env, "site_products", {
+      select:"id,name,slug,short_description,description,seo_title,seo_description,cover_path,price,track_inventory,stock_qty,stock_reserved,updated_at",
+      id:"eq." + id, is_published:"eq.true", limit:1
+    });
+    if (!products.length) {
+      const html = (await asset.text()).replace("</head>", '<meta name="robots" content="noindex,follow"></head>');
+      return new Response(html,{status:404,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
+    }
+    const p = products[0];
+    const vs = await seoRead(env,"site_product_variants",{
+      select:"id,name,price,stock_qty,stock_reserved",
+      product_id:"eq."+id,is_active:"eq.true",order:"sort_order.asc",limit:100
+    });
+    const title=(p.seo_title || p.name).trim().slice(0,180) + " | APcncDIY";
+    const description=String(p.seo_description||p.short_description||p.description||p.name).replace(/\s+/g," ").trim().slice(0,300);
+    const image=seoImage(p.cover_path,env);
+    const offerList=(vs.length?vs:[p]).map(v=>{
+      const price=v.price==null?p.price:Number(v.price);
+      if(price==null||!Number.isFinite(Number(price))||Number(price)<0)return null;
+      const available=!p.track_inventory||Number(v.stock_qty||0)-Number(v.stock_reserved||0)>0;
+      return {"@type":"Offer",name:v.name||p.name,url:canonical,priceCurrency:"THB",price:Number(price),
+        availability:available?"https://schema.org/InStock":"https://schema.org/PreOrder"};
+    }).filter(Boolean);
+    const prices=offerList.map(o=>o.price);
+    const offer=prices.length?{
+      "@type":"AggregateOffer",priceCurrency:"THB",lowPrice:Math.min(...prices),highPrice:Math.max(...prices),offerCount:prices.length,
+      url:canonical,offers:offerList
+    }:undefined;
+    const structured={
+      "@context":"https://schema.org","@type":"Product",
+      name:p.name,description,image:image?[image]:undefined,
+      sku:p.slug||p.id,url:canonical,offers:offer||undefined
+    };
+    const meta = [
+      '<meta name="description" content="'+seoEsc(description)+'">',
+      '<link rel="canonical" href="'+seoEsc(canonical)+'">',
+      '<meta property="og:type" content="product">',
+      '<meta property="og:title" content="'+seoEsc(title)+'">',
+      '<meta property="og:description" content="'+seoEsc(description)+'">',
+      '<meta property="og:url" content="'+seoEsc(canonical)+'">',
+      image?'<meta property="og:image" content="'+seoEsc(image)+'">':"",
+      '<script type="application/ld+json">'+seoJson(structured)+'</script>'
+    ].join("");
+    let html=await asset.text();
+    html=html.replace(/<title>[^<]*<\/title>/,'<title>'+seoEsc(title)+'</title>');
+    html=html.replace("</head>",meta+"</head>");
+    // Readable initial content for crawlers and users without JavaScript; normal app replaces it on load.
+    html=html.replace('<div id="root" class="loading">กำลังโหลดสินค้า...</div>',
+      '<div id="root" class="loading"><h1>'+seoEsc(p.name)+'</h1><p>'+seoEsc(description)+'</p>'+
+      (image?'<img src="'+seoEsc(image)+'" width="360" alt="'+seoEsc(p.name)+'">':"")+'</div>');
+    const headers=new Headers(asset.headers);
+    headers.set("Content-Type","text/html; charset=utf-8");
+    headers.set("Cache-Control","public, max-age=300");
+    headers.delete("Content-Length");
+    return new Response(html,{status:200,headers});
+  } catch (err) {
+    console.error("product SEO metadata failed",err);
+    // Keep the storefront usable during a transient SEO metadata outage; avoid indexing generic copy.
+    const html=(await asset.text()).replace("</head>",'<meta name="robots" content="noindex,follow"></head>');
+    return new Response(html,{status:200,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
+  }
+}
+async function sitemapSeoResponse(env) {
+  const locations=[{url:SEO_ORIGIN+"/",updated_at:null},{url:SEO_ORIGIN+"/products.html",updated_at:null}];
+  for (let offset=0; offset<10000; offset+=500) {
+    const products=await seoRead(env,"site_products",{
+      select:"id,updated_at",is_published:"eq.true",order:"created_at.asc",limit:500,offset
+    });
+    for (const p of products) locations.push({url:SEO_ORIGIN+"/product-detail.html?id="+encodeURIComponent(p.id),updated_at:p.updated_at});
+    if (products.length<500) break;
+  }
+  const xml='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+
+   locations.map(p=>'<url><loc>'+seoEsc(p.url)+'</loc>'+(p.updated_at?'<lastmod>'+seoEsc(new Date(p.updated_at).toISOString())+'</lastmod>':'')+'</url>').join('')+
+   '</urlset>';
+  return seoResponse(xml,"application/xml; charset=utf-8");
+}
+
 export default {
   async fetch(request, env, executionContext) {
     const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/robots.txt") {
+      return seoResponse("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /checkout.html\nDisallow: /cart.html\nSitemap: "+SEO_ORIGIN+"/sitemap.xml\n","text/plain; charset=utf-8");
+    }
+    if (request.method === "GET" && url.pathname === "/sitemap.xml") {
+      try { return await sitemapSeoResponse(env); } catch (e) { console.error(e); return new Response("Sitemap unavailable",{status:503,headers:{"Retry-After":"60"}}); }
+    }
+    if (request.method === "GET" && url.pathname === "/product-detail.html") {
+      return productSeoResponse(request,env,url);
+    }
     if (url.pathname === "/api/shop-orders/slip") {
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
       return uploadShopSlip(request, env, executionContext);

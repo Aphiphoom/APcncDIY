@@ -547,10 +547,18 @@ async function productSeoResponse(request, env, url) {
     const title=(p.seo_title || p.name).trim().slice(0,180) + " | APcncDIY";
     const description=String(p.seo_description||p.short_description||p.description||p.name).replace(/\s+/g," ").trim().slice(0,300);
     const image=seoImage(p.cover_path,env);
-    const prices=(vs.length?vs.map(v=>v.price==null?p.price:v.price):[p.price]).map(Number).filter(n=>Number.isFinite(n)&&n>=0);
+    const offerList=(vs.length?vs:[p]).map(v=>{
+      const price=v.price==null?p.price:Number(v.price);
+      if(price==null||!Number.isFinite(Number(price))||Number(price)<0)return null;
+      const available=!p.track_inventory||Number(v.stock_qty||0)-Number(v.stock_reserved||0)>0;
+      return {"@type":"Offer",name:v.name||p.name,url:canonical,priceCurrency:"THB",price:Number(price),
+        availability:available?"https://schema.org/InStock":"https://schema.org/PreOrder"};
+    }).filter(Boolean);
+    const prices=offerList.map(o=>o.price);
     const offer=prices.length?{
-      "@type":"AggregateOffer",priceCurrency:"THB",lowPrice:Math.min(...prices),highPrice:Math.max(...prices),offerCount:prices.length,url:canonical
-    }:null;
+      "@type":"AggregateOffer",priceCurrency:"THB",lowPrice:Math.min(...prices),highPrice:Math.max(...prices),offerCount:prices.length,
+      url:canonical,offers:offerList
+    }:undefined;
     const structured={
       "@context":"https://schema.org","@type":"Product",
       name:p.name,description,image:image?[image]:undefined,
@@ -580,8 +588,9 @@ async function productSeoResponse(request, env, url) {
     return new Response(html,{status:200,headers});
   } catch (err) {
     console.error("product SEO metadata failed",err);
-    // Do not serve misleading generic SEO to crawlers when backend is unavailable.
-    return new Response("Product temporarily unavailable",{status:503,headers:{"Retry-After":"60","Cache-Control":"no-store"}});
+    // Keep the storefront usable during a transient SEO metadata outage; avoid indexing generic copy.
+    const html=(await asset.text()).replace("</head>",'<meta name="robots" content="noindex,follow"></head>');
+    return new Response(html,{status:200,headers:{"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store"}});
   }
 }
 async function sitemapSeoResponse(env) {
@@ -602,13 +611,13 @@ async function sitemapSeoResponse(env) {
 export default {
   async fetch(request, env, executionContext) {
     const url = new URL(request.url);
-    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/robots.txt") {
+    if (request.method === "GET" && url.pathname === "/robots.txt") {
       return seoResponse("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /checkout.html\nDisallow: /cart.html\nSitemap: "+SEO_ORIGIN+"/sitemap.xml\n","text/plain; charset=utf-8");
     }
-    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/sitemap.xml") {
+    if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       try { return await sitemapSeoResponse(env); } catch (e) { console.error(e); return new Response("Sitemap unavailable",{status:503,headers:{"Retry-After":"60"}}); }
     }
-    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/product-detail.html") {
+    if (request.method === "GET" && url.pathname === "/product-detail.html") {
       return productSeoResponse(request,env,url);
     }
     if (url.pathname === "/api/shop-orders/slip") {

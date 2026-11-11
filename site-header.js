@@ -56,7 +56,26 @@
       #${HEADER_ID} .apsh-adminbar button.apsh-adminlink{font-family:inherit;cursor:pointer}
       @media(max-width:1120px){#${HEADER_ID} .apsh-inner{gap:14px;padding-left:14px;padding-right:14px}#${HEADER_ID} .apsh-nav{gap:18px}#${HEADER_ID} .apsh-nav a{font-size:12px}#${HEADER_ID} .apsh-brand span{display:none}}
       @media(max-width:760px){#${HEADER_ID} .apsh-notify-wrap{position:static}#${HEADER_ID} .apsh-notify-panel{position:fixed;left:12px;right:12px;top:142px;width:auto;max-height:min(55vh,420px)}#${HEADER_ID} .apsh-inner{min-height:0;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;padding:10px 12px}#${HEADER_ID} .apsh-brand{grid-column:1}#${HEADER_ID} .apsh-actions{grid-column:2;justify-self:end}#${HEADER_ID} .apsh-nav{grid-column:1/-1;width:100%;gap:20px;padding-top:2px}#${HEADER_ID} .apsh-nav a{padding:7px 0 5px;font-size:12px}#${HEADER_ID} .apsh-brand img{width:40px;height:40px}#${HEADER_ID} .apsh-brand span{display:inline}#${HEADER_ID} .apsh-btn{min-height:34px;padding:0 10px;font-size:11px}#${HEADER_ID} .apsh-adminbar{padding:8px 12px 10px;gap:7px}}
-      @media(max-width:480px){#${HEADER_ID} .apsh-notify-panel{top:140px}#${HEADER_ID} .apsh-brand span{font-size:13px}#${HEADER_ID} .apsh-btn{padding:0 8px;font-size:10.5px}#${HEADER_ID} .apsh-actions{gap:6px}#${HEADER_ID} .apsh-adminbar-label{font-size:11px}#${HEADER_ID} .apsh-adminlink{font-size:11px;padding:0 10px}}
+      /* A narrow phone must not inherit the intrinsic width of account actions/nav. */
+      @media(max-width:760px){
+        #${HEADER_ID},#${HEADER_ID} .apsh-inner{max-width:100%;min-width:0}
+        #${HEADER_ID} .apsh-inner{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:12px}
+        #${HEADER_ID} .apsh-brand{align-self:flex-start;min-width:0}
+        #${HEADER_ID} .apsh-nav{order:1;display:flex;flex-wrap:wrap;gap:5px 16px;flex:none;width:100%;min-width:0;overflow:visible;white-space:normal}
+        #${HEADER_ID} .apsh-nav a{padding:4px 0;font-size:12px;white-space:nowrap}
+        #${HEADER_ID} .apsh-actions{order:2;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:7px;margin-left:0;width:100%;min-width:0}
+        #${HEADER_ID} .apsh-credit,#${HEADER_ID} .apsh-btn{max-width:100%}
+        #${HEADER_ID} .apsh-notify-panel{top:12px;max-width:calc(100vw - 24px)}
+      }
+      @media(max-width:480px){
+        #${HEADER_ID} .apsh-brand span{font-size:13px}
+        #${HEADER_ID} .apsh-actions{gap:6px}
+        #${HEADER_ID} .apsh-btn{min-height:34px;padding:0 9px;font-size:11px}
+        #${HEADER_ID} .apsh-credit{min-height:34px}
+        #${HEADER_ID} .apsh-nav{gap:4px 14px}
+        #${HEADER_ID} .apsh-adminbar-label{font-size:11px}
+        #${HEADER_ID} .apsh-adminlink{font-size:11px;padding:0 10px}
+      }
     `;
     document.head.appendChild(style);
   }

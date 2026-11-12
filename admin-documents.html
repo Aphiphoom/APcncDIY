@@ -520,18 +520,19 @@ const DOC_TYPES = {
   receipt_tax:  {th:'ใบเสร็จรับเงิน / ใบกำกับภาษี', short:'เสร็จ+ภาษี', en:'RECEIPT / TAX INVOICE', tax:true, receipt:true, signers:['ผู้รับเงิน','ผู้มีอำนาจลงนาม']},
 };
 
-/* numbering groups — tax-bearing docs share ONE legal running number */
+/* Abbreviated tax invoices have their own running-number series. */
 const NUM_GROUPS = {
   quotation:{label:'ใบเสนอราคา'}, delivery:{label:'ใบส่งของ'}, invoice:{label:'ใบแจ้งหนี้'},
-  receipt:{label:'ใบเสร็จรับเงิน'}, tax:{label:'ใบกำกับภาษี (ใช้ร่วมทุกแบบที่มี VAT)'},
+  receipt:{label:'ใบเสร็จรับเงิน'}, tax:{label:'ใบกำกับภาษีแบบเต็ม'}, tax_short:{label:'ใบกำกับภาษีอย่างย่อ'},
 };
-function groupOf(t){ return (t==='quotation'||t==='delivery'||t==='invoice'||t==='receipt') ? t : 'tax'; }
+function groupOf(t){ if(t==='taxinvoice_short')return 'tax_short'; return (t==='quotation'||t==='delivery'||t==='invoice'||t==='receipt') ? t : 'tax'; }
 function defaultNumbering(){ return {
   quotation:{prefix:'QT', year:true, pad:4, next:23},
   delivery: {prefix:'DO', year:true, pad:4, next:1},
   invoice:  {prefix:'IV', year:true, pad:4, next:1},
   receipt:  {prefix:'RE', year:true, pad:4, next:1},
   tax:      {prefix:'TX', year:true, pad:4, next:21},
+  tax_short:{prefix:'TS', year:true, pad:4, next:1},
 };}
 
 const DEFAULT_LOGO = 'assets/ap-cnc-diy-logo.jpg';
@@ -612,7 +613,7 @@ function commitNumber(){ const g=groupOf(state.docType),c=state.numbering[g],tai
   if(tail!=null && tail>=c.next){ c.next=tail+1; persistAll(); } }
 /* bump a group's "next" past the highest number already used in history (keeps numbers continuing forward) */
 function syncNextFromHistory(group){ const c=state.numbering[group]; let maxTail=c.next-1;
-  history.forEach(h=>{ if(groupOf(h.docType)===group){ const t=parseTail(h.number); if(t!=null&&t>maxTail)maxTail=t; } });
+  history.forEach(h=>{ if(groupOf(h.docType)===group){ if(group==='tax_short' && !String(h.number||'').startsWith((c.prefix||'TS')+(c.year?yy(h.data?.doc?.date):'')))return; const t=parseTail(h.number); if(t!=null&&t>maxTail)maxTail=t; } });
   c.next=maxTail+1; }
 
 /* ===== calculations ===== */
@@ -1032,8 +1033,8 @@ function vatWorkbook(month){ const X=window.XLSX, rows=vatRows(month), wb=X.util
 }
 function downloadVatExcel(){ const month=$('#vatMonth').value||todayISO().slice(0,7); try{ const bytes=window.XLSX.write(vatWorkbook(month),{bookType:'xlsx',type:'array'}),blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`รายงานภาษีขาย-${month}.xlsx`; a.click(); URL.revokeObjectURL(a.href); toast('ส่งออกรายงานภาษีขายแล้ว'); }catch(e){ toast('ส่งออกรายงานไม่สำเร็จ'); } }
 
-function openDoc(id){ const h=histById(id); if(!h)return; const live=state.seller.logo;
-  state=Object.assign(structuredClone(DEFAULT),structuredClone(h.data));
+function openDoc(id){ const h=histById(id); if(!h)return; const live=state.seller.logo, liveNumbering=structuredClone(state.numbering);
+  state=Object.assign(structuredClone(DEFAULT),structuredClone(h.data)); state.numbering=liveNumbering;
   if(!state.seller.logo)state.seller.logo=live||loadProfileLogo();
   currentHistoryId=id; buildDocTypeSelect(); renderAll(); closeModals(); toast('เปิดเอกสาร '+h.number); }
 
@@ -1055,10 +1056,10 @@ function renderConvStep2(h,target){ const terms=(h.data.payment.terms||[]).filte
       ${terms.map((tm,i)=>`<label class="amt-opt"><input type="radio" name="amt" value="term:${i}"><span>${escapeHtml(tm.label||('งวดที่ '+(i+1)))}${num(tm.percent)>0?(' ('+num(tm.percent)+'%)'):''}</span><b>${fmt(termAmount(tm,t.grand))}</b></label>`).join('')}
       <label class="amt-opt"><input type="radio" name="amt" value="custom"><span>กำหนดเอง</span><input type="number" id="customAmt" class="amt-input" placeholder="0.00"></label>
     </div>
-    ${groupOf(target)==='tax'?'<label class="switchline"><input type="checkbox" id="amtInc" checked> ยอดที่เลือกรวม VAT แล้ว (ระบบจะทอนฐานภาษี 7% ให้อัตโนมัติ)</label>':''}
+    ${['tax','tax_short'].includes(groupOf(target))?'<label class="switchline"><input type="checkbox" id="amtInc" checked> ยอดที่เลือกรวม VAT แล้ว (ระบบจะทอนฐานภาษี 7% ให้อัตโนมัติ)</label>':''}
     <div class="conv-actions"><button class="mini-btn" data-back>← กลับ</button><button class="mini-btn go" data-makeconv>สร้าง ${DOC_TYPES[target].th}</button></div>`; }
 function doConvertFull(target){ const h=histById(convCtx.sourceId); const live=state.seller.logo;
-  const d=Object.assign(structuredClone(DEFAULT),structuredClone(h.data));
+  const d=Object.assign(structuredClone(DEFAULT),structuredClone(h.data)); d.numbering=structuredClone(state.numbering);
   d.docType=target; d.doc.ref=h.number; d.doc.date=todayISO(); d.doc.number=genNumber(groupOf(target),d.doc.date); d.copy='ต้นฉบับ';
   if(!d.seller.logo)d.seller.logo=live||loadProfileLogo();
   state=d; currentHistoryId=null; buildDocTypeSelect(); renderAll(); closeModals(); toast('สร้าง'+DOC_TYPES[target].th+' จาก '+h.number+' แล้ว'); }
@@ -1067,12 +1068,12 @@ function doConvertReceipt(){ const h=histById(convCtx.sourceId), target=convCtx.
   const tot=calc(h.data); let amount;
   if(sel==='full')amount=tot.grand; else if(sel.startsWith('term:'))amount=termAmount(h.data.payment.terms[+sel.split(':')[1]],tot.grand); else amount=num($('#customAmt').value);
   if(amount<=0){ toast('กรุณาระบุยอดเงิน'); return; }
-  const live=state.seller.logo; const d=Object.assign(structuredClone(DEFAULT),structuredClone(h.data));
+  const live=state.seller.logo; const d=Object.assign(structuredClone(DEFAULT),structuredClone(h.data)); d.numbering=structuredClone(state.numbering);
   d.docType=target; d.doc.ref=h.number; d.doc.date=todayISO(); d.doc.number=genNumber(groupOf(target),d.doc.date); d.copy='ต้นฉบับ';
   const productName=((h.data.items[0]&&h.data.items[0].detail)||'สินค้า/บริการ').split('\n')[0];
   let label = sel==='full'?'ชำระค่าสินค้า/บริการเต็มจำนวน' : sel.startsWith('term:')?('รับชำระ '+(h.data.payment.terms[+sel.split(':')[1]].label||'งวด')) : 'รับชำระเงิน';
   const rate=num(h.data.vatRate)||7; let price;
-  if(groupOf(target)==='tax'){ d.vatMode='exclude'; d.vatRate=rate; price=inc?amount*100/(100+rate):amount; }
+  if(['tax','tax_short'].includes(groupOf(target))){ d.vatMode='exclude'; d.vatRate=rate; price=inc?amount*100/(100+rate):amount; }
   else { d.vatMode='none'; price=amount; }
   d.discountType='percent'; d.discountValue=0;
   d.items=[{ detail:`${label}\n- ${productName}\n- ตามใบเสนอราคาเลขที่ ${h.number}`, qty:1, unit:'รายการ', price:round2(price) }];
@@ -1105,7 +1106,7 @@ $('#convBody').addEventListener('click',e=>{ const b=e.target.closest('button');
 });
 
 /* ===== settings ===== */
-function renderSettings(){ const n=state.numbering, groups=['quotation','delivery','invoice','receipt','tax'];
+function renderSettings(){ const n=state.numbering, groups=['quotation','delivery','invoice','receipt','tax','tax_short'];
   const s=state.seller, p=state.payment, sg=state.sign;
   $('#setBody').innerHTML=`
     <h4 class="set-h">ข้อมูลร้านค้า (ค่าเริ่มต้นทุกเอกสาร)</h4>
@@ -1146,7 +1147,7 @@ function renderSettings(){ const n=state.numbering, groups=['quotation','deliver
     <p class="set-note">เปิดไฟล์สำรองเพื่อกู้คืนทุกอย่าง (ย้ายเครื่อง หรืออัปเดตโปรแกรมเวอร์ชันใหม่)</p>
     <button class="mini-btn" id="btnRestore">เลือกไฟล์สำรอง…</button>
     <h4 class="set-h">เลขที่เอกสาร (รันอัตโนมัติแยกแต่ละชนิด)</h4>
-    <p class="set-note">เลขจะเดินต่อเมื่อ “พิมพ์/บันทึก” เอกสารจริงเท่านั้น — ใบเสนอราคาที่ลูกค้าไม่ยืนยันจะไม่กินเลขของใบกำกับภาษี · เอกสารที่มี VAT ทุกแบบใช้เลขชุด “ใบกำกับภาษี” ร่วมกัน</p>
+    <p class="set-note">เลขจะเดินต่อเมื่อ “พิมพ์/บันทึก” เอกสารจริงเท่านั้น — ใบเสนอราคาที่ลูกค้าไม่ยืนยันจะไม่กินเลขของใบกำกับภาษี · ใบกำกับภาษีอย่างย่อใช้เลขชุด TS แยกจากใบกำกับภาษีเต็มชุด TX (เลขเอกสารเดิมไม่เปลี่ยน)</p>
     <div class="num-grid">
       <div class="num-head"><span>ชนิด</span><span>คำนำหน้า</span><span>ใส่ปี</span><span>หลัก</span><span>เลขถัดไป</span><span>ตัวอย่าง</span></div>
       ${groups.map(g=>`<div class="num-row">

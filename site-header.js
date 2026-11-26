@@ -13,7 +13,7 @@
   }
 
   function isAdminToolPage(){
-    return ['admin','admin-products','admin-shop','manual-editor'].includes(currentPageKey());
+    return ['admin','admin-ai-render','admin-products','admin-shop','manual-editor'].includes(currentPageKey());
   }
 
   function installStyle(){
@@ -111,6 +111,7 @@
       <div class="apsh-adminbar" aria-label="เครื่องมือแอดมิน">
         <span class="apsh-adminbar-label">เครื่องมือแอดมิน</span>
         <a class="apsh-adminlink" href="admin.html">สมาชิก</a>
+        <a class="apsh-adminlink" href="admin-ai-render.html">AI Render</a>
         <a class="apsh-adminlink" href="admin-documents.html">ออกเอกสาร</a>
         <a class="apsh-adminlink" href="admin-products.html">สินค้า</a>
         <a class="apsh-adminlink" href="admin-shop.html">รายการคำสั่งซื้อ</a>
